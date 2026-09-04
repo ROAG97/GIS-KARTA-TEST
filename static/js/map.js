@@ -116,5 +116,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }, 300);
 
     });
+    const mobileFilterButton =
+    document.getElementById("mobile-filter-button");
 
+    const sidebar =
+    document.querySelector(".sidebar");
+
+    mobileFilterButton.addEventListener("click", function () {
+        sidebar.classList.toggle("open");
+    });
+
+
+    const mobileMenuButton =
+    document.getElementById("mobile-menu-button");
+
+    const mobileMenu =
+    document.getElementById("mobile-menu");
+
+    mobileMenuButton.addEventListener("click", function () {
+        mobileMenu.classList.toggle("open");
+    });
 });
