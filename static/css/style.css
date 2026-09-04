@@ -156,6 +156,11 @@ padding: 30px 25px;
  *  MOBILVERSION
  *  ================================= */
 
+.mobile-menu-button,
+.mobile-filter-button,
+.mobile-menu {
+    display: none;
+}
 @media (max-width: 768px) {
 
     header {
@@ -175,11 +180,101 @@ padding: 30px 25px;
         position: relative;
         display: block;
         height: calc(100vh - 56px);
+
+    }
+    .mobile-menu-button {
+        display: block;
+
+        background: none;
+        border: none;
+
+        color: white;
+        font-size: 26px;
+
+        cursor: pointer;
     }
 
-    .sidebar {
+    .mobile-menu {
         display: none;
+
+        position: absolute;
+        top: 56px;
+        right: 10px;
+
+        width: 190px;
+
+        background: #222;
+
+        z-index: 2000;
+
+        border-radius: 0 0 6px 6px;
+
+        overflow: hidden;
     }
+
+    .mobile-menu.open {
+        display: block;
+    }
+
+    .mobile-menu a {
+        display: block;
+
+        padding: 15px 20px;
+
+        color: white;
+        text-decoration: none;
+
+        border-bottom: 1px solid #444;
+    }
+
+    .mobile-filter-button {
+        display: block;
+
+        position: absolute;
+
+        top: 15px;
+        left: 15px;
+
+        z-index: 900;
+
+        padding: 10px 15px;
+
+        background: white;
+        border: none;
+        border-radius: 5px;
+
+        box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+
+        font-weight: bold;
+
+        cursor: pointer;
+    }
+
+
+    /* Vänster filterpanel på mobil */
+
+    .sidebar {
+        display: block;
+
+        position: absolute;
+
+        top: 0;
+        left: -280px;
+        bottom: 0;
+
+        width: 280px;
+
+        z-index: 1500;
+
+        transition: left 0.25s ease;
+
+        box-shadow: 2px 0 8px rgba(0,0,0,0.25);
+    }
+
+    .sidebar.open {
+        left: 0;
+    }
+
 
     .map-container {
         width: 100%;
