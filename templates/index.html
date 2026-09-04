@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Kustförsvaret i Skåne</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+</head>
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+<script src="{{ url_for('static', filename='js/map.js') }}"></script>
+
+<body>
+
+    <header>
+
+        <h1>Kustförsvaret i Skåne</h1>
+
+        <nav>
+            <a href="/">Karta</a>
+            <a href="#">Om projektet</a>
+        </nav>
+
+    </header>
+
+
+<main>
+
+    <aside class="sidebar">
+        <h2>Filter</h2>
+
+        <label>
+            <input type="checkbox">
+            KSP-värn
+        </label>
+
+        <br>
+
+        <label>
+            <input type="checkbox">
+            Värn
+        </label>
+
+        <br>
+
+        <label>
+            <input type="checkbox">
+            Batterier
+        </label>
+    </aside>
+
+
+    <section class="map-container">
+        <div id="map"></div>
+    </section>
+
+
+    <aside id="info-panel" class="info-panel">
+
+        <button id="close-info" class="close-info">
+            ×
+        </button>
+
+        <div id="info-content">
+
+            <div class="info-placeholder">
+                <h2>Ingen anläggning vald</h2>
+                <p>Klicka på ett objekt på kartan för att visa information.</p>
+            </div>
+
+        </div>
+
+    </aside>
+
+</main>
+
+</body>
+
+</html>
