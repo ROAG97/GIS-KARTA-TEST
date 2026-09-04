@@ -19,14 +19,25 @@
 
 <body>
 
-    <header>
+<header>
 
-        <h1>Kustförsvaret i Skåne</h1>
+    <h1>Kustförsvaret i Skåne</h1>
 
-        <nav>
-            <a href="/">Karta</a>
-            <a href="#">Om projektet</a>
-        </nav>
+    <nav>
+        <a href="/">Karta</a>
+        <a href="#">Om projektet</a>
+    </nav>
+
+    <button id="mobile-menu-button" class="mobile-menu-button">
+        ☰
+    </button>
+
+</header>
+
+<div id="mobile-menu" class="mobile-menu">
+    <a href="/">Karta</a>
+    <a href="#">Om projektet</a>
+</div>
 
     </header>
 
@@ -58,6 +69,11 @@
 
 
     <section class="map-container">
+
+     <button id="mobile-filter-button" class="mobile-filter-button">
+        ☰ Filter
+    </button>
+
         <div id="map"></div>
     </section>
 
