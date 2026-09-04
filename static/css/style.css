@@ -1,0 +1,153 @@
+* {
+box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+    color: #222;
+}
+
+header {
+    height: 70px;
+    background: #222;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 25px;
+}
+
+main {
+    display: flex;
+    height: calc(100vh - 70px);
+}
+
+.sidebar {
+    width: 280px;
+    background: white;
+    padding: 25px;
+    border-right: 1px solid #ccc;
+}
+
+.map-container {
+    flex: 1;
+    background: #ddd;
+}
+#map {
+width: 100%;
+height: 100%;
+}
+
+/* =================================
+ *  HÖGERPANEL / ANLÄGGNINGSINFO
+ *  ================================= */
+
+.info-panel {
+    width: 0;
+    background: white;
+    overflow: hidden;
+    border-left: 1px solid #ccc;
+    position: relative;
+
+    transition: width 0.25s ease;
+}
+
+.info-panel.open {
+    width: 360px;
+}
+
+#info-content {
+width: 360px;
+padding: 30px 25px;
+}
+
+.close-info {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+
+    border: none;
+    background: none;
+
+    font-size: 30px;
+    cursor: pointer;
+
+    z-index: 10;
+}
+
+.info-header {
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.info-header h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.info-number {
+    color: #666;
+    font-size: 14px;
+}
+
+.info-section {
+    padding: 20px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.info-row {
+    margin-bottom: 12px;
+}
+
+.info-label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    color: #777;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+}
+
+.info-value {
+    font-size: 15px;
+}
+
+.info-actions {
+    padding-top: 20px;
+}
+
+.info-button {
+    display: block;
+
+    padding: 12px 15px;
+    margin-bottom: 10px;
+
+    background: #222;
+    color: white;
+
+    text-decoration: none;
+    text-align: center;
+
+    border-radius: 4px;
+}
+
+.info-button:hover {
+    background: #444;
+}
+
+.info-placeholder {
+    color: #777;
+}
