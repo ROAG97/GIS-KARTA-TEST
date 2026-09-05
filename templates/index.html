@@ -3,7 +3,10 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <title>Kustförsvaret i Skåne</title>
 
@@ -32,6 +35,7 @@
     <button
         id="mobile-menu-button"
         class="mobile-menu-button"
+        aria-label="Öppna meny"
     >
         ☰
     </button>
@@ -51,7 +55,7 @@
 <main>
 
     <!-- =================================
-         FILTERMENY
+         FILTERPANEL
          ================================= -->
 
     <aside class="sidebar">
@@ -59,6 +63,7 @@
         <button
             id="close-filter"
             class="close-filter"
+            aria-label="Stäng filter"
         >
             ×
         </button>
@@ -69,9 +74,7 @@
         </div>
 
 
-        <!-- =================================
-             KARTUNDERLAG
-             ================================= -->
+        <!-- KARTUNDERLAG -->
 
         <div class="filter-section open">
 
@@ -80,7 +83,10 @@
                 data-filter-section
             >
                 <span>🗺️ Kartunderlag</span>
-                <span class="filter-arrow">▾</span>
+
+                <span class="filter-arrow">
+                    ▾
+                </span>
             </div>
 
 
@@ -135,9 +141,7 @@
         </div>
 
 
-        <!-- =================================
-             DRÖNARRESTRIKTIONER
-             ================================= -->
+        <!-- DRÖNARRESTRIKTIONER -->
 
         <div class="filter-section">
 
@@ -145,8 +149,13 @@
                 class="filter-section-title"
                 data-filter-section
             >
-                <span>🚁 Drönarrestriktioner</span>
-                <span class="filter-arrow">▾</span>
+                <span>
+                    🚁 Drönarrestriktioner
+                </span>
+
+                <span class="filter-arrow">
+                    ▾
+                </span>
             </div>
 
 
@@ -184,9 +193,7 @@
         </div>
 
 
-        <!-- =================================
-             DRAKTÄNDER
-             ================================= -->
+        <!-- DRAKTÄNDER -->
 
         <div class="filter-section">
 
@@ -194,8 +201,13 @@
                 class="filter-section-title"
                 data-filter-section
             >
-                <span>🧱 Draktänder</span>
-                <span class="filter-arrow">▾</span>
+                <span>
+                    🧱 Draktänder
+                </span>
+
+                <span class="filter-arrow">
+                    ▾
+                </span>
             </div>
 
 
@@ -220,7 +232,6 @@
                     <input
                         type="checkbox"
                         id="draktander-kvar"
-                        checked
                     >
 
                     <span>
@@ -235,7 +246,6 @@
                     <input
                         type="checkbox"
                         id="draktander-bevarad"
-                        checked
                     >
 
                     <span>
@@ -249,9 +259,7 @@
         </div>
 
 
-        <!-- =================================
-             VÄRN
-             ================================= -->
+        <!-- VÄRN -->
 
         <div class="filter-section open">
 
@@ -259,8 +267,13 @@
                 class="filter-section-title"
                 data-filter-section
             >
-                <span>🏰 Värn</span>
-                <span class="filter-arrow">▾</span>
+                <span>
+                    🏰 Värn
+                </span>
+
+                <span class="filter-arrow">
+                    ▾
+                </span>
             </div>
 
 
@@ -354,9 +367,20 @@
         class="info-panel"
     >
 
+        <!-- Draghandtag på mobil -->
+
+        <div
+            id="info-drag-handle"
+            class="info-drag-handle"
+        >
+            <div class="info-drag-bar"></div>
+        </div>
+
+
         <button
             id="close-info"
             class="close-info"
+            aria-label="Stäng information"
         >
             ×
         </button>
@@ -366,7 +390,9 @@
 
             <div class="info-placeholder">
 
-                <h2>Inget värn valt</h2>
+                <h2>
+                    Inget värn valt
+                </h2>
 
                 <p>
                     Klicka på ett värn på kartan
