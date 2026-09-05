@@ -1,166 +1,138 @@
-document.addEventListener("DOMContentLoaded", function () {
+/* =================================
+ *  KARTA
+ *  ================================= */
+
+const map = L.map("map").setView(
+    [56.0465, 12.6945],
+    10
+);
 
 
-    /* =========================================================
-     *    KARTA
-     *    ========================================================= */
+/* =================================
+ *  KARTUNDERLAG
+ *  ================================= */
 
-    const map = L.map("map").setView(
-        [56.0465, 12.6945],
-        10
-    );
-
-
-    let selectedLayer = null;
-
-    let customIcons = [];
-
-    const varnFeatures = [];
-
-    let varnDataLoaded = false;
+const osmLayer = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+        attribution: "&copy; OpenStreetMap"
+    }
+);
 
 
-
-    /* =========================================================
-     *    KARTUNDERLAG
-     *    ========================================================= */
-
-    const osm = L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            attribution: "© OpenStreetMap"
-        }
-    );
+const satelliteLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+        maxZoom: 19,
+        attribution: "Tiles &copy; Esri"
+    }
+);
 
 
-    const esriSat = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-            attribution: "Tiles © Esri"
-        }
-    );
+/* Eget ortofoto - framtida tiles */
+
+const orthoLayer = L.tileLayer(
+    "/static/tiles_ortho/{z}/{x}/{y}.jpg",
+    {
+        maxZoom: 22
+    }
+);
+
+
+/* OpenStreetMap standard */
+
+osmLayer.addTo(map);
+
+
+/* =================================
+ *  LAGERGRUPPER
+ *  ================================= */
+
+
+/* Drönarrestriktioner */
+
+const droneRedLayer = L.layerGroup();
+
+const droneOrangeLayer = L.layerGroup();
+
+
+/* Draktänder */
+
+const draktanderRivetLayer = L.layerGroup();
+
+const draktanderKvarLayer = L.layerGroup();
+
+const draktanderBevaradLayer = L.layerGroup();
+
+
+/* =================================
+ *  VÄRN
+ *  ================================= */
+
+let varnFeatures = [];
+
+let availableIcons = [];
+
+let selectedMarker = null;
+
+
+/* Vilka typer som visas */
+
+const varnTypeVisibility = {};
+
+
+/* Specialstatus */
+
+let rivnaVisible = false;
+
+let provisoriskaVisible = false;
+
+let okandaVisible = false;
+
+
+/* =================================
+ *  NORMALISERA IKONNAMN
+ *  ================================= */
+
+function normalizeIconName(type) {
+
+    if (!type) {
+        return "";
+    }
+
+    let name = type
+    .trim()
+    .replace(/\s+/g, "");
 
 
     /*
-     *    Denna fungerar när vi senare lägger ortofotoplattorna
-     *    i static/tiles_ortho/
+     *      Gammal specialregel:
+     *      Typen KSP använder QGIS.svg
      */
 
-    const ortho = L.tileLayer(
-        "/static/tiles_ortho/{z}/{x}/{y}.jpg",
-        {
-            attribution: "© Robert Agnarp",
-            minZoom: 16,
-            maxZoom: 23,
-            opacity: 0.7,
-            zIndex: 100
-        }
-    );
-
-
-    osm.addTo(map);
-
-
-
-    /* =========================================================
-     *    EXTRA LAGER
-     *    ========================================================= */
-
-    const lfvNoFlyLayer =
-    L.layerGroup();
-
-    const lfvRestrictedLayer =
-    L.layerGroup();
-
-
-    const draktanderRivenLayer =
-    L.layerGroup();
-
-    const draktanderKvarLayer =
-    L.layerGroup();
-
-    const draktanderBevaradLayer =
-    L.layerGroup();
-
-
-
-    /* =========================================================
-     *    VÄRNFILTER
-     *    ========================================================= */
-
-    const varnTypeVisibility = {};
-
-
-    let rivnaVisible = false;
-
-    let provisoriskaVisible = false;
-
-    let okandaVisible = false;
-
-
-
-    /* =========================================================
-     *    IKONHJÄLP
-     *    ========================================================= */
-
-    function getIconName(feature) {
-
-        const typ =
-        feature.properties?.Typ;
-
-        if (!typ) {
-            return null;
-        }
-
-
-        /*
-         *        Gamla kartan använde QGIS.svg
-         *        för den generella typen "KSP".
-         */
-
-        if (typ === "KSP") {
-            return "QGIS";
-        }
-
-
-        return typ.replace(/\s+/g, "");
+    if (name === "KSP") {
+        name = "QGIS";
     }
 
+    return name;
+}
 
 
-    function hasCustomIcon(feature) {
+/* =================================
+ *  SKAPA IKON
+ *  ================================= */
 
-        const iconName =
-        getIconName(feature);
+function createVarnIcon(type) {
 
-        if (!iconName) {
-            return false;
-        }
-
-        return customIcons.includes(
-            iconName
-        );
-    }
+    const iconName =
+    normalizeIconName(type);
 
 
-
-    function createNormalIcon(feature) {
-
-        const iconName =
-        getIconName(feature);
-
-
-        /*
-         *        Ingen SVG:
-         *        Leaflets blå standardmarkör
-         */
-
-        if (!hasCustomIcon(feature)) {
-
-            return new L.Icon.Default();
-
-        }
-
+    if (
+        iconName &&
+        availableIcons.includes(iconName)
+    ) {
 
         return L.icon({
 
@@ -168,68 +140,69 @@ document.addEventListener("DOMContentLoaded", function () {
             `/static/icons/${iconName}.svg`,
 
             iconSize:
-            [32, 32],
+            [40, 40],
 
             iconAnchor:
-            [16, 16]
+            [20, 20]
 
         });
+
     }
 
 
+    /* Standard blå Leafletmarkör */
 
-    function createSelectedIcon(feature) {
-
-        const iconName =
-        getIconName(feature);
-
-
-        /*
-         *        Ingen egen SVG:
-         *        blå Leafletmarkör i markeringsram
-         */
-
-        if (!hasCustomIcon(feature)) {
-
-            return L.divIcon({
-
-                className: "",
-
-                html: `
-
-                <div
-                class="selected-marker selected-default-marker"
-                >
-
-                <img
-                src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png"
-                alt=""
-                >
-
-                </div>
-                `,
-
-                iconSize:
-                [48, 58],
-
-                iconAnchor:
-                [24, 50]
-
-            });
-        }
+    return new L.Icon.Default();
+}
 
 
-        /*
-         *        SVG:
-         *        större ikon + gul markering
-         */
+/* =================================
+ *  VALD MARKÖR
+ *  ================================= */
 
-        return L.divIcon({
+function selectMarker(marker, feature) {
+
+    /*
+     *      Återställ tidigare vald markör
+     */
+
+    if (
+        selectedMarker &&
+        selectedMarker.originalIcon
+    ) {
+
+        selectedMarker.setIcon(
+            selectedMarker.originalIcon
+        );
+
+    }
+
+
+    const properties =
+    feature.properties || {};
+
+
+    const iconName =
+    normalizeIconName(
+        properties.Typ
+    );
+
+
+    /*
+     *      Om värnet har egen SVG
+     */
+
+    if (
+        iconName &&
+        availableIcons.includes(iconName)
+    ) {
+
+        const selectedIcon =
+        L.divIcon({
 
             className: "",
 
             html: `
-
             <div class="selected-marker">
 
             <img
@@ -247,425 +220,683 @@ document.addEventListener("DOMContentLoaded", function () {
             [26, 26]
 
         });
+
+
+        marker.setIcon(
+            selectedIcon
+        );
+
+    }
+
+    else {
+
+        /*
+         *          Standard blå Leafletmarkör
+         *          med gul ram
+         */
+
+        const selectedDefaultIcon =
+        L.divIcon({
+
+            className: "",
+
+            html: `
+            <div class="
+            selected-marker
+            selected-default-marker
+            ">
+
+            <img
+            src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png"
+            alt=""
+            >
+
+            </div>
+            `,
+
+            iconSize:
+            [44, 54],
+
+            iconAnchor:
+            [22, 54]
+
+        });
+
+
+        marker.setIcon(
+            selectedDefaultIcon
+        );
+
     }
 
 
-
-    /* =========================================================
-     *    SKA VÄRNET VISAS?
-     *    ========================================================= */
-
-    function shouldShowVarn(feature) {
-
-        const p =
-        feature.properties || {};
+    selectedMarker =
+    marker;
+}
 
 
-        const typ =
-        p.Typ || "";
+/* =================================
+ *  VISA / DÖLJ VÄRN
+ *  ================================= */
+
+function shouldShowVarn(feature) {
+
+    const properties =
+    feature.properties || {};
 
 
-        const status = String(
-            p.Status ??
-            p.STATUS ??
-            ""
-        )
-        .trim()
-        .toUpperCase();
+    const status =
+    String(
+        properties.Status || ""
+    )
+    .trim()
+    .toUpperCase();
 
 
+    /*
+     *      Specialstatus går före typ
+     */
 
-        /*
-         *        STATUS ÖVERSTYR VÄRNTYP
-         */
+    if (
+        status === "RIVET" ||
+        status === "RIVEN"
+    ) {
 
-        if (
-            status === "RIVET" ||
-            status === "RIVEN"
-        ) {
+        return rivnaVisible;
 
-            return rivnaVisible;
+    }
+
+
+    if (
+        status === "PROVISORISKT" ||
+        status === "PROVISORISK"
+    ) {
+
+        return provisoriskaVisible;
+
+    }
+
+
+    if (
+        status === "OKÄND" ||
+        status === "OKAND"
+    ) {
+
+        return okandaVisible;
+
+    }
+
+
+    /*
+     *      Alla övriga värn följer typfiltret
+     */
+
+    const type =
+    properties.Typ || "Okänd";
+
+
+    return (
+        varnTypeVisibility[type] !== false
+    );
+}
+
+
+/* =================================
+ *  UPPDATERA VÄRN PÅ KARTAN
+ *  ================================= */
+
+function updateVarnVisibility() {
+
+    varnFeatures.forEach(
+        item => {
+
+            const show =
+            shouldShowVarn(
+                item.feature
+            );
+
+
+            if (show) {
+
+                if (
+                    !map.hasLayer(
+                        item.marker
+                    )
+                ) {
+
+                    item.marker.addTo(
+                        map
+                    );
+
+                }
+
+            }
+
+            else {
+
+                if (
+                    map.hasLayer(
+                        item.marker
+                    )
+                ) {
+
+                    map.removeLayer(
+                        item.marker
+                    );
+
+                }
+
+            }
 
         }
+    );
+
+}
 
 
-        if (
-            status === "PROVISORISKT" ||
-            status === "PROVISORISK"
-        ) {
+/* =================================
+ *  BILDVÄG
+ *  ================================= */
 
-            return provisoriskaVisible;
+function getImagePath(imageValue) {
 
-        }
-
-
-        if (
-            status === "OKÄND" ||
-            status === "OKAND"
-        ) {
-
-            return okandaVisible;
-
-        }
+    if (!imageValue) {
+        return null;
+    }
 
 
-        /*
-         *        Övriga statusar följer värntyp
-         */
+    const image =
+    String(imageValue).trim();
+
+
+    if (
+        image === "" ||
+        image === "-"
+    ) {
+
+        return null;
+    }
+
+
+    /*
+     *      Exempel:
+     *
+     *      Pictures/varn683.jpg
+     *
+     *      blir:
+     *
+     *      /static/pictures/varn683.jpg
+     */
+
+    if (
+        image.toLowerCase()
+        .startsWith("pictures/")
+    ) {
 
         return (
-            varnTypeVisibility[typ]
-            !== false
-        );
-
-    }
-
-
-
-    /* =========================================================
-     *    UPPDATERA VÄRN
-     *    ========================================================= */
-
-    function uppdateraVarn() {
-
-        if (!varnDataLoaded) {
-            return;
-        }
-
-
-        varnFeatures.forEach(
-            function (item) {
-
-                const skaVisas =
-                shouldShowVarn(
-                    item.feature
-                );
-
-
-                if (skaVisas) {
-
-                    if (
-                        !map.hasLayer(
-                            item.layer
-                        )
-                    ) {
-
-                        item.layer.addTo(map);
-
-                    }
-
-                }
-
-                else {
-
-                    if (
-                        map.hasLayer(
-                            item.layer
-                        )
-                    ) {
-
-                        map.removeLayer(
-                            item.layer
-                        );
-
-                    }
-
-
-                    /*
-                     *                    Om det valda värnet filtreras bort
-                     *                    stänger vi infopanelen.
-                     */
-
-                    if (
-                        selectedLayer ===
-                        item.layer
-                    ) {
-
-                        closeInfoPanel();
-
-                    }
-
-                }
-
-            }
-        );
-
-    }
-
-
-
-    /* =========================================================
-     *    SKAPA VÄRNTYPSFILTER
-     *    ========================================================= */
-
-    function skapaVarnFilter() {
-
-        const container =
-        document.getElementById(
-            "varn-type-filters"
-        );
-
-
-        if (!container) {
-            return;
-        }
-
-
-        container.innerHTML = "";
-
-
-        Object.keys(
-            varnTypeVisibility
-        )
-        .sort(
-            (a, b) =>
-            a.localeCompare(
-                b,
-                "sv"
+            "/" +
+            image.replace(
+                /^Pictures\//i,
+                "static/pictures/"
             )
-        )
-        .forEach(
-            function (typ) {
-
-
-                const label =
-                document.createElement(
-                    "label"
-                );
-
-                label.className =
-                "filter-option";
-
-
-                    const checkbox =
-                    document.createElement(
-                        "input"
-                    );
-
-                    checkbox.type =
-                    "checkbox";
-
-                    checkbox.checked =
-                    true;
-
-
-                    checkbox.addEventListener(
-                        "change",
-                        function () {
-
-                            varnTypeVisibility[
-                                typ
-                            ] =
-                            checkbox.checked;
-
-                            uppdateraVarn();
-
-                        }
-                    );
-
-
-                    label.appendChild(
-                        checkbox
-                    );
-
-
-
-                    /*
-                     *                    Visa SVG i filtermenyn
-                     *                    om en sådan finns.
-                     */
-
-                    const fakeFeature = {
-
-                        properties: {
-                            Typ: typ
-                        }
-
-                    };
-
-
-                    if (
-                        hasCustomIcon(
-                            fakeFeature
-                        )
-                    ) {
-
-                        const img =
-                        document.createElement(
-                            "img"
-                        );
-
-
-                        img.src =
-                        `/static/icons/${getIconName(fakeFeature)}.svg`;
-
-                        img.alt = "";
-
-
-                        label.appendChild(
-                            img
-                        );
-
-                    }
-
-
-
-                    const text =
-                    document.createElement(
-                        "span"
-                    );
-
-                    text.textContent =
-                    typ;
-
-
-                    label.appendChild(
-                        text
-                    );
-
-
-                    container.appendChild(
-                        label
-                    );
-
-            }
         );
 
     }
 
 
+    /*
+     *      Om full webbadress redan finns
+     */
 
-    /* =========================================================
-     *    LADDA IKONER
-     *    ========================================================= */
+    if (
+        image.startsWith("http://") ||
+        image.startsWith("https://")
+    ) {
 
-    fetch("/icons")
+        return image;
 
-    .then(function (response) {
+    }
 
-        if (!response.ok) {
 
-            throw new Error(
-                "Kunde inte läsa ikonlistan"
+    /*
+     *      Om sökvägen redan börjar
+     *      med /static/
+     */
+
+    if (
+        image.startsWith("/static/")
+    ) {
+
+        return image;
+
+    }
+
+
+    /*
+     *      Annars anta att bilden ligger
+     *      i static/pictures
+     */
+
+    return (
+        "/static/pictures/" +
+        image
+    );
+}
+
+
+/* =================================
+ *  ÖPPNA INFOPANEL
+ *  ================================= */
+
+function openInfoPanel(feature) {
+
+    const panel =
+    document.getElementById(
+        "info-panel"
+    );
+
+
+    const content =
+    document.getElementById(
+        "info-content"
+    );
+
+
+    const p =
+    feature.properties || {};
+
+
+    const imagePath =
+    getImagePath(
+        p.Bild
+    );
+
+
+    const imageHtml =
+    imagePath
+    ? `
+    <div class="info-image-wrapper">
+
+    <img
+    src="${imagePath}"
+    alt="Bild på värn ${p.Nr || ""}"
+    class="info-image"
+    onerror="this.parentElement.style.display='none';"
+    >
+
+    </div>
+    `
+    : "";
+
+
+    content.innerHTML = `
+
+    <div class="info-header">
+
+    <h2>
+    ${p.Typ || "Värn"}
+    </h2>
+
+    <div class="info-number">
+    Värn ${p.Nr || "-"}
+    </div>
+
+    </div>
+
+
+    ${imageHtml}
+
+
+    <div class="info-section">
+
+    <div class="info-row">
+
+    <span class="info-label">
+    Status
+    </span>
+
+    <span class="info-value">
+    ${p.Status || "-"}
+    </span>
+
+    </div>
+
+
+    <div class="info-row">
+
+    <span class="info-label">
+    Typ
+    </span>
+
+    <span class="info-value">
+    ${p.Typ || "-"}
+    </span>
+
+    </div>
+
+
+    <div class="info-row">
+
+    <span class="info-label">
+    Tillgänglighet
+    </span>
+
+    <span class="info-value">
+    ${
+        p["Tillgänglighet"]
+        || "-"
+    }
+    </span>
+
+    </div>
+
+
+    <div class="info-row">
+
+    <span class="info-label">
+    Parkering
+    </span>
+
+    <span class="info-value">
+    ${p.Parkering || "-"}
+    </span>
+
+    </div>
+
+
+    <div class="info-row">
+
+    <span class="info-label">
+    Plomberad
+    </span>
+
+    <span class="info-value">
+    ${p.Plomberad || "-"}
+    </span>
+
+    </div>
+
+
+    ${
+        p["Mindre kuriosa"] &&
+        p["Mindre kuriosa"] !== "-"
+
+        ? `
+        <div class="info-row">
+
+        <span class="info-label">
+        Kuriosa
+        </span>
+
+        <span class="info-value">
+        ${p["Mindre kuriosa"]}
+        </span>
+
+        </div>
+        `
+
+        : ""
+    }
+
+    </div>
+
+
+    <div class="info-actions">
+
+    <a
+    href="/varn/${p.Nr}"
+    class="info-button"
+    >
+    Visa mer info om värnet
+    </a>
+
+    </div>
+
+    `;
+
+
+    panel.classList.add(
+        "open"
+    );
+}
+
+
+/* =================================
+ *  STÄNG INFOPANEL
+ *  ================================= */
+
+const closeInfoButton =
+document.getElementById(
+    "close-info"
+);
+
+
+if (closeInfoButton) {
+
+    closeInfoButton.addEventListener(
+        "click",
+        () => {
+
+            const panel =
+            document.getElementById(
+                "info-panel"
             );
 
-        }
 
-        return response.json();
-
-    })
-
-    .then(function (data) {
-
-        customIcons = data;
-
-        console.log(
-            "SVG-ikoner:",
-            customIcons
-        );
-
-    })
-
-    .catch(function (error) {
-
-        /*
-         *            Kartan ska fungera ändå.
-         *            Alla värn blir då blå standardmarkörer.
-         */
-
-        console.warn(
-            "Ikonlistan kunde inte laddas:",
-            error
-        );
-
-        customIcons = [];
-
-    })
-
-    .finally(function () {
-
-        loadVarn();
-
-    });
+            panel.classList.remove(
+                "open"
+            );
 
 
+            /*
+             *              Återställ vald markör
+             */
 
-    /* =========================================================
-     *    LADDA VÄRN
-     *    ========================================================= */
+            if (
+                selectedMarker &&
+                selectedMarker.originalIcon
+            ) {
 
-    function loadVarn() {
-
-        fetch("/geojson")
-
-        .then(function (response) {
-
-            if (!response.ok) {
-
-                throw new Error(
-                    `HTTP ${response.status}`
+                selectedMarker.setIcon(
+                    selectedMarker.originalIcon
                 );
 
             }
 
-            return response.json();
 
-        })
+            selectedMarker = null;
 
-        .then(function (data) {
+        }
+    );
 
+}
+
+
+/* =================================
+ *  SKAPA FILTER FÖR VÄRNTYPER
+ *  ================================= */
+
+function createVarnTypeFilters(
+    geojson
+) {
+
+    const container =
+    document.getElementById(
+        "varn-type-filters"
+    );
+
+
+    if (!container) {
+        return;
+    }
+
+
+    container.innerHTML = "";
+
+
+    const types =
+    [
+        ...new Set(
+            geojson.features
+            .map(
+                feature =>
+                feature.properties
+                ?.Typ
+            )
+            .filter(Boolean)
+        )
+    ]
+    .sort(
+        (a, b) =>
+        a.localeCompare(
+            b,
+            "sv"
+        )
+    );
+
+
+    types.forEach(
+        type => {
 
             /*
-             *                Hitta samtliga värntyper
+             *              Alla normala typer
+             *              PÅ som standard
              */
 
-            data.features.forEach(
-                function (feature) {
-
-                    const typ =
-                    feature
-                    .properties
-                    ?.Typ;
+            varnTypeVisibility[type] =
+            true;
 
 
-                    if (!typ) {
-                        return;
-                    }
-
-
-                    if (
-                        varnTypeVisibility[
-                            typ
-                        ] === undefined
-                    ) {
-
-                        varnTypeVisibility[
-                            typ
-                        ] = true;
-
-                    }
-
-                }
+            const label =
+            document.createElement(
+                "label"
             );
 
 
-
-            /*
-             *                Skapa ett lager per värn
-             */
-
-            data.features.forEach(
-                function (feature) {
+            label.className =
+            "filter-option";
 
 
-                    const geometry =
-                    feature.geometry;
+                const checkbox =
+                document.createElement(
+                    "input"
+                );
 
+
+                checkbox.type =
+                "checkbox";
+
+
+                checkbox.checked =
+                true;
+
+
+                checkbox.addEventListener(
+                    "change",
+                    () => {
+
+                        varnTypeVisibility[type] =
+                        checkbox.checked;
+
+
+                        updateVarnVisibility();
+
+                    }
+                );
+
+
+                label.appendChild(
+                    checkbox
+                );
+
+
+                const iconName =
+                normalizeIconName(
+                    type
+                );
+
+
+                if (
+                    iconName &&
+                    availableIcons.includes(
+                        iconName
+                    )
+                ) {
+
+                    const image =
+                    document.createElement(
+                        "img"
+                    );
+
+
+                    image.src =
+                    `/static/icons/${iconName}.svg`;
+
+
+                    image.alt =
+                    "";
+
+
+            label.appendChild(
+                image
+            );
+
+                }
+
+
+                const text =
+                document.createElement(
+                    "span"
+                );
+
+
+                text.textContent =
+                type;
+
+
+                label.appendChild(
+                    text
+                );
+
+
+                container.appendChild(
+                    label
+                );
+
+        }
+    );
+
+}
+
+
+/* =================================
+ *  LADDA VÄRN
+ *  ================================= */
+
+function loadVarn() {
+
+    fetch("/geojson")
+
+    .then(
+        response =>
+        response.json()
+    )
+
+    .then(
+        geojson => {
+
+            createVarnTypeFilters(
+                geojson
+            );
+
+
+            geojson.features.forEach(
+                feature => {
 
                     if (
-                        !geometry ||
-                        geometry.type !==
-                        "Point"
+                        !feature.geometry ||
+                        feature.geometry.type
+                        !== "Point"
                     ) {
 
                         return;
@@ -674,98 +905,57 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                     const coordinates =
-                    geometry.coordinates;
+                    feature.geometry
+                    .coordinates;
 
 
-                    const latlng = [
-                        coordinates[1],
-                        coordinates[0]
-                    ];
+                    const p =
+                    feature.properties
+                    || {};
 
 
-                    const layer =
+                    const icon =
+                    createVarnIcon(
+                        p.Typ
+                    );
+
+
+                    const marker =
                     L.marker(
-                        latlng,
+                        [
+                            coordinates[1],
+                             coordinates[0]
+                        ],
                         {
-                            icon:
-                            createNormalIcon(
-                                feature
-                            )
+                            icon: icon
                         }
                     );
 
 
                     /*
-                     *                        Leaflet behöver feature
-                     *                        kopplad till markören
+                     *                          Spara originalikon
                      */
 
-                    layer.feature =
-                    feature;
+                    marker.originalIcon =
+                    icon;
 
 
-
-                    layer.on(
+                    marker.on(
                         "click",
-                        function () {
+                        () => {
 
-
-                            /*
-                             *                                Återställ tidigare
-                             *                                valt värn
-                             */
-
-                            if (
-                                selectedLayer &&
-                                selectedLayer !==
-                                layer
-                            ) {
-
-                                selectedLayer
-                                .setIcon(
-                                    createNormalIcon(
-                                        selectedLayer
-                                        .feature
-                                    )
-                                );
-
-
-                                selectedLayer
-                                .setZIndexOffset(
-                                    0
-                                );
-
-                            }
-
-
-
-                            /*
-                             *                                Markera nytt
-                             */
-
-                            layer.setIcon(
-                                createSelectedIcon(
-                                    feature
-                                )
+                            selectMarker(
+                                marker,
+                                feature
                             );
 
 
-                            layer.setZIndexOffset(
-                                1000
-                            );
-
-
-                            selectedLayer =
-                            layer;
-
-
-                            showInfoPanel(
+                            openInfoPanel(
                                 feature
                             );
 
                         }
                     );
-
 
 
                     varnFeatures.push({
@@ -773,8 +963,8 @@ document.addEventListener("DOMContentLoaded", function () {
                         feature:
                         feature,
 
-                        layer:
-                        layer
+                        marker:
+                        marker
 
                     });
 
@@ -782,338 +972,150 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
 
-            varnDataLoaded =
-            true;
+            updateVarnVisibility();
 
+        }
+    )
 
-            skapaVarnFilter();
-
-            uppdateraVarn();
-
-
-            console.log(
-                "Värn laddade:",
-                data.features.length
-            );
-
-        })
-
-        .catch(function (error) {
+    .catch(
+        error => {
 
             console.error(
-                "Misslyckades med att ladda värn:",
+                "Kunde inte läsa värn:",
                 error
             );
 
-        });
-
-    }
-
-
-
-    /* =========================================================
-     *    INFOPANEL
-     *    ========================================================= */
-
-    function showInfoPanel(feature) {
-
-        const p =
-        feature.properties || {};
-
-
-        const panel =
-        document.getElementById(
-            "info-panel"
-        );
-
-
-        const content =
-        document.getElementById(
-            "info-content"
-        );
-
-
-        if (
-            !panel ||
-            !content
-        ) {
-
-            return;
-
         }
-
-
-        content.innerHTML = `
-
-        <div class="info-header">
-
-        <h2>
-        ${p.Typ || "Okänt värn"}
-        </h2>
-
-        <div class="info-number">
-        Nr ${p.Nr || "-"}
-        </div>
-
-        </div>
-
-
-        <div class="info-section">
-
-        <div class="info-row">
-
-        <span class="info-label">
-        Status
-        </span>
-
-        <span class="info-value">
-        ${p.Status || p.STATUS || "-"}
-        </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-        <span class="info-label">
-        Tillgänglighet
-        </span>
-
-        <span class="info-value">
-        ${p["Tillgänglighet"] || "-"}
-        </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-        <span class="info-label">
-        Parkering
-        </span>
-
-        <span class="info-value">
-        ${p.Parkering || "-"}
-        </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-        <span class="info-label">
-        Plomberad
-        </span>
-
-        <span class="info-value">
-        ${p.Plomberad || "-"}
-        </span>
-
-        </div>
-
-
-        <div class="info-row">
-
-        <span class="info-label">
-        Besökt
-        </span>
-
-        <span class="info-value">
-        ${p["Besökt"] || "-"}
-        </span>
-
-        </div>
-
-        </div>
-
-
-        <div class="info-actions">
-
-        <a
-        href="/varn/${p.Nr}"
-        class="info-button"
-        >
-        Visa mer info om värnet
-        </a>
-
-        </div>
-        `;
-
-
-        panel.classList.add(
-            "open"
-        );
-
-
-        setTimeout(
-            function () {
-
-                map.invalidateSize();
-
-            },
-            300
-        );
-
-    }
-
-
-
-    function closeInfoPanel() {
-
-        const panel =
-        document.getElementById(
-            "info-panel"
-        );
-
-
-        if (panel) {
-
-            panel.classList.remove(
-                "open"
-            );
-
-        }
-
-
-        if (selectedLayer) {
-
-            selectedLayer.setIcon(
-                createNormalIcon(
-                    selectedLayer.feature
-                )
-            );
-
-
-            selectedLayer.setZIndexOffset(
-                0
-            );
-
-
-            selectedLayer = null;
-
-        }
-
-
-        setTimeout(
-            function () {
-
-                map.invalidateSize();
-
-            },
-            300
-        );
-
-    }
-
-
-
-    const closeInfo =
-    document.getElementById(
-        "close-info"
     );
 
+}
 
-    if (closeInfo) {
 
-        closeInfo.addEventListener(
+/* =================================
+ *  LADDA IKONER
+ *  ================================= */
+
+fetch("/icons")
+
+.then(
+    response => {
+
+        if (!response.ok) {
+            throw new Error(
+                "Ikonlistan kunde inte läsas"
+            );
+        }
+
+        return response.json();
+
+    }
+)
+
+.then(
+    icons => {
+
+        availableIcons =
+        icons;
+
+        loadVarn();
+
+    }
+)
+
+.catch(
+    error => {
+
+        console.warn(
+            "Kunde inte läsa SVG-ikoner. Standardmarkörer används.",
+            error
+        );
+
+
+        availableIcons = [];
+
+
+        loadVarn();
+
+    }
+);
+
+
+/* =================================
+ *  FILTERSEKTIONER
+ *  ================================= */
+
+document
+.querySelectorAll(
+    "[data-filter-section]"
+)
+.forEach(
+    title => {
+
+        title.addEventListener(
             "click",
-            closeInfoPanel
+            () => {
+
+                title
+                .closest(
+                    ".filter-section"
+                )
+                .classList
+                .toggle(
+                    "open"
+                );
+
+            }
         );
 
     }
+);
 
 
+/* =================================
+ *  KARTUNDERLAG
+ *  ================================= */
 
-    /* =========================================================
-     *    FILTERSEKTIONER
-     *    ========================================================= */
-
-    document
-    .querySelectorAll(
-        "[data-filter-section]"
-    )
-    .forEach(
-        function (title) {
-
-            title.addEventListener(
-                "click",
-                function () {
-
-                    title
-                    .parentElement
-                    .classList
-                    .toggle(
-                        "open"
-                    );
-
-                }
-            );
-
-        }
-    );
+const osmRadio =
+document.getElementById(
+    "osm-radio"
+);
 
 
+const satRadio =
+document.getElementById(
+    "sat-radio"
+);
 
-    /* =========================================================
-     *    KARTUNDERLAG
-     *    ========================================================= */
 
-    document
-    .getElementById(
-        "osm-radio"
-    )
-    ?.addEventListener(
+const orthoCheck =
+document.getElementById(
+    "ortho-check"
+);
+
+
+if (osmRadio) {
+
+    osmRadio.addEventListener(
         "change",
-        function () {
+        () => {
 
-            if (!this.checked) {
+            if (!osmRadio.checked) {
                 return;
             }
 
 
             map.removeLayer(
-                esriSat
-            );
-
-
-            if (
-                !map.hasLayer(osm)
-            ) {
-
-                osm.addTo(map);
-
-            }
-
-        }
-    );
-
-
-
-    document
-    .getElementById(
-        "sat-radio"
-    )
-    ?.addEventListener(
-        "change",
-        function () {
-
-            if (!this.checked) {
-                return;
-            }
-
-
-            map.removeLayer(
-                osm
+                satelliteLayer
             );
 
 
             if (
                 !map.hasLayer(
-                    esriSat
+                    osmLayer
                 )
             ) {
 
-                esriSat.addTo(
+                osmLayer.addTo(
                     map
                 );
 
@@ -1122,26 +1124,33 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
+}
 
 
-    document
-    .getElementById(
-        "ortho-check"
-    )
-    ?.addEventListener(
+if (satRadio) {
+
+    satRadio.addEventListener(
         "change",
-        function () {
+        () => {
 
-            if (this.checked) {
-
-                ortho.addTo(map);
-
+            if (!satRadio.checked) {
+                return;
             }
 
-            else {
 
-                map.removeLayer(
-                    ortho
+            map.removeLayer(
+                osmLayer
+            );
+
+
+            if (
+                !map.hasLayer(
+                    satelliteLayer
+                )
+            ) {
+
+                satelliteLayer.addTo(
+                    map
                 );
 
             }
@@ -1149,225 +1158,305 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     );
 
+}
 
 
-    /* =========================================================
-     *    STATUSFILTER VÄRN
-     *    ========================================================= */
+if (orthoCheck) {
 
-    document
-    .getElementById(
-        "status-rivet"
-    )
-    ?.addEventListener(
+    orthoCheck.addEventListener(
         "change",
-        function () {
+        () => {
+
+            if (
+                orthoCheck.checked
+            ) {
+
+                orthoLayer.addTo(
+                    map
+                );
+
+            }
+
+            else {
+
+                map.removeLayer(
+                    orthoLayer
+                );
+
+            }
+
+        }
+    );
+
+}
+
+
+/* =================================
+ *  STATUSFILTER VÄRN
+ *  ================================= */
+
+const statusRivet =
+document.getElementById(
+    "status-rivet"
+);
+
+
+const statusProvisoriskt =
+document.getElementById(
+    "status-provisoriskt"
+);
+
+
+const statusOkand =
+document.getElementById(
+    "status-okand"
+);
+
+
+if (statusRivet) {
+
+    statusRivet.checked =
+    false;
+
+
+    statusRivet.addEventListener(
+        "change",
+        () => {
 
             rivnaVisible =
-            this.checked;
+            statusRivet.checked;
 
-            uppdateraVarn();
+
+            updateVarnVisibility();
 
         }
     );
 
+}
 
 
-    document
-    .getElementById(
-        "status-provisoriskt"
-    )
-    ?.addEventListener(
+if (statusProvisoriskt) {
+
+    statusProvisoriskt.checked =
+    false;
+
+
+    statusProvisoriskt.addEventListener(
         "change",
-        function () {
+        () => {
 
             provisoriskaVisible =
-            this.checked;
+            statusProvisoriskt
+            .checked;
 
-            uppdateraVarn();
+
+            updateVarnVisibility();
 
         }
     );
 
+}
 
 
-    document
-    .getElementById(
-        "status-okand"
-    )
-    ?.addEventListener(
+if (statusOkand) {
+
+    statusOkand.checked =
+    false;
+
+
+    statusOkand.addEventListener(
         "change",
-        function () {
+        () => {
 
             okandaVisible =
-            this.checked;
+            statusOkand.checked;
 
-            uppdateraVarn();
+
+            updateVarnVisibility();
 
         }
     );
 
+}
 
 
-    /* =========================================================
-     *    DRAKTÄNDER
-     *    ========================================================= */
+/* =================================
+ *  HJÄLPFUNKTION LAGER
+ *  ================================= */
 
-    fetch("/draktander")
+function toggleLayer(
+    layer,
+    visible
+) {
 
-    .then(function (response) {
+    if (visible) {
 
-        if (!response.ok) {
+        if (
+            !map.hasLayer(
+                layer
+            )
+        ) {
 
-            throw new Error(
-                `HTTP ${response.status}`
+            layer.addTo(
+                map
             );
 
         }
 
+    }
+
+    else {
+
+        if (
+            map.hasLayer(
+                layer
+            )
+        ) {
+
+            map.removeLayer(
+                layer
+            );
+
+        }
+
+    }
+
+}
+
+
+/* =================================
+ *  DRAKTÄNDER
+ *  ================================= */
+
+fetch("/draktander")
+
+.then(
+    response => {
+
+        if (!response.ok) {
+            throw new Error(
+                "Draktänder kunde inte läsas"
+            );
+        }
+
         return response.json();
 
-    })
+    }
+)
 
-    .then(function (data) {
+.then(
+    geojson => {
 
         L.geoJSON(
-            data,
+            geojson,
             {
 
                 style:
-                function (feature) {
-
+                feature => {
 
                     const status =
                     String(
-                        feature
-                        .properties
-                        ?.STATUS || ""
+                        feature.properties
+                        ?.STATUS
+                        || ""
                     )
-                    .trim()
                     .toUpperCase();
 
 
                     if (
-                        status ===
-                        "RIVET"
+                        status.includes(
+                            "RIV"
+                        )
                     ) {
 
                         return {
-                            color: "#ff0000",
-                            weight: 5,
-                            opacity: 1
+                            color: "#d00000",
+                            weight: 3
                         };
 
                     }
 
 
                     if (
-                        status ===
-                        "KVAR"
+                        status.includes(
+                            "FLYTT"
+                        ) ||
+                        status.includes(
+                            "BEVAR"
+                        )
                     ) {
 
                         return {
-                            color: "#00a000",
-                            weight: 5,
-                            opacity: 1
-                        };
-
-                    }
-
-
-                    if (
-                        status ===
-                        "BEVARAD"
-                    ) {
-
-                        return {
-                            color: "#ff8800",
-                            weight: 5,
-                            opacity: 1
+                            color: "#e68a00",
+                            weight: 3
                         };
 
                     }
 
 
                     return {
-
-                        color: "#888888",
-                        weight: 4,
-                        opacity: 1
-
+                        color: "#198754",
+                        weight: 3
                     };
 
                 },
 
 
                 onEachFeature:
-                function (
+                (
                     feature,
-                    layer
-                ) {
+                 layer
+                ) => {
 
                     const p =
-                    feature
-                    .properties
+                    feature.properties
                     || {};
 
 
-                    layer.bindPopup(`
+                    layer.bindPopup(
+                        `
+                        <strong>
+                        Draktänder
+                        </strong>
 
-                    <div class="popup-content">
+                        <br>
 
-                    <b>Status:</b>
-                    ${p.STATUS || "-"}
-                    <br>
-
-                    <b>ID:</b>
-                    ${p.id || "-"}
-
-                    </div>
-
-                    `);
+                        Status:
+                        ${
+                            p.STATUS
+                            || "-"
+                        }
+                        `
+                    );
 
 
                     const status =
                     String(
-                        p.STATUS ||
-                        ""
+                        p.STATUS || ""
                     )
-                    .trim()
                     .toUpperCase();
 
 
                     if (
-                        status ===
-                        "RIVET"
+                        status.includes(
+                            "RIV"
+                        )
                     ) {
 
-                        draktanderRivenLayer
+                        draktanderRivetLayer
                         .addLayer(
                             layer
                         );
 
                     }
 
-
-                    if (
-                        status ===
-                        "KVAR"
-                    ) {
-
-                        draktanderKvarLayer
-                        .addLayer(
-                            layer
-                        );
-
-                    }
-
-
-                    if (
-                        status ===
-                        "BEVARAD"
+                    else if (
+                        status.includes(
+                            "FLYTT"
+                        ) ||
+                        status.includes(
+                            "BEVAR"
+                        )
                     ) {
 
                         draktanderBevaradLayer
@@ -1377,6 +1466,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     }
 
+                    else {
+
+                        draktanderKvarLayer
+                        .addLayer(
+                            layer
+                        );
+
+                    }
+
                 }
 
             }
@@ -1384,160 +1482,182 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
         /*
-         *            Samma standard som gamla kartan:
-         *            Kvar och bevarade visas.
-         *            Rivna visas inte.
+         *              OBS:
+         *              inga draktänder läggs till
+         *              automatiskt.
+         *
+         *              Alla är AV från början.
          */
 
-        draktanderKvarLayer
-        .addTo(map);
+    }
+)
 
-
-        draktanderBevaradLayer
-        .addTo(map);
-
-    })
-
-    .catch(function (error) {
+.catch(
+    error => {
 
         console.warn(
             "Draktänder kunde inte laddas:",
             error
         );
 
-    });
+    }
+);
 
 
+/* Draktandsfilter */
 
-    document
-    .getElementById(
-        "draktander-riven"
-    )
-    ?.addEventListener(
+const draktanderRivenCheck =
+document.getElementById(
+    "draktander-riven"
+);
+
+
+const draktanderKvarCheck =
+document.getElementById(
+    "draktander-kvar"
+);
+
+
+const draktanderBevaradCheck =
+document.getElementById(
+    "draktander-bevarad"
+);
+
+
+if (draktanderRivenCheck) {
+
+    draktanderRivenCheck.checked =
+    false;
+
+
+    draktanderRivenCheck
+    .addEventListener(
         "change",
-        function () {
+        () => {
 
             toggleLayer(
-                draktanderRivenLayer,
-                this.checked
+                draktanderRivetLayer,
+                draktanderRivenCheck
+                .checked
             );
 
         }
     );
 
+}
 
-    document
-    .getElementById(
-        "draktander-kvar"
-    )
-    ?.addEventListener(
+
+if (draktanderKvarCheck) {
+
+    draktanderKvarCheck.checked =
+    false;
+
+
+    draktanderKvarCheck
+    .addEventListener(
         "change",
-        function () {
+        () => {
 
             toggleLayer(
                 draktanderKvarLayer,
-                this.checked
+                draktanderKvarCheck
+                .checked
             );
 
         }
     );
 
+}
 
-    document
-    .getElementById(
-        "draktander-bevarad"
-    )
-    ?.addEventListener(
+
+if (draktanderBevaradCheck) {
+
+    draktanderBevaradCheck.checked =
+    false;
+
+
+    draktanderBevaradCheck
+    .addEventListener(
         "change",
-        function () {
+        () => {
 
             toggleLayer(
                 draktanderBevaradLayer,
-                this.checked
+                draktanderBevaradCheck
+                .checked
             );
 
         }
     );
 
+}
 
 
-    /* =========================================================
-     *    LFV DRÖNARKARTA
-     *    ========================================================= */
+/* =================================
+ *  LFV / DRÖNARRESTRIKTIONER
+ *  ================================= */
 
-    fetch("/lfv")
+fetch("/lfv")
 
-    .then(function (response) {
+.then(
+    response => {
 
         if (!response.ok) {
-
             throw new Error(
-                `HTTP ${response.status}`
+                "LFV-lagret kunde inte läsas"
             );
-
         }
 
         return response.json();
 
-    })
+    }
+)
 
-    .then(function (data) {
+.then(
+    geojson => {
 
         L.geoJSON(
-            data,
+            geojson,
             {
 
                 style:
-                function (feature) {
+                feature => {
 
-                    const farg =
-                    feature
-                    .properties
-                    ?.Färg;
+                    const color =
+                    String(
+                        feature.properties
+                        ?.["Färg"]
+                        ||
+                        feature.properties
+                        ?.Farg
+                        ||
+                        ""
+                    )
+                    .toLowerCase();
 
 
                     if (
-                        farg ===
-                        "RÖD"
+                        color.includes(
+                            "orange"
+                        ) ||
+                        color.includes(
+                            "orange"
+                        )
                     ) {
 
                         return {
 
                             color:
-                            "#d00000",
-
-                            weight:
-                            3,
+                            "#ff8c00",
 
                             fillColor:
-                            "#d00000",
-
-                            fillOpacity:
-                            0.08
-
-                        };
-
-                    }
-
-
-                    if (
-                        farg ===
-                        "ORANGE"
-                    ) {
-
-                        return {
-
-                            color:
-                            "#ff8800",
+                            "#ff8c00",
 
                             weight:
-                            3,
-
-                            fillColor:
-                            "#ff8800",
+                            2,
 
                             fillOpacity:
-                            0.08
+                            0.25
 
                         };
 
@@ -1547,13 +1667,16 @@ document.addEventListener("DOMContentLoaded", function () {
                     return {
 
                         color:
-                        "#888888",
+                        "#d00000",
+
+                        fillColor:
+                        "#d00000",
 
                         weight:
                         2,
 
                         fillOpacity:
-                        0
+                        0.25
 
                     };
 
@@ -1561,307 +1684,255 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
                 onEachFeature:
-                function (
+                (
                     feature,
-                    layer
-                ) {
+                 layer
+                ) => {
 
                     const p =
-                    feature
-                    .properties
+                    feature.properties
                     || {};
 
 
-                    layer.bindPopup(`
-
-                    <div class="popup-content">
-
-                    <b>Område:</b>
-                    ${p.NAMEOFAREA || "-"}
-                    <br>
-
-                    <b>Typ:</b>
-                    ${p.TYPEOFAREA || "-"}
-                    <br>
-
-                    <b>Plats:</b>
-                    ${p.LOCATION || "-"}
-                    <br>
-
-                    <b>Undre gräns:</b>
-                    ${p.LOWER || "-"}
-                    <br>
-
-                    <b>Övre gräns:</b>
-                    ${p.UPPER || "-"}
-                    <br>
-
-                    <b>Gäller från:</b>
-                    ${p.WEF || "-"}
-                    <br>
-
-                    <b>Klass:</b>
-                    ${p.Färg || "-"}
-
-                    </div>
-
-                    `);
+                    const color =
+                    String(
+                        p["Färg"]
+                        ||
+                        p.Farg
+                        ||
+                        ""
+                    )
+                    .toLowerCase();
 
 
-                    if (
-                        p.Färg ===
-                        "RÖD"
-                    ) {
+                    let popup =
+                    "<strong>Drönarrestriktion</strong>";
 
-                        lfvNoFlyLayer
-                        .addLayer(
-                            layer
+
+                        Object.entries(
+                            p
+                        ).forEach(
+                            ([key, value]) => {
+
+                                if (
+                                    value === null ||
+                                    value === ""
+                                ) {
+
+                                    return;
+
+                                }
+
+
+                                popup +=
+                                `<br>${key}: ${value}`;
+
+                            }
                         );
 
-                    }
 
-
-                    if (
-                        p.Färg ===
-                        "ORANGE"
-                    ) {
-
-                        lfvRestrictedLayer
-                        .addLayer(
-                            layer
+                        layer.bindPopup(
+                            popup
                         );
 
-                    }
+
+                        if (
+                            color.includes(
+                                "orange"
+                            ) ||
+                            color.includes(
+                                "orange"
+                            )
+                        ) {
+
+                            droneOrangeLayer
+                            .addLayer(
+                                layer
+                            );
+
+                        }
+
+                        else {
+
+                            droneRedLayer
+                            .addLayer(
+                                layer
+                            );
+
+                        }
 
                 }
 
             }
         );
 
-    })
 
-    .catch(function (error) {
+        /*
+         *              Båda LFV-lagren är
+         *              AV från början.
+         */
+
+    }
+)
+
+.catch(
+    error => {
 
         console.warn(
-            "LFV-data kunde inte laddas:",
+            "LFV kunde inte laddas:",
             error
         );
 
-    });
+    }
+);
 
 
+/* Drönarfilter */
 
-    document
-    .getElementById(
-        "drone-red"
-    )
-    ?.addEventListener(
+const droneRedCheck =
+document.getElementById(
+    "drone-red"
+);
+
+
+const droneOrangeCheck =
+document.getElementById(
+    "drone-orange"
+);
+
+
+if (droneRedCheck) {
+
+    droneRedCheck.checked =
+    false;
+
+
+    droneRedCheck.addEventListener(
         "change",
-        function () {
+        () => {
 
             toggleLayer(
-                lfvNoFlyLayer,
-                this.checked
+                droneRedLayer,
+                droneRedCheck.checked
             );
 
         }
     );
 
+}
 
-    document
-    .getElementById(
-        "drone-orange"
-    )
-    ?.addEventListener(
+
+if (droneOrangeCheck) {
+
+    droneOrangeCheck.checked =
+    false;
+
+
+    droneOrangeCheck.addEventListener(
         "change",
-        function () {
+        () => {
 
             toggleLayer(
-                lfvRestrictedLayer,
-                this.checked
+                droneOrangeLayer,
+                droneOrangeCheck.checked
             );
 
         }
     );
 
+}
 
 
-    /* =========================================================
-     *    HJÄLPFUNKTION FÖR LAGER
-     *    ========================================================= */
+/* =================================
+ *  MOBIL FILTERMENY
+ *  ================================= */
 
-    function toggleLayer(
-        layer,
-        visible
-    ) {
-
-        if (visible) {
-
-            if (
-                !map.hasLayer(layer)
-            ) {
-
-                layer.addTo(map);
-
-            }
-
-        }
-
-        else {
-
-            if (
-                map.hasLayer(layer)
-            ) {
-
-                map.removeLayer(
-                    layer
-                );
-
-            }
-
-        }
-
-    }
+const mobileFilterButton =
+document.getElementById(
+    "mobile-filter-button"
+);
 
 
-
-    /* =========================================================
-     *    MOBILFILTER
-     *    ========================================================= */
-
-    const mobileFilterButton =
-    document.getElementById(
-        "mobile-filter-button"
-    );
+const closeFilterButton =
+document.getElementById(
+    "close-filter"
+);
 
 
-    const sidebar =
-    document.querySelector(
-        ".sidebar"
-    );
+const sidebar =
+document.querySelector(
+    ".sidebar"
+);
 
 
-    const closeFilter =
-    document.getElementById(
-        "close-filter"
-    );
+if (
+    mobileFilterButton &&
+    sidebar
+) {
 
-
-    if (
-        mobileFilterButton &&
-        sidebar
-    ) {
-
-        mobileFilterButton
-        .addEventListener(
-            "click",
-            function (event) {
-
-                event.stopPropagation();
-
-                sidebar
-                .classList
-                .toggle(
-                    "open"
-                );
-
-            }
-        );
-
-    }
-
-
-    if (
-        closeFilter &&
-        sidebar
-    ) {
-
-        closeFilter
-        .addEventListener(
-            "click",
-            function () {
-
-                sidebar
-                .classList
-                .remove(
-                    "open"
-                );
-
-            }
-        );
-
-    }
-
-
-
-    document.addEventListener(
+    mobileFilterButton.addEventListener(
         "click",
-        function (event) {
+        () => {
 
-            if (
-                sidebar &&
-                sidebar
-                .classList
-                .contains(
-                    "open"
-                ) &&
-                !sidebar.contains(
-                    event.target
-                ) &&
-                !mobileFilterButton
-                ?.contains(
-                    event.target
-                )
-            ) {
-
-                sidebar
-                .classList
-                .remove(
-                    "open"
-                );
-
-            }
+            sidebar.classList.add(
+                "open"
+            );
 
         }
     );
 
+}
 
 
-    /* =========================================================
-     *    MOBILMENY
-     *    ========================================================= */
+if (
+    closeFilterButton &&
+    sidebar
+) {
 
-    const mobileMenuButton =
-    document.getElementById(
-        "mobile-menu-button"
+    closeFilterButton.addEventListener(
+        "click",
+        () => {
+
+            sidebar.classList.remove(
+                "open"
+            );
+
+        }
     );
 
+}
 
-    const mobileMenu =
-    document.getElementById(
-        "mobile-menu"
+
+/* =================================
+ *  MOBIL HAMBURGARMENY
+ *  ================================= */
+
+const mobileMenuButton =
+document.getElementById(
+    "mobile-menu-button"
+);
+
+
+const mobileMenu =
+document.getElementById(
+    "mobile-menu"
+);
+
+
+if (
+    mobileMenuButton &&
+    mobileMenu
+) {
+
+    mobileMenuButton.addEventListener(
+        "click",
+        () => {
+
+            mobileMenu.classList.toggle(
+                "open"
+            );
+
+        }
     );
 
-
-    if (
-        mobileMenuButton &&
-        mobileMenu
-    ) {
-
-        mobileMenuButton
-        .addEventListener(
-            "click",
-            function () {
-
-                mobileMenu
-                .classList
-                .toggle(
-                    "open"
-                );
-
-            }
-        );
-
-    }
-
-});
+}
