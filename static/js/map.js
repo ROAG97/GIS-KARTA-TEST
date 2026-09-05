@@ -13,6 +13,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
         L.geoJSON(data, {
 
+            pointToLayer: function(feature, latlng) {
+
+                const typ = feature.properties.Typ || "default";
+
+                const iconName = typ.replace(/\s+/g, "");
+
+                const icon = L.icon({
+                    iconUrl: `/static/icons/${iconName}.svg`,
+                    iconSize: [32, 32],
+                    iconAnchor: [16, 16]
+                });
+
+                return L.marker(latlng, {
+                    icon: icon
+                });
+            },
+
             onEachFeature: function(feature, layer) {
 
                 layer.on("click", function () {
@@ -22,7 +39,6 @@ document.addEventListener("DOMContentLoaded", function () {
             }
 
         }).addTo(map);
-
     })
     .catch(error => {
         console.error("Fel vid inläsning av GeoJSON:", error);
@@ -86,7 +102,7 @@ document.addEventListener("DOMContentLoaded", function () {
         <div class="info-actions">
 
         <a
-        href="/Nr/${p.Nr}"
+        href="/varn/${p.Nr}"
         class="info-button"
         >
         Visa mer info om värnet
