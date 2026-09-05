@@ -20,7 +20,6 @@ const osmLayer = L.tileLayer(
     }
 );
 
-
 const satelliteLayer = L.tileLayer(
     "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     {
@@ -29,18 +28,12 @@ const satelliteLayer = L.tileLayer(
     }
 );
 
-
-/* Eget ortofoto - framtida tiles */
-
 const orthoLayer = L.tileLayer(
     "/static/tiles_ortho/{z}/{x}/{y}.jpg",
     {
         maxZoom: 22
     }
 );
-
-
-/* OpenStreetMap standard */
 
 osmLayer.addTo(map);
 
@@ -49,20 +42,11 @@ osmLayer.addTo(map);
  *  LAGERGRUPPER
  *  ================================= */
 
-
-/* Drönarrestriktioner */
-
 const droneRedLayer = L.layerGroup();
-
 const droneOrangeLayer = L.layerGroup();
 
-
-/* Draktänder */
-
 const draktanderRivetLayer = L.layerGroup();
-
 const draktanderKvarLayer = L.layerGroup();
-
 const draktanderBevaradLayer = L.layerGroup();
 
 
@@ -71,23 +55,13 @@ const draktanderBevaradLayer = L.layerGroup();
  *  ================================= */
 
 let varnFeatures = [];
-
 let availableIcons = [];
-
 let selectedMarker = null;
-
-
-/* Vilka typer som visas */
 
 const varnTypeVisibility = {};
 
-
-/* Specialstatus */
-
 let rivnaVisible = false;
-
 let provisoriskaVisible = false;
-
 let okandaVisible = false;
 
 
@@ -104,12 +78,6 @@ function normalizeIconName(type) {
     let name = type
     .trim()
     .replace(/\s+/g, "");
-
-
-    /*
-     *      Gammal specialregel:
-     *      Typen KSP använder QGIS.svg
-     */
 
     if (name === "KSP") {
         name = "QGIS";
@@ -128,29 +96,20 @@ function createVarnIcon(type) {
     const iconName =
     normalizeIconName(type);
 
-
     if (
         iconName &&
         availableIcons.includes(iconName)
     ) {
 
         return L.icon({
-
             iconUrl:
             `/static/icons/${iconName}.svg`,
-
             iconSize:
             [40, 40],
-
             iconAnchor:
             [20, 20]
-
         });
-
     }
-
-
-    /* Standard blå Leafletmarkör */
 
     return new L.Icon.Default();
 }
@@ -162,35 +121,22 @@ function createVarnIcon(type) {
 
 function selectMarker(marker, feature) {
 
-    /*
-     *      Återställ tidigare vald markör
-     */
-
     if (
         selectedMarker &&
         selectedMarker.originalIcon
     ) {
-
         selectedMarker.setIcon(
             selectedMarker.originalIcon
         );
-
     }
-
 
     const properties =
     feature.properties || {};
-
 
     const iconName =
     normalizeIconName(
         properties.Typ
     );
-
-
-    /*
-     *      Om värnet har egen SVG
-     */
 
     if (
         iconName &&
@@ -199,79 +145,45 @@ function selectMarker(marker, feature) {
 
         const selectedIcon =
         L.divIcon({
-
             className: "",
-
             html: `
             <div class="selected-marker">
-
             <img
             src="/static/icons/${iconName}.svg"
             alt=""
             >
-
             </div>
             `,
-
-            iconSize:
-            [52, 52],
-
-            iconAnchor:
-            [26, 26]
-
+            iconSize: [52, 52],
+            iconAnchor: [26, 26]
         });
 
+        marker.setIcon(selectedIcon);
 
-        marker.setIcon(
-            selectedIcon
-        );
-
-    }
-
-    else {
-
-        /*
-         *          Standard blå Leafletmarkör
-         *          med gul ram
-         */
+    } else {
 
         const selectedDefaultIcon =
         L.divIcon({
-
             className: "",
-
             html: `
             <div class="
             selected-marker
             selected-default-marker
             ">
-
             <img
             src="https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png"
             alt=""
             >
-
             </div>
             `,
-
-            iconSize:
-            [44, 54],
-
-            iconAnchor:
-            [22, 54]
-
+            iconSize: [44, 54],
+            iconAnchor: [22, 54]
         });
 
-
-        marker.setIcon(
-            selectedDefaultIcon
-        );
-
+        marker.setIcon(selectedDefaultIcon);
     }
 
-
-    selectedMarker =
-    marker;
+    selectedMarker = marker;
 }
 
 
@@ -284,7 +196,6 @@ function shouldShowVarn(feature) {
     const properties =
     feature.properties || {};
 
-
     const status =
     String(
         properties.Status || ""
@@ -292,48 +203,29 @@ function shouldShowVarn(feature) {
     .trim()
     .toUpperCase();
 
-
-    /*
-     *      Specialstatus går före typ
-     */
-
     if (
         status === "RIVET" ||
         status === "RIVEN"
     ) {
-
         return rivnaVisible;
-
     }
-
 
     if (
         status === "PROVISORISKT" ||
         status === "PROVISORISK"
     ) {
-
         return provisoriskaVisible;
-
     }
-
 
     if (
         status === "OKÄND" ||
         status === "OKAND"
     ) {
-
         return okandaVisible;
-
     }
-
-
-    /*
-     *      Alla övriga värn följer typfiltret
-     */
 
     const type =
     properties.Typ || "Okänd";
-
 
     return (
         varnTypeVisibility[type] !== false
@@ -355,7 +247,6 @@ function updateVarnVisibility() {
                 item.feature
             );
 
-
             if (show) {
 
                 if (
@@ -363,34 +254,23 @@ function updateVarnVisibility() {
                         item.marker
                     )
                 ) {
-
-                    item.marker.addTo(
-                        map
-                    );
-
+                    item.marker.addTo(map);
                 }
 
-            }
-
-            else {
+            } else {
 
                 if (
                     map.hasLayer(
                         item.marker
                     )
                 ) {
-
                     map.removeLayer(
                         item.marker
                     );
-
                 }
-
             }
-
         }
     );
-
 }
 
 
@@ -404,35 +284,20 @@ function getImagePath(imageValue) {
         return null;
     }
 
-
     const image =
     String(imageValue).trim();
-
 
     if (
         image === "" ||
         image === "-"
     ) {
-
         return null;
     }
-
-
-    /*
-     *      Exempel:
-     *
-     *      Pictures/varn683.jpg
-     *
-     *      blir:
-     *
-     *      /static/pictures/varn683.jpg
-     */
 
     if (
         image.toLowerCase()
         .startsWith("pictures/")
     ) {
-
         return (
             "/" +
             image.replace(
@@ -440,42 +305,20 @@ function getImagePath(imageValue) {
                 "static/pictures/"
             )
         );
-
     }
-
-
-    /*
-     *      Om full webbadress redan finns
-     */
 
     if (
         image.startsWith("http://") ||
         image.startsWith("https://")
     ) {
-
         return image;
-
     }
-
-
-    /*
-     *      Om sökvägen redan börjar
-     *      med /static/
-     */
 
     if (
         image.startsWith("/static/")
     ) {
-
         return image;
-
     }
-
-
-    /*
-     *      Annars anta att bilden ligger
-     *      i static/pictures
-     */
 
     return (
         "/static/pictures/" +
@@ -495,39 +338,32 @@ function openInfoPanel(feature) {
         "info-panel"
     );
 
-
     const content =
     document.getElementById(
         "info-content"
     );
 
-
     const p =
     feature.properties || {};
-
 
     const imagePath =
     getImagePath(
         p.Bild
     );
 
-
     const imageHtml =
     imagePath
     ? `
     <div class="info-image-wrapper">
-
     <img
     src="${imagePath}"
     alt="Bild på värn ${p.Nr || ""}"
     class="info-image"
     onerror="this.parentElement.style.display='none';"
     >
-
     </div>
     `
     : "";
-
 
     content.innerHTML = `
 
@@ -550,91 +386,66 @@ function openInfoPanel(feature) {
     <div class="info-section">
 
     <div class="info-row">
-
     <span class="info-label">
     Status
     </span>
-
     <span class="info-value">
     ${p.Status || "-"}
     </span>
-
     </div>
 
-
     <div class="info-row">
-
     <span class="info-label">
     Typ
     </span>
-
     <span class="info-value">
     ${p.Typ || "-"}
     </span>
-
     </div>
 
-
     <div class="info-row">
-
     <span class="info-label">
     Tillgänglighet
     </span>
-
     <span class="info-value">
     ${
         p["Tillgänglighet"]
         || "-"
     }
     </span>
-
     </div>
 
-
     <div class="info-row">
-
     <span class="info-label">
     Parkering
     </span>
-
     <span class="info-value">
     ${p.Parkering || "-"}
     </span>
-
     </div>
 
-
     <div class="info-row">
-
     <span class="info-label">
     Plomberad
     </span>
-
     <span class="info-value">
     ${p.Plomberad || "-"}
     </span>
-
     </div>
-
 
     ${
         p["Mindre kuriosa"] &&
         p["Mindre kuriosa"] !== "-"
-
         ? `
         <div class="info-row">
-
         <span class="info-label">
         Kuriosa
         </span>
-
         <span class="info-value">
         ${p["Mindre kuriosa"]}
         </span>
-
         </div>
         `
-
         : ""
     }
 
@@ -654,6 +465,17 @@ function openInfoPanel(feature) {
 
     `;
 
+    /*
+     *      På mobil ska varje nytt värn
+     *      öppnas på 60 %.
+     */
+
+    if (
+        window.innerWidth <= 768
+    ) {
+        panel.style.height =
+        "60%";
+    }
 
     panel.classList.add(
         "open"
@@ -670,7 +492,6 @@ document.getElementById(
     "close-info"
 );
 
-
 if (closeInfoButton) {
 
     closeInfoButton.addEventListener(
@@ -682,33 +503,22 @@ if (closeInfoButton) {
                 "info-panel"
             );
 
-
             panel.classList.remove(
                 "open"
             );
-
-
-            /*
-             *              Återställ vald markör
-             */
 
             if (
                 selectedMarker &&
                 selectedMarker.originalIcon
             ) {
-
                 selectedMarker.setIcon(
                     selectedMarker.originalIcon
                 );
-
             }
 
-
             selectedMarker = null;
-
         }
     );
-
 }
 
 
@@ -725,14 +535,11 @@ function createVarnTypeFilters(
         "varn-type-filters"
     );
 
-
     if (!container) {
         return;
     }
 
-
     container.innerHTML = "";
-
 
     const types =
     [
@@ -754,42 +561,30 @@ function createVarnTypeFilters(
         )
     );
 
-
     types.forEach(
         type => {
 
-            /*
-             *              Alla normala typer
-             *              PÅ som standard
-             */
-
             varnTypeVisibility[type] =
             true;
-
 
             const label =
             document.createElement(
                 "label"
             );
 
-
             label.className =
             "filter-option";
-
 
                 const checkbox =
                 document.createElement(
                     "input"
                 );
 
-
                 checkbox.type =
                 "checkbox";
 
-
                 checkbox.checked =
                 true;
-
 
                 checkbox.addEventListener(
                     "change",
@@ -798,23 +593,18 @@ function createVarnTypeFilters(
                         varnTypeVisibility[type] =
                         checkbox.checked;
 
-
                         updateVarnVisibility();
-
                     }
                 );
-
 
                 label.appendChild(
                     checkbox
                 );
 
-
                 const iconName =
                 normalizeIconName(
                     type
                 );
-
 
                 if (
                     iconName &&
@@ -828,44 +618,34 @@ function createVarnTypeFilters(
                         "img"
                     );
 
-
                     image.src =
                     `/static/icons/${iconName}.svg`;
-
 
                     image.alt =
                     "";
 
-
             label.appendChild(
                 image
             );
-
                 }
-
 
                 const text =
                 document.createElement(
                     "span"
                 );
 
-
                 text.textContent =
                 type;
-
 
                 label.appendChild(
                     text
                 );
 
-
                 container.appendChild(
                     label
                 );
-
         }
     );
-
 }
 
 
@@ -889,7 +669,6 @@ function loadVarn() {
                 geojson
             );
 
-
             geojson.features.forEach(
                 feature => {
 
@@ -898,27 +677,21 @@ function loadVarn() {
                         feature.geometry.type
                         !== "Point"
                     ) {
-
                         return;
-
                     }
-
 
                     const coordinates =
                     feature.geometry
                     .coordinates;
 
-
                     const p =
                     feature.properties
                     || {};
-
 
                     const icon =
                     createVarnIcon(
                         p.Typ
                     );
-
 
                     const marker =
                     L.marker(
@@ -931,14 +704,8 @@ function loadVarn() {
                         }
                     );
 
-
-                    /*
-                     *                          Spara originalikon
-                     */
-
                     marker.originalIcon =
                     icon;
-
 
                     marker.on(
                         "click",
@@ -949,31 +716,20 @@ function loadVarn() {
                                 feature
                             );
 
-
                             openInfoPanel(
                                 feature
                             );
-
                         }
                     );
 
-
                     varnFeatures.push({
-
-                        feature:
-                        feature,
-
-                        marker:
-                        marker
-
+                        feature: feature,
+                        marker: marker
                     });
-
                 }
             );
 
-
             updateVarnVisibility();
-
         }
     )
 
@@ -984,10 +740,8 @@ function loadVarn() {
                 "Kunde inte läsa värn:",
                 error
             );
-
         }
     );
-
 }
 
 
@@ -1007,7 +761,6 @@ fetch("/icons")
         }
 
         return response.json();
-
     }
 )
 
@@ -1018,7 +771,6 @@ fetch("/icons")
         icons;
 
         loadVarn();
-
     }
 )
 
@@ -1030,12 +782,9 @@ fetch("/icons")
             error
         );
 
-
         availableIcons = [];
 
-
         loadVarn();
-
     }
 );
 
@@ -1063,10 +812,8 @@ document
                 .toggle(
                     "open"
                 );
-
             }
         );
-
     }
 );
 
@@ -1080,18 +827,15 @@ document.getElementById(
     "osm-radio"
 );
 
-
 const satRadio =
 document.getElementById(
     "sat-radio"
 );
 
-
 const orthoCheck =
 document.getElementById(
     "ortho-check"
 );
-
 
 if (osmRadio) {
 
@@ -1103,29 +847,22 @@ if (osmRadio) {
                 return;
             }
 
-
             map.removeLayer(
                 satelliteLayer
             );
-
 
             if (
                 !map.hasLayer(
                     osmLayer
                 )
             ) {
-
                 osmLayer.addTo(
                     map
                 );
-
             }
-
         }
     );
-
 }
-
 
 if (satRadio) {
 
@@ -1137,29 +874,22 @@ if (satRadio) {
                 return;
             }
 
-
             map.removeLayer(
                 osmLayer
             );
-
 
             if (
                 !map.hasLayer(
                     satelliteLayer
                 )
             ) {
-
                 satelliteLayer.addTo(
                     map
                 );
-
             }
-
         }
     );
-
 }
-
 
 if (orthoCheck) {
 
@@ -1170,24 +900,16 @@ if (orthoCheck) {
             if (
                 orthoCheck.checked
             ) {
-
                 orthoLayer.addTo(
                     map
                 );
-
-            }
-
-            else {
-
+            } else {
                 map.removeLayer(
                     orthoLayer
                 );
-
             }
-
         }
     );
-
 }
 
 
@@ -1200,24 +922,20 @@ document.getElementById(
     "status-rivet"
 );
 
-
 const statusProvisoriskt =
 document.getElementById(
     "status-provisoriskt"
 );
-
 
 const statusOkand =
 document.getElementById(
     "status-okand"
 );
 
-
 if (statusRivet) {
 
     statusRivet.checked =
     false;
-
 
     statusRivet.addEventListener(
         "change",
@@ -1226,20 +944,15 @@ if (statusRivet) {
             rivnaVisible =
             statusRivet.checked;
 
-
             updateVarnVisibility();
-
         }
     );
-
 }
-
 
 if (statusProvisoriskt) {
 
     statusProvisoriskt.checked =
     false;
-
 
     statusProvisoriskt.addEventListener(
         "change",
@@ -1249,20 +962,15 @@ if (statusProvisoriskt) {
             statusProvisoriskt
             .checked;
 
-
             updateVarnVisibility();
-
         }
     );
-
 }
-
 
 if (statusOkand) {
 
     statusOkand.checked =
     false;
-
 
     statusOkand.addEventListener(
         "change",
@@ -1271,12 +979,9 @@ if (statusOkand) {
             okandaVisible =
             statusOkand.checked;
 
-
             updateVarnVisibility();
-
         }
     );
-
 }
 
 
@@ -1296,31 +1001,23 @@ function toggleLayer(
                 layer
             )
         ) {
-
             layer.addTo(
                 map
             );
-
         }
 
-    }
-
-    else {
+    } else {
 
         if (
             map.hasLayer(
                 layer
             )
         ) {
-
             map.removeLayer(
                 layer
             );
-
         }
-
     }
-
 }
 
 
@@ -1340,7 +1037,6 @@ fetch("/draktander")
         }
 
         return response.json();
-
     }
 )
 
@@ -1350,7 +1046,6 @@ fetch("/draktander")
         L.geoJSON(
             geojson,
             {
-
                 style:
                 feature => {
 
@@ -1362,20 +1057,16 @@ fetch("/draktander")
                     )
                     .toUpperCase();
 
-
                     if (
                         status.includes(
                             "RIV"
                         )
                     ) {
-
                         return {
                             color: "#d00000",
                             weight: 3
                         };
-
                     }
-
 
                     if (
                         status.includes(
@@ -1385,22 +1076,17 @@ fetch("/draktander")
                             "BEVAR"
                         )
                     ) {
-
                         return {
                             color: "#e68a00",
                             weight: 3
                         };
-
                     }
-
 
                     return {
                         color: "#198754",
                         weight: 3
                     };
-
                 },
-
 
                 onEachFeature:
                 (
@@ -1411,7 +1097,6 @@ fetch("/draktander")
                     const p =
                     feature.properties
                     || {};
-
 
                     layer.bindPopup(
                         `
@@ -1429,13 +1114,11 @@ fetch("/draktander")
                         `
                     );
 
-
                     const status =
                     String(
                         p.STATUS || ""
                     )
                     .toUpperCase();
-
 
                     if (
                         status.includes(
@@ -1448,9 +1131,7 @@ fetch("/draktander")
                             layer
                         );
 
-                    }
-
-                    else if (
+                    } else if (
                         status.includes(
                             "FLYTT"
                         ) ||
@@ -1464,31 +1145,16 @@ fetch("/draktander")
                             layer
                         );
 
-                    }
-
-                    else {
+                    } else {
 
                         draktanderKvarLayer
                         .addLayer(
                             layer
                         );
-
                     }
-
                 }
-
             }
         );
-
-
-        /*
-         *              OBS:
-         *              inga draktänder läggs till
-         *              automatiskt.
-         *
-         *              Alla är AV från början.
-         */
-
     }
 )
 
@@ -1499,7 +1165,6 @@ fetch("/draktander")
             "Draktänder kunde inte laddas:",
             error
         );
-
     }
 );
 
@@ -1511,24 +1176,20 @@ document.getElementById(
     "draktander-riven"
 );
 
-
 const draktanderKvarCheck =
 document.getElementById(
     "draktander-kvar"
 );
-
 
 const draktanderBevaradCheck =
 document.getElementById(
     "draktander-bevarad"
 );
 
-
 if (draktanderRivenCheck) {
 
     draktanderRivenCheck.checked =
     false;
-
 
     draktanderRivenCheck
     .addEventListener(
@@ -1540,18 +1201,14 @@ if (draktanderRivenCheck) {
                 draktanderRivenCheck
                 .checked
             );
-
         }
     );
-
 }
-
 
 if (draktanderKvarCheck) {
 
     draktanderKvarCheck.checked =
     false;
-
 
     draktanderKvarCheck
     .addEventListener(
@@ -1563,18 +1220,14 @@ if (draktanderKvarCheck) {
                 draktanderKvarCheck
                 .checked
             );
-
         }
     );
-
 }
-
 
 if (draktanderBevaradCheck) {
 
     draktanderBevaradCheck.checked =
     false;
-
 
     draktanderBevaradCheck
     .addEventListener(
@@ -1586,10 +1239,8 @@ if (draktanderBevaradCheck) {
                 draktanderBevaradCheck
                 .checked
             );
-
         }
     );
-
 }
 
 
@@ -1609,7 +1260,6 @@ fetch("/lfv")
         }
 
         return response.json();
-
     }
 )
 
@@ -1619,7 +1269,6 @@ fetch("/lfv")
         L.geoJSON(
             geojson,
             {
-
                 style:
                 feature => {
 
@@ -1635,53 +1284,26 @@ fetch("/lfv")
                     )
                     .toLowerCase();
 
-
                     if (
-                        color.includes(
-                            "orange"
-                        ) ||
                         color.includes(
                             "orange"
                         )
                     ) {
-
                         return {
-
-                            color:
-                            "#ff8c00",
-
-                            fillColor:
-                            "#ff8c00",
-
-                            weight:
-                            2,
-
-                            fillOpacity:
-                            0.25
-
+                            color: "#ff8c00",
+                            fillColor: "#ff8c00",
+                            weight: 2,
+                            fillOpacity: 0.25
                         };
-
                     }
 
-
                     return {
-
-                        color:
-                        "#d00000",
-
-                        fillColor:
-                        "#d00000",
-
-                        weight:
-                        2,
-
-                        fillOpacity:
-                        0.25
-
+                        color: "#d00000",
+                        fillColor: "#d00000",
+                        weight: 2,
+                        fillOpacity: 0.25
                     };
-
                 },
-
 
                 onEachFeature:
                 (
@@ -1693,7 +1315,6 @@ fetch("/lfv")
                     feature.properties
                     || {};
 
-
                     const color =
                     String(
                         p["Färg"]
@@ -1704,10 +1325,8 @@ fetch("/lfv")
                     )
                     .toLowerCase();
 
-
                     let popup =
                     "<strong>Drönarrestriktion</strong>";
-
 
                         Object.entries(
                             p
@@ -1718,28 +1337,19 @@ fetch("/lfv")
                                     value === null ||
                                     value === ""
                                 ) {
-
                                     return;
-
                                 }
-
 
                                 popup +=
                                 `<br>${key}: ${value}`;
-
                             }
                         );
-
 
                         layer.bindPopup(
                             popup
                         );
 
-
                         if (
-                            color.includes(
-                                "orange"
-                            ) ||
                             color.includes(
                                 "orange"
                             )
@@ -1750,28 +1360,16 @@ fetch("/lfv")
                                 layer
                             );
 
-                        }
-
-                        else {
+                        } else {
 
                             droneRedLayer
                             .addLayer(
                                 layer
                             );
-
                         }
-
                 }
-
             }
         );
-
-
-        /*
-         *              Båda LFV-lagren är
-         *              AV från början.
-         */
-
     }
 )
 
@@ -1782,7 +1380,6 @@ fetch("/lfv")
             "LFV kunde inte laddas:",
             error
         );
-
     }
 );
 
@@ -1794,18 +1391,15 @@ document.getElementById(
     "drone-red"
 );
 
-
 const droneOrangeCheck =
 document.getElementById(
     "drone-orange"
 );
 
-
 if (droneRedCheck) {
 
     droneRedCheck.checked =
     false;
-
 
     droneRedCheck.addEventListener(
         "change",
@@ -1815,18 +1409,14 @@ if (droneRedCheck) {
                 droneRedLayer,
                 droneRedCheck.checked
             );
-
         }
     );
-
 }
-
 
 if (droneOrangeCheck) {
 
     droneOrangeCheck.checked =
     false;
-
 
     droneOrangeCheck.addEventListener(
         "change",
@@ -1836,10 +1426,8 @@ if (droneOrangeCheck) {
                 droneOrangeLayer,
                 droneOrangeCheck.checked
             );
-
         }
     );
-
 }
 
 
@@ -1852,18 +1440,15 @@ document.getElementById(
     "mobile-filter-button"
 );
 
-
 const closeFilterButton =
 document.getElementById(
     "close-filter"
 );
 
-
 const sidebar =
 document.querySelector(
     ".sidebar"
 );
-
 
 if (
     mobileFilterButton &&
@@ -1877,12 +1462,9 @@ if (
             sidebar.classList.add(
                 "open"
             );
-
         }
     );
-
 }
-
 
 if (
     closeFilterButton &&
@@ -1896,10 +1478,8 @@ if (
             sidebar.classList.remove(
                 "open"
             );
-
         }
     );
-
 }
 
 
@@ -1912,12 +1492,10 @@ document.getElementById(
     "mobile-menu-button"
 );
 
-
 const mobileMenu =
 document.getElementById(
     "mobile-menu"
 );
-
 
 if (
     mobileMenuButton &&
@@ -1931,368 +1509,298 @@ if (
             mobileMenu.classList.toggle(
                 "open"
             );
-
         }
     );
 }
 
-    /* =================================
-     *  DRAGBAR INFOPANEL PÅ MOBIL
-     *  ================================= */
 
-    const infoPanel =
-    document.getElementById(
-        "info-panel"
-    );
+/* =================================
+ *  DRAGBAR INFOPANEL PÅ MOBIL
+ *  ================================= */
 
-    const infoDragHandle =
-    document.getElementById(
-        "info-drag-handle"
-    );
+const infoPanel =
+document.getElementById(
+    "info-panel"
+);
 
+const infoDragHandle =
+document.getElementById(
+    "info-drag-handle"
+);
 
-    let sheetDragging = false;
+let sheetDragging = false;
+let sheetStartY = 0;
+let sheetStartHeight = 0;
 
-    let sheetStartY = 0;
-
-    let sheetStartHeight = 0;
-
-
-    /* Höjdlägen */
-
-    const sheetSnapPoints = [
-        30,
-        60,
-        90
-    ];
+const sheetSnapPoints = [
+    30,
+60,
+90
+];
 
 
-    /* =================================
-     *  SÄTT PANELHÖJD
-     *  ================================= */
+/* =================================
+ *  SÄTT PANELHÖJD
+ *  ================================= */
 
-    function setSheetHeight(percent) {
+function setSheetHeight(percent) {
 
-        if (!infoPanel) {
-            return;
+    if (!infoPanel) {
+        return;
+    }
+
+    infoPanel.style.height =
+    `${percent}%`;
+}
+
+
+/* =================================
+ *  HITTA NÄRMASTE LÄGE
+ *  ================================= */
+
+function getClosestSnapPoint(
+    currentPercent
+) {
+
+    return sheetSnapPoints.reduce(
+        (closest, point) => {
+
+            const currentDistance =
+            Math.abs(
+                currentPercent -
+                point
+            );
+
+            const closestDistance =
+            Math.abs(
+                currentPercent -
+                closest
+            );
+
+            return (
+                currentDistance <
+                closestDistance
+            )
+            ? point
+            : closest;
         }
-
-        infoPanel.style.height =
-        `${percent}%`;
-
-    }
+    );
+}
 
 
-    /* =================================
-     *  HITTA NÄRMASTE LÄGE
-     *  ================================= */
+/* =================================
+ *  DRAGLOGIK
+ *  ================================= */
 
-    function getClosestSnapPoint(
-        currentPercent
-    ) {
+if (
+    infoPanel &&
+    infoDragHandle
+) {
 
-        return sheetSnapPoints.reduce(
-            (closest, point) => {
+    infoDragHandle.addEventListener(
+        "pointerdown",
+        event => {
 
-                const currentDistance =
-                Math.abs(
-                    currentPercent -
-                    point
-                );
-
-                const closestDistance =
-                Math.abs(
-                    currentPercent -
-                    closest
-                );
-
-                return (
-                    currentDistance <
-                    closestDistance
-                )
-                ? point
-                : closest;
-
+            if (
+                window.innerWidth > 768
+            ) {
+                return;
             }
-        );
 
-    }
+            sheetDragging = true;
 
+            sheetStartY =
+            event.clientY;
 
-    /* =================================
-     *  BÖRJA DRA
-     *  ================================= */
+            sheetStartHeight =
+            infoPanel
+            .getBoundingClientRect()
+            .height;
 
-    if (
-        infoPanel &&
-        infoDragHandle
-    ) {
+            infoPanel.classList.add(
+                "dragging"
+            );
 
-        infoDragHandle.addEventListener(
-            "pointerdown",
-            event => {
-
-                /*
-                 *              Bara mobil
-                 */
-
-                if (
-                    window.innerWidth > 768
-                ) {
-
-                    return;
-
-                }
-
-
-                sheetDragging = true;
-
-                sheetStartY =
-                event.clientY;
-
-
-                sheetStartHeight =
-                infoPanel
-                .getBoundingClientRect()
-                .height;
-
-
-                infoPanel.classList.add(
-                    "dragging"
-                );
-
-
+            if (
+                infoDragHandle
+                .setPointerCapture
+            ) {
                 infoDragHandle
                 .setPointerCapture(
                     event.pointerId
                 );
-
-
-                event.preventDefault();
-
             }
-        );
+
+            event.preventDefault();
+        }
+    );
 
 
-        /* =================================
-         *      DRAR PANELEN
-         *      ================================= */
-
-        infoDragHandle.addEventListener(
-            "pointermove",
-            event => {
-
-                if (!sheetDragging) {
-                    return;
-                }
-
-
-                const deltaY =
-                sheetStartY -
-                event.clientY;
-
-
-                const newHeight =
-                sheetStartHeight +
-                deltaY;
-
-
-                const viewportHeight =
-                document.querySelector(
-                    "main"
-                )
-                .getBoundingClientRect()
-                .height;
-
-
-                let percent =
-                (
-                    newHeight /
-                    viewportHeight
-                ) * 100;
-
-
-                /*
-                 *              Begränsa hur långt
-                 *              panelen kan dras
-                 */
-
-                percent =
-                Math.max(
-                    15,
-                    Math.min(
-                        95,
-                        percent
-                    )
-                );
-
-
-                infoPanel.style.height =
-                `${percent}%`;
-
-            }
-        );
-
-
-        /* =================================
-         *      SLÄPP PANELEN
-         *      ================================= */
-
-        function stopSheetDrag(
-            event
-        ) {
+    infoDragHandle.addEventListener(
+        "pointermove",
+        event => {
 
             if (!sheetDragging) {
                 return;
             }
 
+            const deltaY =
+            sheetStartY -
+            event.clientY;
 
-            sheetDragging = false;
+            const newHeight =
+            sheetStartHeight +
+            deltaY;
 
-
-            infoPanel.classList.remove(
-                "dragging"
-            );
-
-
-            const viewportHeight =
+            const mainElement =
             document.querySelector(
                 "main"
-            )
+            );
+
+            if (!mainElement) {
+                return;
+            }
+
+            const viewportHeight =
+            mainElement
             .getBoundingClientRect()
             .height;
 
-
-            const currentHeight =
-            infoPanel
-            .getBoundingClientRect()
-            .height;
-
-
-            const currentPercent =
+            let percent =
             (
-                currentHeight /
+                newHeight /
                 viewportHeight
             ) * 100;
 
-
-            /*
-             *          Drar man under 22 %
-             *          stängs panelen
-             */
-
-            if (
-                currentPercent < 22
-            ) {
-
-                infoPanel.classList.remove(
-                    "open"
-                );
-
-
-                /*
-                 *              Återställ till 60 %
-                 *              inför nästa öppning
-                 */
-
-                setTimeout(
-                    () => {
-
-                        setSheetHeight(
-                            60
-                        );
-
-                    },
-                    250
-                );
-
-
-                return;
-
-            }
-
-
-            /*
-             *          Annars snäpp till
-             *          30 / 60 / 90 %
-             */
-
-            const closest =
-            getClosestSnapPoint(
-                currentPercent
+            percent =
+            Math.max(
+                15,
+                Math.min(
+                    95,
+                    percent
+                )
             );
 
+            infoPanel.style.height =
+            `${percent}%`;
+        }
+    );
 
-            setSheetHeight(
-                closest
-            );
 
+    function stopSheetDrag(
+        event
+    ) {
+
+        if (!sheetDragging) {
+            return;
         }
 
+        sheetDragging = false;
 
-        infoDragHandle.addEventListener(
-            "pointerup",
-            stopSheetDrag
+        infoPanel.classList.remove(
+            "dragging"
         );
 
-
-        infoDragHandle.addEventListener(
-            "pointercancel",
-            stopSheetDrag
+        const mainElement =
+        document.querySelector(
+            "main"
         );
 
-    }
+        if (!mainElement) {
+            return;
+        }
 
+        const viewportHeight =
+        mainElement
+        .getBoundingClientRect()
+        .height;
 
-    /* =================================
-     *  ÅTERSTÄLL TILL 60 % VID NYTT VÄRN
-     *  ================================= */
+        const currentHeight =
+        infoPanel
+        .getBoundingClientRect()
+        .height;
 
-    if (infoPanel) {
+        const currentPercent =
+        (
+            currentHeight /
+            viewportHeight
+        ) * 100;
 
-        const observer =
-        new MutationObserver(
-            mutations => {
+        /*
+         *          Under 22 %:
+         *          stäng panelen.
+         */
 
-                mutations.forEach(
-                    mutation => {
+        if (
+            currentPercent < 22
+        ) {
 
-                        if (
-                            mutation.attributeName
-                            !== "class"
-                        ) {
+            infoPanel.classList.remove(
+                "open"
+            );
 
-                            return;
+            setTimeout(
+                () => {
 
-                        }
+                    setSheetHeight(
+                        60
+                    );
+                },
+                250
+            );
 
-
-                        if (
-                            window.innerWidth <= 768 &&
-                            infoPanel.classList.contains(
-                                "open"
-                            )
-                        ) {
-
-                            setSheetHeight(
-                                60
-                            );
-
-                        }
-
-                    }
+            if (
+                selectedMarker &&
+                selectedMarker.originalIcon
+            ) {
+                selectedMarker.setIcon(
+                    selectedMarker.originalIcon
                 );
 
+                selectedMarker = null;
             }
+
+            return;
+        }
+
+        /*
+         *          Annars snäpp till
+         *          30 / 60 / 90 %.
+         */
+
+        const closest =
+        getClosestSnapPoint(
+            currentPercent
         );
 
-
-        observer.observe(
-            infoPanel,
-            {
-                attributes: true
-            }
+        setSheetHeight(
+            closest
         );
 
+        if (
+            event &&
+            infoDragHandle
+            .releasePointerCapture
+        ) {
+            try {
+                infoDragHandle
+                .releasePointerCapture(
+                    event.pointerId
+                );
+            } catch (error) {
+                /* Ingen åtgärd behövs */
+            }
+        }
     }
 
+
+    infoDragHandle.addEventListener(
+        "pointerup",
+        stopSheetDrag
+    );
+
+    infoDragHandle.addEventListener(
+        "pointercancel",
+        stopSheetDrag
+    );
+}
