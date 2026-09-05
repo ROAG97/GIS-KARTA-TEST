@@ -7,15 +7,16 @@
 
     <title>Kustförsvaret i Skåne</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
 </head>
-
-<script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
-
-<script src="{{ url_for('static', filename='js/map.js') }}"></script>
 
 <body>
 
@@ -28,70 +29,350 @@
         <a href="#">Om projektet</a>
     </nav>
 
-    <button id="mobile-menu-button" class="mobile-menu-button">
+    <button
+        id="mobile-menu-button"
+        class="mobile-menu-button"
+    >
         ☰
     </button>
 
 </header>
 
-<div id="mobile-menu" class="mobile-menu">
+
+<div
+    id="mobile-menu"
+    class="mobile-menu"
+>
     <a href="/">Karta</a>
     <a href="#">Om projektet</a>
 </div>
 
-    </header>
-
 
 <main>
 
+    <!-- =================================
+         FILTERMENY
+         ================================= -->
+
     <aside class="sidebar">
-    <button id="close-filter" class="close-filter">
-    ×
-    </button>
-        <h2>Filter</h2>
 
-        <label>
-            <input type="checkbox">
-            KSP-värn
-        </label>
+        <button
+            id="close-filter"
+            class="close-filter"
+        >
+            ×
+        </button>
 
-        <br>
 
-        <label>
-            <input type="checkbox">
-            Värn
-        </label>
+        <div class="sidebar-title">
+            <h2>Filter</h2>
+        </div>
 
-        <br>
 
-        <label>
-            <input type="checkbox">
-            Batterier
-        </label>
+        <!-- =================================
+             KARTUNDERLAG
+             ================================= -->
+
+        <div class="filter-section open">
+
+            <div
+                class="filter-section-title"
+                data-filter-section
+            >
+                <span>🗺️ Kartunderlag</span>
+                <span class="filter-arrow">▾</span>
+            </div>
+
+
+            <div class="filter-section-content">
+
+                <label class="filter-option">
+
+                    <input
+                        type="radio"
+                        name="basemap"
+                        id="osm-radio"
+                        checked
+                    >
+
+                    <span>
+                        OpenStreetMap
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="radio"
+                        name="basemap"
+                        id="sat-radio"
+                    >
+
+                    <span>
+                        Satellit (ESRI)
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="ortho-check"
+                    >
+
+                    <span>
+                        Ortofoto
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================
+             DRÖNARRESTRIKTIONER
+             ================================= -->
+
+        <div class="filter-section">
+
+            <div
+                class="filter-section-title"
+                data-filter-section
+            >
+                <span>🚁 Drönarrestriktioner</span>
+                <span class="filter-arrow">▾</span>
+            </div>
+
+
+            <div class="filter-section-content">
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="drone-red"
+                    >
+
+                    <span>
+                        🔴 Tillstånd krävs
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="drone-orange"
+                    >
+
+                    <span>
+                        🟠 Begränsad
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================
+             DRAKTÄNDER
+             ================================= -->
+
+        <div class="filter-section">
+
+            <div
+                class="filter-section-title"
+                data-filter-section
+            >
+                <span>🧱 Draktänder</span>
+                <span class="filter-arrow">▾</span>
+            </div>
+
+
+            <div class="filter-section-content">
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="draktander-riven"
+                    >
+
+                    <span>
+                        🔴 Rivna
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="draktander-kvar"
+                        checked
+                    >
+
+                    <span>
+                        🟢 Kvar
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="draktander-bevarad"
+                        checked
+                    >
+
+                    <span>
+                        🟠 Bevarade / flyttade
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
+
+        <!-- =================================
+             VÄRN
+             ================================= -->
+
+        <div class="filter-section open">
+
+            <div
+                class="filter-section-title"
+                data-filter-section
+            >
+                <span>🏰 Värn</span>
+                <span class="filter-arrow">▾</span>
+            </div>
+
+
+            <div class="filter-section-content">
+
+                <div
+                    id="varn-type-filters"
+                ></div>
+
+
+                <div class="filter-divider"></div>
+
+
+                <div class="filter-subtitle">
+                    Status
+                </div>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="status-rivet"
+                    >
+
+                    <span>
+                        🔴 Rivna värn
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="status-provisoriskt"
+                    >
+
+                    <span>
+                        🟠 Provisoriska värn
+                    </span>
+
+                </label>
+
+
+                <label class="filter-option">
+
+                    <input
+                        type="checkbox"
+                        id="status-okand"
+                    >
+
+                    <span>
+                        ⚫ Okända värn
+                    </span>
+
+                </label>
+
+            </div>
+
+        </div>
+
     </aside>
 
 
+    <!-- =================================
+         KARTA
+         ================================= -->
+
     <section class="map-container">
 
-     <button id="mobile-filter-button" class="mobile-filter-button">
-        ☰ Filter
-    </button>
+        <button
+            id="mobile-filter-button"
+            class="mobile-filter-button"
+        >
+            ☰ Filter
+        </button>
 
         <div id="map"></div>
+
     </section>
 
 
-    <aside id="info-panel" class="info-panel">
+    <!-- =================================
+         INFOPANEL
+         ================================= -->
 
-        <button id="close-info" class="close-info">
+    <aside
+        id="info-panel"
+        class="info-panel"
+    >
+
+        <button
+            id="close-info"
+            class="close-info"
+        >
             ×
         </button>
+
 
         <div id="info-content">
 
             <div class="info-placeholder">
-                <h2>Ingen anläggning vald</h2>
-                <p>Klicka på ett objekt på kartan för att visa information.</p>
+
+                <h2>Inget värn valt</h2>
+
+                <p>
+                    Klicka på ett värn på kartan
+                    för att visa information.
+                </p>
+
             </div>
 
         </div>
@@ -99,6 +380,15 @@
     </aside>
 
 </main>
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+<script
+    src="{{ url_for('static', filename='js/map.js') }}"
+></script>
 
 </body>
 
