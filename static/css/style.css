@@ -9,13 +9,20 @@ body {
     color: #222;
 }
 
+
+/* =================================
+ *  HEADER
+ *  ================================= */
+
 header {
     height: 70px;
     background: #222;
     color: white;
+
     display: flex;
     align-items: center;
     justify-content: space-between;
+
     padding: 0 30px;
 }
 
@@ -30,56 +37,117 @@ nav a {
     margin-left: 25px;
 }
 
+
+/* =================================
+ *  HUVUDLAYOUT
+ *  ================================= */
+
 main {
+    position: relative;
+
     display: flex;
+
     height: calc(100vh - 70px);
+
+    overflow: hidden;
 }
 
+
+/* =================================
+ *  VÄNSTERPANEL / FILTER
+ *  ================================= */
+
 .sidebar {
+    position: relative;
+
     width: 280px;
+    flex-shrink: 0;
+
     background: white;
+
     padding: 25px;
+
     border-right: 1px solid #ccc;
 
     overflow-y: auto;
     overflow-x: hidden;
+
     scrollbar-width: thin;
+
+    z-index: 1300;
 }
 
+
+/* =================================
+ *  KARTA
+ *  ================================= */
+
 .map-container {
+    position: relative;
+
     flex: 1;
+    min-width: 0;
+
     background: #ddd;
+
+    overflow: hidden;
 }
+
 #map {
 width: 100%;
 height: 100%;
 }
 
+
 /* =================================
- *  HÖGERPANEL / ANLÄGGNINGSINFO
+ *  HÖGERPANEL / VÄRNINFO
  *  ================================= */
 
 .info-panel {
-    width: 0;
-    background: white;
-    overflow: hidden;
-    border-left: 1px solid #ccc;
-    position: relative;
+    position: absolute;
 
-    transition: width 0.25s ease;
+    top: 0;
+    right: 0;
+
+    width: 360px;
+    height: 100%;
+
+    background: white;
+
+    border-left: 1px solid #ccc;
+
+    transform: translateX(100%);
+
+    transition: transform 0.25s ease;
+
+    z-index: 1200;
+
+    overflow: hidden;
+
+    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.18);
 }
 
 .info-panel.open {
-    width: 360px;
+    transform: translateX(0);
 }
 
 #info-content {
-width: 360px;
+width: 100%;
+height: 100%;
+
 padding: 30px 25px;
+
+overflow-y: auto;
 }
+
+
+/* =================================
+ *  STÄNG INFOPANEL
+ *  ================================= */
 
 .close-info {
     position: absolute;
+
     top: 10px;
     right: 15px;
 
@@ -87,13 +155,20 @@ padding: 30px 25px;
     background: none;
 
     font-size: 30px;
+
     cursor: pointer;
 
     z-index: 10;
 }
 
+
+/* =================================
+ *  INFOPANEL INNEHÅLL
+ *  ================================= */
+
 .info-header {
     padding-bottom: 20px;
+
     border-bottom: 1px solid #ddd;
 }
 
@@ -109,6 +184,7 @@ padding: 30px 25px;
 
 .info-section {
     padding: 20px 0;
+
     border-bottom: 1px solid #ddd;
 }
 
@@ -118,11 +194,15 @@ padding: 30px 25px;
 
 .info-label {
     display: block;
+
+    margin-bottom: 3px;
+
     font-size: 12px;
     font-weight: bold;
+
     color: #777;
+
     text-transform: uppercase;
-    margin-bottom: 3px;
 }
 
 .info-value {
@@ -155,21 +235,31 @@ padding: 30px 25px;
 .info-placeholder {
     color: #777;
 }
+
+
 /* =================================
  *  VALT VÄRN PÅ KARTAN
  *  ================================= */
 
 .selected-marker {
-    padding: 3px;
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 52px;
+    height: 52px;
+
+    padding: 4px;
 
     border: 3px solid #ffd400;
-    border-radius: 6px;
+    border-radius: 7px;
 
-    box-sizing: border-box;
+    background: rgba(255, 255, 255, 0.2);
 
-    background: rgba(255, 255, 255, 0.15);
-
-    box-shadow: 0 0 8px rgba(255, 212, 0, 0.8);
+    box-shadow:
+    0 0 8px
+    rgba(255, 212, 0, 0.9);
 }
 
 .selected-marker img {
@@ -177,7 +267,24 @@ padding: 30px 25px;
 
     width: 40px;
     height: 40px;
+
+    object-fit: contain;
 }
+
+
+/* Standard blå Leafletmarkör */
+
+.selected-default-marker {
+    width: 44px;
+    height: 54px;
+}
+
+.selected-default-marker img {
+    width: 25px;
+    height: 41px;
+}
+
+
 /* =================================
  *  3D-MODELL PÅ VÄRNSIDA
  *  ================================= */
@@ -188,17 +295,24 @@ padding: 30px 25px;
 
 .sketchfab-wrapper {
     width: 100%;
+
     aspect-ratio: 16 / 9;
+
     border-radius: 10px;
+
     overflow: hidden;
+
     background: #111;
 }
 
 .sketchfab-wrapper iframe {
     width: 100%;
     height: 100%;
+
     border: none;
 }
+
+
 /* =================================
  *  FILTERMENY
  *  ================================= */
@@ -209,6 +323,7 @@ padding: 30px 25px;
 
 .sidebar-title h2 {
     margin: 0;
+
     font-size: 22px;
 }
 
@@ -224,6 +339,7 @@ padding: 30px 25px;
 
 .filter-section-title {
     display: flex;
+
     align-items: center;
     justify-content: space-between;
 
@@ -232,6 +348,7 @@ padding: 30px 25px;
     font-weight: bold;
 
     cursor: pointer;
+
     user-select: none;
 }
 
@@ -294,13 +411,12 @@ padding: 30px 25px;
     font-size: 14px;
 }
 
-
 .filter-option:hover {
     background: #f5f5f5;
 }
 
 
-/* Checkbox */
+/* Checkbox / radio */
 
 .filter-option input {
     margin: 0;
@@ -332,7 +448,7 @@ padding: 30px 25px;
 }
 
 
-/* Status-rubrik */
+/* Statusrubrik */
 
 .filter-subtitle {
     margin:
@@ -342,73 +458,22 @@ padding: 30px 25px;
     0;
 
     font-size: 13px;
-
     font-weight: bold;
 }
 
 
 /* =================================
- *  VALT VÄRN
+ *  MOBILKNAPPAR - AV PÅ DESKTOP
  *  ================================= */
 
-.selected-marker {
-    display: flex;
-
-    align-items: center;
-    justify-content: center;
-
-    width: 52px;
-    height: 52px;
-
-    padding: 4px;
-
-    border: 3px solid #ffd400;
-
-    border-radius: 7px;
-
-    box-sizing: border-box;
-
-    background:
-    rgba(
-        255,
-         255,
-         255,
-         0.2
-    );
-
-    box-shadow:
-    0 0 8px
-    rgba(
-        255,
-         212,
-         0,
-         0.9
-    );
+.mobile-menu-button,
+.mobile-filter-button,
+.mobile-menu,
+.close-filter {
+    display: none;
 }
 
 
-.selected-marker img {
-    display: block;
-
-    width: 40px;
-    height: 40px;
-
-    object-fit: contain;
-}
-
-
-/* Standard blå Leafletmarkör */
-
-.selected-default-marker {
-    width: 44px;
-    height: 54px;
-}
-
-
-.selected-default-marker img {
-    width: 25px;
-    height: 41px;
-}
 /* =================================
  *  SURFPLATTA
  *  ================================= */
@@ -417,6 +482,7 @@ padding: 30px 25px;
 
     header {
         height: 60px;
+
         padding: 0 18px;
     }
 
@@ -428,30 +494,35 @@ padding: 30px 25px;
         height: calc(100vh - 60px);
     }
 
-    /* Lite smalare vänsterpanel */
+
+    /* Filter */
+
     .sidebar {
         width: 220px;
+
         padding: 20px 15px;
+
+        font-size: 13px;
     }
 
-    /* Kartan får resterande plats */
+
+    /* Kartan */
+
     .map-container {
         flex: 1;
+
         min-width: 0;
     }
 
-    /* Höger info-panel lite smalare */
-    .info-panel.open {
+
+    /* Infooverlay */
+
+    .info-panel {
         width: 300px;
     }
 
     #info-content {
-    width: 300px;
     padding: 25px 20px;
-    }
-
-    .sidebar {
-        font-size: 13px;
     }
 
     .info-value {
@@ -463,19 +534,14 @@ padding: 30px 25px;
     }
 
 }
+
+
 /* =================================
  *  MOBILVERSION
  *  ================================= */
 
-.mobile-menu-button,
-.mobile-filter-button,
-.mobile-menu,
-.close-filter {
-    display: none;
-}
-
-
 @media (max-width: 768px) {
+
 
     /* -----------------------------
      *      HEADER
@@ -483,6 +549,7 @@ padding: 30px 25px;
 
     header {
         height: 56px;
+
         padding: 0 15px;
     }
 
@@ -501,9 +568,12 @@ padding: 30px 25px;
 
     main {
         position: relative;
+
         display: block;
 
         height: calc(100vh - 56px);
+
+        overflow: hidden;
     }
 
 
@@ -518,6 +588,7 @@ padding: 30px 25px;
         border: none;
 
         color: white;
+
         font-size: 26px;
 
         cursor: pointer;
@@ -552,6 +623,7 @@ padding: 30px 25px;
         padding: 15px 20px;
 
         color: white;
+
         text-decoration: none;
 
         border-bottom: 1px solid #444;
@@ -559,7 +631,7 @@ padding: 30px 25px;
 
 
     /* -----------------------------
-     *      FILTERKNAPP PÅ KARTAN
+     *      FILTERKNAPP
      *      ----------------------------- */
 
     .mobile-filter-button {
@@ -569,17 +641,19 @@ padding: 30px 25px;
 
         left: 15px;
         bottom: 40px;
-        top: auto;
 
         z-index: 900;
 
         padding: 10px 15px;
 
         background: white;
+
         border: none;
         border-radius: 5px;
 
-        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
+        box-shadow:
+        0 1px 5px
+        rgba(0, 0, 0, 0.4);
 
         font-weight: bold;
 
@@ -602,11 +676,18 @@ padding: 30px 25px;
 
         width: 280px;
 
+        padding: 25px;
+
         z-index: 1500;
+
+        overflow-y: auto;
+        overflow-x: hidden;
 
         transition: left 0.25s ease;
 
-        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
+        box-shadow:
+        2px 0 8px
+        rgba(0, 0, 0, 0.25);
     }
 
     .sidebar.open {
@@ -643,6 +724,8 @@ padding: 30px 25px;
      *      ----------------------------- */
 
     .map-container {
+        position: relative;
+
         width: 100%;
         height: 100%;
     }
@@ -660,12 +743,14 @@ padding: 30px 25px;
     .info-panel {
         position: absolute;
 
+        top: auto;
+
         left: 0;
         right: 0;
         bottom: 0;
 
         width: 100%;
-        height: 0;
+        height: 45%;
 
         background: white;
 
@@ -674,16 +759,23 @@ padding: 30px 25px;
 
         border-radius: 18px 18px 0 0;
 
+        transform: translateY(100%);
+
+        transition: transform 0.25s ease;
+
+        z-index: 1200;
+
         overflow: hidden;
 
-        transition: height 0.25s ease;
-
-        z-index: 1000;
+        box-shadow:
+        0 -4px 12px
+        rgba(0, 0, 0, 0.18);
     }
 
     .info-panel.open {
         width: 100%;
-        height: 45%;
+
+        transform: translateY(0);
     }
 
     #info-content {
