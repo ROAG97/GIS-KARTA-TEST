@@ -125,7 +125,12 @@ document.addEventListener("DOMContentLoaded", function () {
     mobileFilterButton.addEventListener("click", function () {
         sidebar.classList.toggle("open");
     });
+    const closeFilter =
+    document.getElementById("close-filter");
 
+    closeFilter.addEventListener("click", function () {
+        sidebar.classList.remove("open");
+    });
 
     const mobileMenuButton =
     document.getElementById("mobile-menu-button");
