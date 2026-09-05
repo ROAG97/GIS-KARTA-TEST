@@ -4,7 +4,9 @@ box-sizing: border-box;
 
 body {
     margin: 0;
+
     font-family: Arial, sans-serif;
+
     background: #f2f2f2;
     color: #222;
 }
@@ -16,25 +18,29 @@ body {
 
 header {
     height: 70px;
-    background: #222;
-    color: white;
 
     display: flex;
     align-items: center;
     justify-content: space-between;
 
     padding: 0 30px;
+
+    background: #222;
+    color: white;
 }
 
 header h1 {
     margin: 0;
+
     font-size: 24px;
 }
 
 nav a {
-    color: white;
-    text-decoration: none;
     margin-left: 25px;
+
+    color: white;
+
+    text-decoration: none;
 }
 
 
@@ -61,11 +67,12 @@ main {
     position: relative;
 
     width: 280px;
+
     flex-shrink: 0;
 
-    background: white;
-
     padding: 25px;
+
+    background: white;
 
     border-right: 1px solid #ccc;
 
@@ -86,6 +93,7 @@ main {
     position: relative;
 
     flex: 1;
+
     min-width: 0;
 
     background: #ddd;
@@ -118,13 +126,16 @@ height: 100%;
 
     transform: translateX(100%);
 
-    transition: transform 0.25s ease;
+    transition:
+    transform 0.25s ease;
 
     z-index: 1200;
 
     overflow: hidden;
 
-    box-shadow: -4px 0 12px rgba(0, 0, 0, 0.18);
+    box-shadow:
+    -4px 0 12px
+    rgba(0, 0, 0, 0.18);
 }
 
 .info-panel.open {
@@ -142,6 +153,16 @@ overflow-y: auto;
 
 
 /* =================================
+ *  DRAGHANDTAG
+ *  DOLT PÅ DESKTOP
+ *  ================================= */
+
+.info-drag-handle {
+    display: none;
+}
+
+
+/* =================================
  *  STÄNG INFOPANEL
  *  ================================= */
 
@@ -152,13 +173,14 @@ overflow-y: auto;
     right: 15px;
 
     border: none;
+
     background: none;
 
     font-size: 30px;
 
     cursor: pointer;
 
-    z-index: 10;
+    z-index: 30;
 }
 
 
@@ -179,8 +201,41 @@ overflow-y: auto;
 
 .info-number {
     color: #666;
+
     font-size: 14px;
 }
+
+
+/* =================================
+ *  BILD I INFOPANEL
+ *  ================================= */
+
+.info-image-wrapper {
+    width: 100%;
+
+    margin-top: 20px;
+    margin-bottom: 5px;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    background: #ddd;
+}
+
+.info-image {
+    display: block;
+
+    width: 100%;
+    height: 190px;
+
+    object-fit: cover;
+}
+
+
+/* =================================
+ *  INFORMATION
+ *  ================================= */
 
 .info-section {
     padding: 20px 0;
@@ -253,13 +308,25 @@ overflow-y: auto;
     padding: 4px;
 
     border: 3px solid #ffd400;
+
     border-radius: 7px;
 
-    background: rgba(255, 255, 255, 0.2);
+    background:
+    rgba(
+        255,
+         255,
+         255,
+         0.2
+    );
 
     box-shadow:
     0 0 8px
-    rgba(255, 212, 0, 0.9);
+    rgba(
+        255,
+         212,
+         0,
+         0.9
+    );
 }
 
 .selected-marker img {
@@ -312,31 +379,7 @@ overflow-y: auto;
     border: none;
 }
 
-/* =================================
- *  BILD I VÄRNINFO
- *  ================================= */
 
-.info-image-wrapper {
-    width: 100%;
-
-    margin-top: 20px;
-    margin-bottom: 5px;
-
-    border-radius: 8px;
-
-    overflow: hidden;
-
-    background: #ddd;
-}
-
-.info-image {
-    display: block;
-
-    width: 100%;
-    height: 190px;
-
-    object-fit: cover;
-}
 /* =================================
  *  FILTERMENY
  *  ================================= */
@@ -351,15 +394,9 @@ overflow-y: auto;
     font-size: 22px;
 }
 
-
-/* Filtersektion */
-
 .filter-section {
     border-bottom: 1px solid #ddd;
 }
-
-
-/* Rubrik */
 
 .filter-section-title {
     display: flex;
@@ -380,17 +417,12 @@ overflow-y: auto;
     background: #f2f2f2;
 }
 
-
-/* Pil */
-
 .filter-arrow {
     font-size: 13px;
 
-    transition: transform 0.2s ease;
+    transition:
+    transform 0.2s ease;
 }
-
-
-/* Stängd sektion */
 
 .filter-section-content {
     display: none;
@@ -402,24 +434,15 @@ overflow-y: auto;
     4px;
 }
 
-
-/* Öppen sektion */
-
 .filter-section.open
 .filter-section-content {
     display: block;
 }
 
-
-/* Rotera pil */
-
 .filter-section.open
 .filter-arrow {
     transform: rotate(180deg);
 }
-
-
-/* Checkbox/radio-rad */
 
 .filter-option {
     display: flex;
@@ -439,9 +462,6 @@ overflow-y: auto;
     background: #f5f5f5;
 }
 
-
-/* Checkbox / radio */
-
 .filter-option input {
     margin: 0;
 
@@ -449,9 +469,6 @@ overflow-y: auto;
 
     flex-shrink: 0;
 }
-
-
-/* SVG i filterlistan */
 
 .filter-option img {
     width: 26px;
@@ -462,17 +479,11 @@ overflow-y: auto;
     flex-shrink: 0;
 }
 
-
-/* Avdelare */
-
 .filter-divider {
-    border-top: 1px solid #aaa;
-
     margin: 10px 0;
+
+    border-top: 1px solid #aaa;
 }
-
-
-/* Statusrubrik */
 
 .filter-subtitle {
     margin:
@@ -487,7 +498,7 @@ overflow-y: auto;
 
 
 /* =================================
- *  MOBILKNAPPAR - AV PÅ DESKTOP
+ *  MOBILKNAPPAR
  *  ================================= */
 
 .mobile-menu-button,
@@ -518,9 +529,6 @@ overflow-y: auto;
         height: calc(100vh - 60px);
     }
 
-
-    /* Filter */
-
     .sidebar {
         width: 220px;
 
@@ -529,9 +537,6 @@ overflow-y: auto;
         font-size: 13px;
     }
 
-
-    /* Kartan */
-
     .map-container {
         flex: 1;
 
@@ -539,7 +544,10 @@ overflow-y: auto;
     }
 
 
-    /* Infooverlay */
+    /*
+     *      Infopanelen ligger ovanpå kartan
+     *      och flyttar inte kartan.
+     */
 
     .info-panel {
         width: 300px;
@@ -555,6 +563,10 @@ overflow-y: auto;
 
     .info-button {
         padding: 10px 12px;
+    }
+
+    .info-image {
+        height: 165px;
     }
 
 }
@@ -608,7 +620,10 @@ overflow-y: auto;
     .mobile-menu-button {
         display: block;
 
+        padding: 0;
+
         background: none;
+
         border: none;
 
         color: white;
@@ -630,11 +645,11 @@ overflow-y: auto;
 
         background: #222;
 
-        z-index: 2000;
-
         border-radius: 0 0 6px 6px;
 
         overflow: hidden;
+
+        z-index: 2000;
     }
 
     .mobile-menu.open {
@@ -666,13 +681,12 @@ overflow-y: auto;
         left: 15px;
         bottom: 40px;
 
-        z-index: 900;
-
         padding: 10px 15px;
 
         background: white;
 
         border: none;
+
         border-radius: 5px;
 
         box-shadow:
@@ -682,6 +696,8 @@ overflow-y: auto;
         font-weight: bold;
 
         cursor: pointer;
+
+        z-index: 900;
     }
 
 
@@ -702,16 +718,17 @@ overflow-y: auto;
 
         padding: 25px;
 
-        z-index: 1500;
-
         overflow-y: auto;
         overflow-x: hidden;
 
-        transition: left 0.25s ease;
+        transition:
+        left 0.25s ease;
 
         box-shadow:
         2px 0 8px
         rgba(0, 0, 0, 0.25);
+
+        z-index: 1500;
     }
 
     .sidebar.open {
@@ -731,10 +748,14 @@ overflow-y: auto;
         top: 10px;
         right: 12px;
 
+        padding: 0;
+
         background: none;
+
         border: none;
 
         font-size: 30px;
+
         line-height: 1;
 
         cursor: pointer;
@@ -761,7 +782,7 @@ overflow-y: auto;
 
 
     /* -----------------------------
-     *      INFOPANEL / BOTTOM SHEET
+     *      DRAGBAR INFOPANEL
      *      ----------------------------- */
 
     .info-panel {
@@ -781,39 +802,117 @@ overflow-y: auto;
         border-left: none;
         border-top: 1px solid #ccc;
 
-        border-radius: 18px 18px 0 0;
+        border-radius:
+        18px
+        18px
+        0
+        0;
 
-        transform: translateY(100%);
+        transform:
+        translateY(100%);
 
-        transition: transform 0.25s ease;
-
-        z-index: 1200;
+        transition:
+        transform 0.25s ease,
+        height 0.25s ease;
 
         overflow: hidden;
 
         box-shadow:
         0 -4px 12px
         rgba(0, 0, 0, 0.18);
+
+        z-index: 1200;
     }
 
     .info-panel.open {
         width: 100%;
 
-        transform: translateY(0);
+        transform:
+        translateY(0);
     }
+
+
+    /*
+     *      När panelen dras ska den
+     *      följa fingret direkt.
+     */
+
+    .info-panel.dragging {
+        transition: none;
+    }
+
+
+    /* -----------------------------
+     *      DRAGHANDTAG
+     *      ----------------------------- */
+
+    .info-drag-handle {
+        display: flex;
+
+        position: absolute;
+
+        top: 0;
+        left: 50%;
+
+        transform:
+        translateX(-50%);
+
+        width: 120px;
+        height: 32px;
+
+        align-items: center;
+        justify-content: center;
+
+        cursor: grab;
+
+        touch-action: none;
+
+        z-index: 20;
+    }
+
+    .info-drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .info-drag-bar {
+        width: 48px;
+        height: 5px;
+
+        background: #aaa;
+
+        border-radius: 10px;
+    }
+
+
+    /* -----------------------------
+     *      INFOINNEHÅLL
+     *      ----------------------------- */
 
     #info-content {
     width: 100%;
     height: 100%;
 
-    padding: 25px 20px;
+    padding:
+    38px
+    20px
+    25px
+    20px;
 
     overflow-y: auto;
+
+    overscroll-behavior: contain;
     }
 
     .close-info {
         top: 8px;
         right: 15px;
+    }
+
+
+    /* Bild lite större relativt mobilen */
+
+    .info-image {
+        height: 200px;
     }
 
 }
