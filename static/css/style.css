@@ -232,10 +232,9 @@ padding: 30px 25px;
 
         position: absolute;
 
-        - top: 15px;
         left: 15px;
-        + bottom: 20px;
-        + top: auto;
+        bottom: 20px;
+        top: auto;
 
         z-index: 900;
 
