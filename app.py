@@ -33,7 +33,40 @@ def geojson():
         mimetype="application/geo+json"
     )
 
+# =================================
+# DRAKTÄNDER
+# =================================
 
+@app.route("/draktander")
+def draktander():
+
+    file_path = "data/draktander.geojson"
+
+    if not os.path.exists(file_path):
+        abort(404)
+
+    return send_file(
+        file_path,
+        mimetype="application/geo+json"
+    )
+
+
+# =================================
+# LFV DRÖNARKARTA
+# =================================
+
+@app.route("/lfv")
+def lfv():
+
+    file_path = "data/lfv_dronarkarta.geojson"
+
+    if not os.path.exists(file_path):
+        abort(404)
+
+    return send_file(
+        file_path,
+        mimetype="application/geo+json"
+    )
 # =================================
 # IKONLISTA
 # =================================
