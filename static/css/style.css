@@ -151,7 +151,83 @@ padding: 30px 25px;
 .info-placeholder {
     color: #777;
 }
+/* =================================
+ *  VALT VÄRN PÅ KARTAN
+ *  ================================= */
 
+.selected-marker {
+    padding: 3px;
+
+    border: 3px solid #ffd400;
+    border-radius: 6px;
+
+    box-sizing: border-box;
+
+    background: rgba(255, 255, 255, 0.15);
+
+    box-shadow: 0 0 8px rgba(255, 212, 0, 0.8);
+}
+
+.selected-marker img {
+    display: block;
+
+    width: 40px;
+    height: 40px;
+}
+/* =================================
+ *  SURFPLATTA
+ *  ================================= */
+
+@media (min-width: 769px) and (max-width: 1100px) {
+
+    header {
+        height: 60px;
+        padding: 0 18px;
+    }
+
+    header h1 {
+        font-size: 20px;
+    }
+
+    main {
+        height: calc(100vh - 60px);
+    }
+
+    /* Lite smalare vänsterpanel */
+    .sidebar {
+        width: 220px;
+        padding: 20px 15px;
+    }
+
+    /* Kartan får resterande plats */
+    .map-container {
+        flex: 1;
+        min-width: 0;
+    }
+
+    /* Höger info-panel lite smalare */
+    .info-panel.open {
+        width: 300px;
+    }
+
+    #info-content {
+    width: 300px;
+    padding: 25px 20px;
+    }
+
+    .sidebar {
+        font-size: 13px;
+    }
+
+    .info-value {
+        font-size: 14px;
+    }
+
+    .info-button {
+        padding: 10px 12px;
+    }
+
+}
 /* =================================
  *  MOBILVERSION
  *  ================================= */
