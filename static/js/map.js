@@ -1934,5 +1934,363 @@ if (
 
         }
     );
+    /* =================================
+     *  DRAGBAR INFOPANEL PÅ MOBIL
+     *  ================================= */
 
-}
+    const infoPanel =
+    document.getElementById(
+        "info-panel"
+    );
+
+    const infoDragHandle =
+    document.getElementById(
+        "info-drag-handle"
+    );
+
+
+    let sheetDragging = false;
+
+    let sheetStartY = 0;
+
+    let sheetStartHeight = 0;
+
+
+    /* Höjdlägen */
+
+    const sheetSnapPoints = [
+        30,
+        60,
+        90
+    ];
+
+
+    /* =================================
+     *  SÄTT PANELHÖJD
+     *  ================================= */
+
+    function setSheetHeight(percent) {
+
+        if (!infoPanel) {
+            return;
+        }
+
+        infoPanel.style.height =
+        `${percent}%`;
+
+    }
+
+
+    /* =================================
+     *  HITTA NÄRMASTE LÄGE
+     *  ================================= */
+
+    function getClosestSnapPoint(
+        currentPercent
+    ) {
+
+        return sheetSnapPoints.reduce(
+            (closest, point) => {
+
+                const currentDistance =
+                Math.abs(
+                    currentPercent -
+                    point
+                );
+
+                const closestDistance =
+                Math.abs(
+                    currentPercent -
+                    closest
+                );
+
+                return (
+                    currentDistance <
+                    closestDistance
+                )
+                ? point
+                : closest;
+
+            }
+        );
+
+    }
+
+
+    /* =================================
+     *  BÖRJA DRA
+     *  ================================= */
+
+    if (
+        infoPanel &&
+        infoDragHandle
+    ) {
+
+        infoDragHandle.addEventListener(
+            "pointerdown",
+            event => {
+
+                /*
+                 *              Bara mobil
+                 */
+
+                if (
+                    window.innerWidth > 768
+                ) {
+
+                    return;
+
+                }
+
+
+                sheetDragging = true;
+
+                sheetStartY =
+                event.clientY;
+
+
+                sheetStartHeight =
+                infoPanel
+                .getBoundingClientRect()
+                .height;
+
+
+                infoPanel.classList.add(
+                    "dragging"
+                );
+
+
+                infoDragHandle
+                .setPointerCapture(
+                    event.pointerId
+                );
+
+
+                event.preventDefault();
+
+            }
+        );
+
+
+        /* =================================
+         *      DRAR PANELEN
+         *      ================================= */
+
+        infoDragHandle.addEventListener(
+            "pointermove",
+            event => {
+
+                if (!sheetDragging) {
+                    return;
+                }
+
+
+                const deltaY =
+                sheetStartY -
+                event.clientY;
+
+
+                const newHeight =
+                sheetStartHeight +
+                deltaY;
+
+
+                const viewportHeight =
+                document.querySelector(
+                    "main"
+                )
+                .getBoundingClientRect()
+                .height;
+
+
+                let percent =
+                (
+                    newHeight /
+                    viewportHeight
+                ) * 100;
+
+
+                /*
+                 *              Begränsa hur långt
+                 *              panelen kan dras
+                 */
+
+                percent =
+                Math.max(
+                    15,
+                    Math.min(
+                        95,
+                        percent
+                    )
+                );
+
+
+                infoPanel.style.height =
+                `${percent}%`;
+
+            }
+        );
+
+
+        /* =================================
+         *      SLÄPP PANELEN
+         *      ================================= */
+
+        function stopSheetDrag(
+            event
+        ) {
+
+            if (!sheetDragging) {
+                return;
+            }
+
+
+            sheetDragging = false;
+
+
+            infoPanel.classList.remove(
+                "dragging"
+            );
+
+
+            const viewportHeight =
+            document.querySelector(
+                "main"
+            )
+            .getBoundingClientRect()
+            .height;
+
+
+            const currentHeight =
+            infoPanel
+            .getBoundingClientRect()
+            .height;
+
+
+            const currentPercent =
+            (
+                currentHeight /
+                viewportHeight
+            ) * 100;
+
+
+            /*
+             *          Drar man under 22 %
+             *          stängs panelen
+             */
+
+            if (
+                currentPercent < 22
+            ) {
+
+                infoPanel.classList.remove(
+                    "open"
+                );
+
+
+                /*
+                 *              Återställ till 60 %
+                 *              inför nästa öppning
+                 */
+
+                setTimeout(
+                    () => {
+
+                        setSheetHeight(
+                            60
+                        );
+
+                    },
+                    250
+                );
+
+
+                return;
+
+            }
+
+
+            /*
+             *          Annars snäpp till
+             *          30 / 60 / 90 %
+             */
+
+            const closest =
+            getClosestSnapPoint(
+                currentPercent
+            );
+
+
+            setSheetHeight(
+                closest
+            );
+
+        }
+
+
+        infoDragHandle.addEventListener(
+            "pointerup",
+            stopSheetDrag
+        );
+
+
+        infoDragHandle.addEventListener(
+            "pointercancel",
+            stopSheetDrag
+        );
+
+    }
+
+
+    /* =================================
+     *  ÅTERSTÄLL TILL 60 % VID NYTT VÄRN
+     *  ================================= */
+
+    if (infoPanel) {
+
+        const observer =
+        new MutationObserver(
+            mutations => {
+
+                mutations.forEach(
+                    mutation => {
+
+                        if (
+                            mutation.attributeName
+                            !== "class"
+                        ) {
+
+                            return;
+
+                        }
+
+
+                        if (
+                            window.innerWidth <= 768 &&
+                            infoPanel.classList.contains(
+                                "open"
+                            )
+                        ) {
+
+                            setSheetHeight(
+                                60
+                            );
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        observer.observe(
+            infoPanel,
+            {
+                attributes: true
+            }
+        );
+
+    }
+
