@@ -40,6 +40,10 @@ main {
     background: white;
     padding: 25px;
     border-right: 1px solid #ccc;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
 }
 
 .map-container {
