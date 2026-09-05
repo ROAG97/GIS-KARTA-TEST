@@ -70,7 +70,27 @@
         <strong>Byggår:</strong>
         {{ detaljinfo.get("byggar", "-") }}
     </p>
+{% if detaljinfo.get("modell") %}
 
+<section class="model-section">
+
+    <h2>3D-modell</h2>
+
+    <div class="sketchfab-wrapper">
+
+        <iframe
+            title="3D-modell av värnet"
+            src="{{ detaljinfo.get('modell') }}"
+            frameborder="0"
+            allow="autoplay; fullscreen; xr-spatial-tracking"
+            allowfullscreen>
+        </iframe>
+
+    </div>
+
+</section>
+
+{% endif %}
 </div>
 
 </body>
