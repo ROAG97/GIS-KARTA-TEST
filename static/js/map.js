@@ -131,7 +131,18 @@ document.addEventListener("DOMContentLoaded", function () {
     closeFilter.addEventListener("click", function () {
         sidebar.classList.remove("open");
     });
+    /* Stäng filterpanelen vid klick utanför */
+    document.addEventListener("click", function (event) {
 
+        if (
+            sidebar.classList.contains("open") &&
+            !sidebar.contains(event.target) &&
+            !mobileFilterButton.contains(event.target)
+        ) {
+            sidebar.classList.remove("open");
+        }
+
+    });
     const mobileMenuButton =
     document.getElementById("mobile-menu-button");
 
