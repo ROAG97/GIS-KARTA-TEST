@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ varn.properties.Typ }}
+        {{ varn.properties.Nr }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+<body>
+
+<header>
+    <h1>Kustförsvaret i Skåne</h1>
+
+    <nav>
+        <a href="/">Karta</a>
+        <a href="#">Om projektet</a>
+    </nav>
+</header>
+
+
+<div class="varn-page">
+
+    <a href="/" class="back-link">
+        ← Tillbaka till kartan
+    </a>
+
+    <h1>
+        {{ detaljinfo.get("rubrik", varn.properties.Typ ~ " " ~ varn.properties.Nr) }}
+    </h1>
+
+
+    <h2>Historik</h2>
+
+    <p>
+        {{ detaljinfo.get("historik", "Ingen historik har lagts till ännu.") }}
+    </p>
+
+
+    <h2>Grunddata</h2>
+
+    <p>
+        <strong>Typ:</strong>
+        {{ varn.properties.Typ }}
+    </p>
+
+    <p>
+        <strong>Nummer:</strong>
+        {{ varn.properties.Nr }}
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        {{ varn.properties.Status or "-" }}
+    </p>
+
+    <p>
+        <strong>Byggår:</strong>
+        {{ detaljinfo.get("byggar", "-") }}
+    </p>
+
+</div>
+
+</body>
+
+</html>
