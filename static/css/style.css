@@ -158,28 +158,18 @@ padding: 30px 25px;
 
 .mobile-menu-button,
 .mobile-filter-button,
-.mobile-menu {
+.mobile-menu,
+.close-filter {
     display: none;
 }
+
+
 @media (max-width: 768px) {
 
-    .close-filter {
-        display: block;
+    /* -----------------------------
+     *      HEADER
+     *      ----------------------------- */
 
-        position: absolute;
-        top: 10px;
-        right: 12px;
-
-        background: none;
-        border: none;
-
-        font-size: 30px;
-        line-height: 1;
-
-        cursor: pointer;
-
-        z-index: 10;
-    }
     header {
         height: 56px;
         padding: 0 15px;
@@ -193,12 +183,23 @@ padding: 30px 25px;
         display: none;
     }
 
+
+    /* -----------------------------
+     *      HUVUDLAYOUT
+     *      ----------------------------- */
+
     main {
         position: relative;
         display: block;
-        height: calc(100vh - 56px);
 
+        height: calc(100vh - 56px);
     }
+
+
+    /* -----------------------------
+     *      HAMBURGARMENY
+     *      ----------------------------- */
+
     .mobile-menu-button {
         display: block;
 
@@ -215,6 +216,7 @@ padding: 30px 25px;
         display: none;
 
         position: absolute;
+
         top: 56px;
         right: 10px;
 
@@ -244,13 +246,18 @@ padding: 30px 25px;
         border-bottom: 1px solid #444;
     }
 
+
+    /* -----------------------------
+     *      FILTERKNAPP PÅ KARTAN
+     *      ----------------------------- */
+
     .mobile-filter-button {
         display: block;
 
         position: absolute;
 
         left: 15px;
-        bottom: 35px;
+        bottom: 40px;
         top: auto;
 
         z-index: 900;
@@ -261,7 +268,7 @@ padding: 30px 25px;
         border: none;
         border-radius: 5px;
 
-        box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+        box-shadow: 0 1px 5px rgba(0, 0, 0, 0.4);
 
         font-weight: bold;
 
@@ -269,7 +276,9 @@ padding: 30px 25px;
     }
 
 
-    /* Vänster filterpanel på mobil */
+    /* -----------------------------
+     *      FILTERPANEL
+     *      ----------------------------- */
 
     .sidebar {
         display: block;
@@ -286,13 +295,41 @@ padding: 30px 25px;
 
         transition: left 0.25s ease;
 
-        box-shadow: 2px 0 8px rgba(0,0,0,0.25);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.25);
     }
 
     .sidebar.open {
         left: 0;
     }
 
+
+    /* -----------------------------
+     *      STÄNG FILTER
+     *      ----------------------------- */
+
+    .close-filter {
+        display: block;
+
+        position: absolute;
+
+        top: 10px;
+        right: 12px;
+
+        background: none;
+        border: none;
+
+        font-size: 30px;
+        line-height: 1;
+
+        cursor: pointer;
+
+        z-index: 10;
+    }
+
+
+    /* -----------------------------
+     *      KARTA
+     *      ----------------------------- */
 
     .map-container {
         width: 100%;
@@ -303,6 +340,11 @@ padding: 30px 25px;
     width: 100%;
     height: 100%;
     }
+
+
+    /* -----------------------------
+     *      INFOPANEL / BOTTOM SHEET
+     *      ----------------------------- */
 
     .info-panel {
         position: absolute;
@@ -346,4 +388,5 @@ padding: 30px 25px;
         top: 8px;
         right: 15px;
     }
+
 }
