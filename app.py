@@ -1,4 +1,5 @@
-from flask import Flask, render_template, send_file, abort
+from flask import Flask, render_template, send_file, abort, jsonify
+import os
 import json
 
 app = Flask(__name__)
@@ -57,3 +58,18 @@ def varn(nr):
 
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.route("/icons")
+def icons():
+
+    icon_folder = "static/icons"
+
+    files = os.listdir(icon_folder)
+
+    svg_icons = [
+        os.path.splitext(filename)[0]
+        for filename in files
+        if filename.lower().endswith(".svg")
+    ]
+
+    return jsonify(svg_icons)
