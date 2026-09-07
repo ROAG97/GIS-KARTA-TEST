@@ -1164,3 +1164,21 @@ overflow-y: auto;
     }
 
 }
+@media (max-width: 768px) {
+
+    .info-panel {
+        pointer-events: none;
+    }
+
+    .info-panel:not(.open) {
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
+
+    .info-panel.open {
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto;
+    }
+
+}
