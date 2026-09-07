@@ -1166,15 +1166,14 @@ overflow-y: auto;
 }
 @media (max-width: 768px) {
 
+    /* Behåll kartan normalt */
     #map {
     position: relative !important;
-    z-index: 99999 !important;
+    z-index: 1 !important;
     }
 
-    .sidebar,
-    .info-panel,
-    .mobile-menu,
-    .mobile-filter-button {
+    /* Dölj bara sidbaren */
+    .sidebar {
         display: none !important;
     }
 
