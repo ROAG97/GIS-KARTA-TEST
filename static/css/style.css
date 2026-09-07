@@ -1166,19 +1166,16 @@ overflow-y: auto;
 }
 @media (max-width: 768px) {
 
-    .info-panel {
-        pointer-events: none;
+    #map {
+    position: relative !important;
+    z-index: 99999 !important;
     }
 
-    .info-panel:not(.open) {
-        visibility: hidden !important;
-        opacity: 0 !important;
-    }
-
-    .info-panel.open {
-        visibility: visible !important;
-        opacity: 1 !important;
-        pointer-events: auto;
+    .sidebar,
+    .info-panel,
+    .mobile-menu,
+    .mobile-filter-button {
+        display: none !important;
     }
 
 }
