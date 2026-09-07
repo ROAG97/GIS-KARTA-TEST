@@ -2939,3 +2939,34 @@ document.addEventListener(
         }
     }
 );
+/* =================================
+ *  LEAFLET - RÄKNA OM KARTSTORLEK
+ *  MOBIL / RESIZE
+ *  ================================= */
+
+window.addEventListener(
+    "load",
+    () => {
+
+        setTimeout(
+            () => {
+                map.invalidateSize();
+            },
+            300
+        );
+    }
+);
+
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        setTimeout(
+            () => {
+                map.invalidateSize();
+            },
+            100
+        );
+    }
+);
