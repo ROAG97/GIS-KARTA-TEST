@@ -57,6 +57,7 @@ const draktanderBevaradLayer = L.layerGroup();
 let varnFeatures = [];
 let availableIcons = [];
 let selectedMarker = null;
+let activeSearchType = null;
 
 const varnTypeVisibility = {};
 
@@ -196,12 +197,48 @@ function shouldShowVarn(feature) {
     const properties =
     feature.properties || {};
 
+    const type =
+    String(
+        properties.Typ || ""
+    )
+    .trim();
+
     const status =
     String(
         properties.Status || ""
     )
     .trim()
     .toUpperCase();
+
+
+    /* =================================
+     *      AKTIV SÖKTYP
+     *
+     *      Om sökningen valt exempelvis
+     *      KSP III ska endast KSP III visas.
+     *      ================================= */
+
+    if (activeSearchType) {
+
+        const featureType =
+        type.toLocaleLowerCase("sv");
+
+        const wantedType =
+        String(
+            activeSearchType
+        )
+        .trim()
+        .toLocaleLowerCase("sv");
+
+        return (
+            featureType === wantedType
+        );
+    }
+
+
+    /* =================================
+     *      SPECIALSTATUS
+     *      ================================= */
 
     if (
         status === "RIVET" ||
@@ -210,12 +247,14 @@ function shouldShowVarn(feature) {
         return rivnaVisible;
     }
 
+
     if (
         status === "PROVISORISKT" ||
         status === "PROVISORISK"
     ) {
         return provisoriskaVisible;
     }
+
 
     if (
         status === "OKÄND" ||
@@ -224,15 +263,16 @@ function shouldShowVarn(feature) {
         return okandaVisible;
     }
 
-    const type =
-    properties.Typ || "Okänd";
+
+    /* =================================
+     *      VANLIG TYPFILTRERING
+     *      ================================= */
 
     return (
-        varnTypeVisibility[type] !== false
+        varnTypeVisibility[type]
+        !== false
     );
 }
-
-
 /* =================================
  *  UPPDATERA VÄRN PÅ KARTAN
  *  ================================= */
@@ -583,12 +623,24 @@ function createVarnTypeFilters(
                 checkbox.type =
                 "checkbox";
 
+                checkbox.dataset.varnType =
+                type;
+
                 checkbox.checked =
                 true;
 
                 checkbox.addEventListener(
                     "change",
                     () => {
+
+                        /*
+                         *           Om användaren manuellt
+                         *           ändrar filtren slutar
+                         *           sökningens typfilter gälla.
+                         */
+
+                        activeSearchType =
+                        null;
 
                         varnTypeVisibility[type] =
                         checkbox.checked;
@@ -1804,3 +1856,1086 @@ if (
         stopSheetDrag
     );
 }
+/* =================================
+ * SÖKFUNKTION VÄRN
+ * ================================= */
+
+const varnSearchInput =
+document.getElementById(
+    "varn-search"
+);
+
+const varnSearchResults =
+document.getElementById(
+    "varn-search-results"
+);
+
+const clearVarnSearch =
+document.getElementById(
+    "clear-varn-search"
+);
+
+const mapSearch =
+document.querySelector(
+    ".map-search"
+);
+
+
+/* =================================
+ * NORMALISERA SÖKTEXT
+ * ================================= */
+
+function normalizeSearchText(value) {
+
+    return String(
+        value ?? ""
+    )
+    .trim()
+    .toLocaleLowerCase(
+        "sv"
+    );
+}
+
+
+/* =================================
+ * NATURLIG SORTERING
+ *
+ * Exempel:
+ *
+ * KSP
+ * KSP II
+ * KSP III
+ * KSP IV
+ *
+ * samt
+ *
+ * 5
+ * 12
+ * 100
+ * 679
+ * ================================= */
+
+const searchCollator =
+new Intl.Collator(
+    "sv",
+    {
+        numeric: true,
+        sensitivity: "base"
+    }
+);
+
+
+/* =================================
+ * STÄNG SÖKRESULTAT
+ * ================================= */
+
+function closeSearchResults() {
+
+    if (!varnSearchResults) {
+        return;
+    }
+
+    varnSearchResults.classList.remove(
+        "open"
+    );
+}
+
+
+/* =================================
+ * RENSA SÖKNING
+ * ================================= */
+
+function resetVarnSearch() {
+
+    if (varnSearchInput) {
+        varnSearchInput.value = "";
+    }
+
+    if (mapSearch) {
+        mapSearch.classList.remove(
+            "has-text"
+        );
+    }
+
+    if (varnSearchResults) {
+        varnSearchResults.innerHTML = "";
+    }
+
+    closeSearchResults();
+
+
+    /* =================================
+     *      TA BORT SÖKFILTER
+     *      ================================= */
+
+    activeSearchType = null;
+
+
+    /* =================================
+     *      ÅTERSTÄLL ALLA VÄRNTYPER
+     *      ================================= */
+
+    Object.keys(
+        varnTypeVisibility
+    ).forEach(
+        type => {
+
+            varnTypeVisibility[type] =
+            true;
+        }
+    );
+
+
+    /* =================================
+     *      BOCKA I ALLA TYPFILTER I SIDBAREN
+     *      ================================= */
+
+    document
+    .querySelectorAll(
+        "[data-varn-type]"
+    )
+    .forEach(
+        checkbox => {
+
+            checkbox.checked =
+            true;
+        }
+    );
+
+
+    /* =================================
+     *      UPPDATERA KARTAN
+     *      ================================= */
+
+    updateVarnVisibility();
+}
+
+/* =================================
+ * HÄMTA ALL TEXT FRÅN ETT VÄRN
+ *
+ * Söker i samtliga properties.
+ *
+ * Exempel:
+ * Nr
+ * Typ
+ * Status
+ * Tillgänglighet
+ * Parkering
+ * Kuriosa
+ * osv.
+ * ================================= */
+
+function getVarnSearchText(
+    feature
+) {
+
+    const properties =
+    feature.properties || {};
+
+    return Object.values(
+        properties
+    )
+    .filter(
+        value =>
+        value !== null &&
+        value !== undefined
+    )
+    .map(
+        value =>
+        String(value)
+    )
+    .join(" ")
+    .toLocaleLowerCase(
+        "sv"
+    );
+}
+
+
+/* =================================
+ * POÄNGSÄTT SÖKRESULTAT
+ *
+ * Exakta träffar först.
+ *
+ * Sedan:
+ * börjar med.
+ *
+ * Sedan:
+ * finns någonstans.
+ * ================================= */
+
+function getSearchScore(
+    item,
+    query
+) {
+
+    const p =
+    item.feature.properties
+    || {};
+
+    const nr =
+    normalizeSearchText(
+        p.Nr
+    );
+
+    const type =
+    normalizeSearchText(
+        p.Typ
+    );
+
+    /*
+     *     Exakt värnnummer
+     */
+
+    if (
+        nr === query
+    ) {
+        return 100;
+    }
+
+
+    /*
+     *     Exakt typ
+     */
+
+    if (
+        type === query
+    ) {
+        return 90;
+    }
+
+
+    /*
+     *     Nummer börjar med
+     */
+
+    if (
+        nr.startsWith(
+            query
+        )
+    ) {
+        return 80;
+    }
+
+
+    /*
+     *     Typ börjar med
+     */
+
+    if (
+        type.startsWith(
+            query
+        )
+    ) {
+        return 70;
+    }
+
+
+    /*
+     *     Typ innehåller
+     */
+
+    if (
+        type.includes(
+            query
+        )
+    ) {
+        return 60;
+    }
+
+
+    /*
+     *     Annat attribut
+     */
+
+    return 10;
+}
+
+
+/* =================================
+ * VISA ETT SPECIFIKT VÄRN
+ * ================================= */
+
+function goToSearchVarn(
+    item
+) {
+
+    const feature =
+    item.feature;
+
+    const marker =
+    item.marker;
+
+    const p =
+    feature.properties || {};
+
+    /*
+     *     Ett specifikt värn ska kunna
+     *     hittas även om ett typfilter
+     *     tidigare aktiverats via sök.
+     */
+
+    activeSearchType = null;
+
+
+    /*
+     *     Säkerställ att värnet är synligt
+     *     enligt vanliga filter.
+     */
+
+    const status =
+    String(
+        p.Status || ""
+    )
+    .trim()
+    .toUpperCase();
+
+
+    if (
+        status === "RIVET" ||
+        status === "RIVEN"
+    ) {
+
+        rivnaVisible = true;
+
+        if (statusRivet) {
+            statusRivet.checked =
+            true;
+        }
+
+    } else if (
+        status === "PROVISORISKT" ||
+        status === "PROVISORISK"
+    ) {
+
+        provisoriskaVisible =
+        true;
+
+        if (statusProvisoriskt) {
+            statusProvisoriskt.checked =
+            true;
+        }
+
+    } else if (
+        status === "OKÄND" ||
+        status === "OKAND"
+    ) {
+
+        okandaVisible =
+        true;
+
+        if (statusOkand) {
+            statusOkand.checked =
+            true;
+        }
+
+    } else {
+
+        const type =
+        p.Typ || "Okänd";
+
+        varnTypeVisibility[type] =
+        true;
+
+
+        /*
+         *         Uppdatera motsvarande
+         *         checkbox i typfiltret.
+         */
+
+        document
+        .querySelectorAll(
+            "[data-varn-type]"
+        )
+        .forEach(
+            checkbox => {
+
+                if (
+                    checkbox.dataset
+                    .varnType ===
+                    type
+                ) {
+
+                    checkbox.checked =
+                    true;
+                }
+            }
+        );
+    }
+
+
+    updateVarnVisibility();
+
+
+    /*
+     *     Säkerhet:
+     *     lägg till markören ifall
+     *     något filter fortfarande
+     *     dolde den.
+     */
+
+    if (
+        !map.hasLayer(
+            marker
+        )
+    ) {
+
+        marker.addTo(
+            map
+        );
+    }
+
+
+    /*
+     *     Zooma snyggt till värnet.
+     */
+
+    map.flyTo(
+        marker.getLatLng(),
+              17,
+              {
+                  duration: 0.8
+              }
+    );
+
+
+    /*
+     *     Samma gula markering som
+     *     vanligt klick på kartan.
+     */
+
+    selectMarker(
+        marker,
+        feature
+    );
+
+
+    /*
+     *     Öppna vanliga infopanelen.
+     */
+
+    openInfoPanel(
+        feature
+    );
+
+
+    closeSearchResults();
+
+
+    /*
+     *     På mobil stänger vi även
+     *     filterpanelen så kartan
+     *     syns direkt.
+     */
+
+    if (
+        window.innerWidth <= 768 &&
+        sidebar
+    ) {
+
+        sidebar.classList.remove(
+            "open"
+        );
+    }
+}
+
+
+/* =================================
+ * FILTRERA PÅ EN VÄRNTYP
+ * ================================= */
+
+function filterBySearchType(
+    type
+) {
+
+    activeSearchType =
+    type;
+
+
+    /*
+     *     Uppdatera checkboxarna visuellt.
+     *
+     *     Bara den valda typen markeras.
+     */
+
+    document
+    .querySelectorAll(
+        "[data-varn-type]"
+    )
+    .forEach(
+        checkbox => {
+
+            checkbox.checked =
+            (
+                checkbox.dataset
+                .varnType ===
+                type
+            );
+        }
+    );
+
+
+    updateVarnVisibility();
+
+
+    /*
+     *     Zooma så alla värn
+     *     av vald typ syns.
+     */
+
+    const matchingMarkers =
+    varnFeatures
+    .filter(
+        item => {
+
+            const p =
+            item.feature
+            .properties
+            || {};
+
+            return (
+                normalizeSearchText(
+                    p.Typ
+                ) ===
+                normalizeSearchText(
+                    type
+                )
+            );
+        }
+    )
+    .map(
+        item =>
+        item.marker
+    );
+
+
+    if (
+        matchingMarkers.length === 1
+    ) {
+
+        map.flyTo(
+            matchingMarkers[0]
+            .getLatLng(),
+                  17
+        );
+
+    } else if (
+        matchingMarkers.length > 1
+    ) {
+
+        const group =
+        L.featureGroup(
+            matchingMarkers
+        );
+
+        map.fitBounds(
+            group.getBounds(),
+                      {
+                          padding:
+                          [40, 40],
+                          maxZoom:
+                          15
+                      }
+        );
+    }
+
+
+    if (varnSearchInput) {
+
+        varnSearchInput.value =
+        type;
+    }
+
+
+    if (mapSearch) {
+
+        mapSearch.classList.add(
+            "has-text"
+        );
+    }
+
+
+    closeSearchResults();
+
+
+    if (
+        window.innerWidth <= 768 &&
+        sidebar
+    ) {
+
+        sidebar.classList.remove(
+            "open"
+        );
+    }
+}
+
+
+/* =================================
+ * SKAPA RESULTATLISTA
+ * ================================= */
+
+function renderSearchResults(
+    query
+) {
+
+    if (
+        !varnSearchResults
+    ) {
+        return;
+    }
+
+
+    const normalizedQuery =
+    normalizeSearchText(
+        query
+    );
+
+
+    varnSearchResults.innerHTML =
+    "";
+
+
+    /*
+     *     Ingen sökning:
+     *     ingen panel.
+     */
+
+    if (
+        normalizedQuery.length === 0
+    ) {
+
+        closeSearchResults();
+
+        return;
+    }
+
+
+    /* =================================
+     *     TYPTRÄFFAR
+     *     ================================= */
+
+    const matchingTypes =
+    [
+        ...new Set(
+            varnFeatures
+            .map(
+                item =>
+                item.feature
+                .properties
+                ?.Typ
+            )
+            .filter(Boolean)
+        )
+    ]
+    .filter(
+        type =>
+
+        normalizeSearchText(
+            type
+        )
+        .includes(
+            normalizedQuery
+        )
+    )
+    .sort(
+        (
+            a,
+         b
+        ) =>
+        searchCollator.compare(
+            a,
+            b
+        )
+    );
+
+
+    /* =================================
+     *     VÄRNTRÄFFAR
+     *     ================================= */
+
+    const matchingVarn =
+    varnFeatures
+    .filter(
+        item => {
+
+            const text =
+            getVarnSearchText(
+                item.feature
+            );
+
+            return (
+                text.includes(
+                    normalizedQuery
+                )
+            );
+        }
+    )
+    .map(
+        item => ({
+            item:
+            item,
+
+            score:
+            getSearchScore(
+                item,
+                normalizedQuery
+            )
+        })
+    )
+    .sort(
+        (
+            a,
+         b
+        ) => {
+
+            if (
+                a.score !==
+                b.score
+            ) {
+
+                return (
+                    b.score -
+                    a.score
+                );
+            }
+
+
+            const aNr =
+            a.item.feature
+            .properties
+            ?.Nr
+            || "";
+
+            const bNr =
+            b.item.feature
+            .properties
+            ?.Nr
+            || "";
+
+
+            return (
+                searchCollator
+                .compare(
+                    aNr,
+                    bNr
+                )
+            );
+        }
+    )
+    .slice(
+        0,
+        40
+    );
+
+
+    /* =================================
+     *     INGA RESULTAT
+     *     ================================= */
+
+    if (
+        matchingTypes.length === 0 &&
+        matchingVarn.length === 0
+    ) {
+
+        varnSearchResults.innerHTML =
+        `
+        <div
+        class="search-no-results"
+        >
+        Inga värn hittades.
+        </div>
+        `;
+
+        varnSearchResults
+        .classList
+        .add(
+            "open"
+        );
+
+        return;
+    }
+
+
+    /* =================================
+     *     VISA TYPER
+     *     ================================= */
+
+    if (
+        matchingTypes.length > 0
+    ) {
+
+        const heading =
+        document.createElement(
+            "div"
+        );
+
+        heading.className =
+        "search-result-heading";
+
+            heading.textContent =
+            "Typer";
+
+            varnSearchResults
+            .appendChild(
+                heading
+            );
+
+
+            matchingTypes
+            .forEach(
+                type => {
+
+                    const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                    button.type =
+                    "button";
+
+            button.className =
+            `
+            search-result-item
+            search-result-type
+            `;
+
+            button.innerHTML =
+            `
+            <span
+            class="search-result-title"
+            >
+            ${type}
+            </span>
+
+            <span
+            class="search-result-meta"
+            >
+            Visa alla värn av denna typ
+            </span>
+            `;
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    filterBySearchType(
+                        type
+                    );
+                }
+            );
+
+
+            varnSearchResults
+            .appendChild(
+                button
+            );
+                }
+            );
+    }
+
+
+    /* =================================
+     *     VISA ENSKILDA VÄRN
+     *     ================================= */
+
+    if (
+        matchingVarn.length > 0
+    ) {
+
+        const heading =
+        document.createElement(
+            "div"
+        );
+
+        heading.className =
+        "search-result-heading";
+
+            heading.textContent =
+            "Värn";
+
+            varnSearchResults
+            .appendChild(
+                heading
+            );
+
+
+            matchingVarn
+            .forEach(
+                result => {
+
+                    const item =
+                    result.item;
+
+                    const p =
+                    item.feature
+                    .properties
+                    || {};
+
+
+                    const button =
+                    document.createElement(
+                        "button"
+                    );
+
+                    button.type =
+                    "button";
+
+            button.className =
+            "search-result-item";
+
+
+                    button.innerHTML =
+                    `
+                    <span
+                    class="search-result-title"
+                    >
+                    Värn ${p.Nr || "-"}
+                    </span>
+
+                    <span
+                    class="search-result-meta"
+                    >
+                    ${p.Typ || "Okänd typ"}
+                    </span>
+                    `;
+
+
+                    button.addEventListener(
+                        "click",
+                        () => {
+
+                            goToSearchVarn(
+                                item
+                            );
+                        }
+                    );
+
+
+                    varnSearchResults
+                    .appendChild(
+                        button
+                    );
+                }
+            );
+    }
+
+
+    varnSearchResults
+    .classList
+    .add(
+        "open"
+    );
+}
+
+
+/* =================================
+ * SÖKRUTANS EVENTS
+ * ================================= */
+
+if (varnSearchInput) {
+
+    varnSearchInput.addEventListener(
+        "input",
+        () => {
+
+            const value =
+            varnSearchInput.value;
+
+
+            if (mapSearch) {
+
+                mapSearch.classList.toggle(
+                    "has-text",
+                    value.trim()
+                    .length > 0
+                );
+            }
+
+
+            /*
+             *             Börjar användaren skriva
+             *             något nytt tar vi bort
+             *             tidigare typfilter.
+             */
+
+            activeSearchType =
+            null;
+
+
+            updateVarnVisibility();
+
+
+            renderSearchResults(
+                value
+            );
+        }
+    );
+
+
+    varnSearchInput.addEventListener(
+        "focus",
+        () => {
+
+            if (
+                varnSearchInput
+                .value
+                .trim()
+                .length > 0
+            ) {
+
+                renderSearchResults(
+                    varnSearchInput
+                    .value
+                );
+            }
+        }
+    );
+}
+
+
+/* =================================
+ * RENSA-KNAPP
+ * ================================= */
+
+if (clearVarnSearch) {
+
+    clearVarnSearch.addEventListener(
+        "click",
+        () => {
+
+            resetVarnSearch();
+
+            if (varnSearchInput) {
+
+                varnSearchInput.focus();
+            }
+        }
+    );
+}
+
+
+/* =================================
+ * KLICK UTANFÖR SÖKNINGEN
+ * ================================= */
+
+document.addEventListener(
+    "click",
+    event => {
+
+        if (
+            !mapSearch
+        ) {
+            return;
+        }
+
+
+        if (
+            !mapSearch.contains(
+                event.target
+            )
+        ) {
+
+            closeSearchResults();
+        }
+    }
+);
