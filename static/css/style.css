@@ -1164,17 +1164,46 @@ overflow-y: auto;
     }
 
 }
+/* =================================
+ *  PERMANENT MOBILFIX - FILTERSIDEBAR
+ *  ================================= */
+
 @media (max-width: 768px) {
 
-    /* Behåll kartan normalt */
-    #map {
-    position: relative !important;
-    z-index: 1 !important;
+    .sidebar {
+        display: block;
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        bottom: 0;
+
+        width: 280px;
+        max-width: 85vw;
+
+        transform: translateX(-100%);
+
+        visibility: hidden;
+        pointer-events: none;
+
+        transition:
+        transform 0.25s ease,
+        visibility 0s linear 0.25s;
+
+        z-index: 1500;
     }
 
-    /* Dölj bara sidbaren */
-    .sidebar {
-        display: none !important;
+
+    .sidebar.open {
+        transform: translateX(0);
+
+        visibility: visible;
+        pointer-events: auto;
+
+        transition:
+        transform 0.25s ease,
+        visibility 0s;
     }
 
 }
