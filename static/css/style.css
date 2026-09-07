@@ -1217,18 +1217,49 @@ overflow-y: auto;
 }
 @media (max-width: 768px) {
 
-    html,
-    body {
+    /* =================================
+     *      KARTSIDAN - HELT LÅST
+     *      ================================= */
+
+    html:has(body.map-page),
+    body.map-page {
         width: 100%;
         height: 100%;
         overflow: hidden !important;
         overscroll-behavior: none;
     }
 
-    body {
+    body.map-page {
         position: fixed;
         inset: 0;
     }
+
+
+    /* =================================
+     *      VÄRNENS DETALJSIDOR - SCROLLBARA
+     *      ================================= */
+
+    body.varn-detail-page {
+        position: static !important;
+
+        width: 100%;
+        height: auto !important;
+        min-height: 100dvh;
+
+        overflow-x: hidden !important;
+        overflow-y: auto !important;
+
+        overscroll-behavior-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.varn-detail-page .varn-page {
+        height: auto;
+        min-height: 100dvh;
+        overflow: visible;
+    }
+
+}
 
     main {
         height: calc(100dvh - 56px);
@@ -1241,6 +1272,24 @@ overflow-y: auto;
     height: 100%;
     overflow: hidden;
     overscroll-behavior: none;
+    }
+
+}
+@media (max-width: 768px) {
+
+    .info-panel {
+        overflow: hidden;
+    }
+
+    #info-content {
+    height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+
+    padding-bottom: 30px;
     }
 
 }
