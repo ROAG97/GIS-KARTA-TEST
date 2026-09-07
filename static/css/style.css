@@ -1207,3 +1207,11 @@ overflow-y: auto;
     }
 
 }
+@media (max-width: 768px) {
+
+    #map,
+    .leaflet-container {
+        touch-action: manipulation;
+    }
+
+}
