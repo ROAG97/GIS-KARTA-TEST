@@ -1239,24 +1239,39 @@ overflow-y: auto;
      *      VÄRNENS DETALJSIDOR - SCROLLBARA
      *      ================================= */
 
-    body.varn-detail-page {
-        position: static !important;
+    @media (max-width: 768px) {
 
-        width: 100%;
-        height: auto !important;
-        min-height: 100dvh;
+        html.varn-detail-html,
+        body.varn-detail-page {
+            width: 100%;
 
-        overflow-x: hidden !important;
-        overflow-y: auto !important;
+            overflow-x: hidden;
 
-        overscroll-behavior-y: none;
-        -webkit-overflow-scrolling: touch;
-    }
+            overscroll-behavior-y: none;
+            overscroll-behavior-x: none;
+        }
 
-    body.varn-detail-page .varn-page {
-        height: auto;
-        min-height: 100dvh;
-        overflow: visible;
+        html.varn-detail-html {
+            height: auto;
+            min-height: 100%;
+        }
+
+        body.varn-detail-page {
+            position: static !important;
+
+            height: auto !important;
+            min-height: 100%;
+
+            overflow-y: visible !important;
+        }
+
+        body.varn-detail-page .varn-page {
+            height: auto;
+            min-height: 0;
+
+            overflow: visible;
+        }
+
     }
 
 }
