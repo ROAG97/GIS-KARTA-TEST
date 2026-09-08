@@ -1708,3 +1708,23 @@ body.varn-detail-page{
     }
 
 }
+.hero-title-row {
+
+    gap: 15px;
+}
+
+
+.hero-title-row h1 {
+
+    font-size: 42px;
+
+}
+
+
+.hero-coordinates {
+
+    gap: 8px;
+
+    font-size: 10px;
+
+}
