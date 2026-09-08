@@ -1526,7 +1526,7 @@ body.varn-detail-page{
 
     white-space:nowrap;
 
-    font-size:clamp(9px, 1.1vw, 25px);
+    font-size:clamp(13px, 1.1vw, 25px);
     font-weight:400;
 
     letter-spacing:.3px;
