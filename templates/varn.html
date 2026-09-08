@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="sv" class="varn-detail-html">
+<html lang="sv">
 
 <head>
     <meta charset="UTF-8">
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -19,6 +20,7 @@
     >
 </head>
 
+
 <body class="varn-detail-page">
 
 <header>
@@ -30,68 +32,99 @@
     </nav>
 </header>
 
+<!-- BAKGRUNDSBILD -->
+<div
+    class="varn-background"
+    style="background-image:url('{{ varn.properties.Bild }}');">
+</div>
 
-<div class="varn-page">
+<!-- Dynamisk mörkning -->
+<div class="varn-background-overlay" id="background-overlay"></div>
+
+<main class="varn-page">
 
     <a href="/" class="back-link">
         ← Tillbaka till kartan
     </a>
 
-    <h1>
-        {{ detaljinfo.get("rubrik", varn.properties.Typ ~ " " ~ varn.properties.Nr) }}
-    </h1>
+    <!-- Titel ovanpå bilden -->
+    <section class="hero-content">
+
+        <div class="hero-type">
+            {{ varn.properties.Typ }}
+        </div>
+
+        <h1>
+            Värn {{ varn.properties.Nr }}
+        </h1>
+
+        <div class="hero-status">
+            {{ varn.properties.Status or "Status saknas" }}
+        </div>
+
+    </section>
 
 
-    <h2>Historik</h2>
+    <!-- Kort med grunddata -->
+    <section class="info-grid">
 
-    <p>
-        {{ detaljinfo.get("historik", "Ingen historik har lagts till ännu.") }}
-    </p>
+        <div class="info-card">
+            <span class="info-title">Typ</span>
+            <strong>{{ varn.properties.Typ }}</strong>
+        </div>
+
+        <div class="info-card">
+            <span class="info-title">Status</span>
+            <strong>{{ varn.properties.Status or "-" }}</strong>
+        </div>
+
+        <div class="info-card">
+            <span class="info-title">Byggår</span>
+            <strong>{{ detaljinfo.get("byggar", "-") }}</strong>
+        </div>
+
+        <div class="info-card">
+            <span class="info-title">Nummer</span>
+            <strong>{{ varn.properties.Nr }}</strong>
+        </div>
+
+    </section>
 
 
-    <h2>Grunddata</h2>
+    <!-- Historik -->
+    <section class="content-card">
 
-    <p>
-        <strong>Typ:</strong>
-        {{ varn.properties.Typ }}
-    </p>
+        <h2>Historik</h2>
 
-    <p>
-        <strong>Nummer:</strong>
-        {{ varn.properties.Nr }}
-    </p>
+        <p>
+            {{ detaljinfo.get("historik", "Ingen historik har lagts till ännu.") }}
+        </p>
 
-    <p>
-        <strong>Status:</strong>
-        {{ varn.properties.Status or "-" }}
-    </p>
+    </section>
 
-    <p>
-        <strong>Byggår:</strong>
-        {{ detaljinfo.get("byggar", "-") }}
-    </p>
-{% if detaljinfo.get("modell") %}
 
-<section class="model-section">
+    <!-- 3D Modell -->
+    {% if detaljinfo.get("modell") %}
+    <section class="content-card">
 
-    <h2>3D-modell</h2>
+        <h2>3D-modell</h2>
 
-    <div class="sketchfab-wrapper">
+        <div class="sketchfab-wrapper">
 
-        <iframe
-            title="3D-modell av värnet"
-            src="{{ detaljinfo.get('modell') }}"
-            frameborder="0"
-            allow="autoplay; fullscreen; xr-spatial-tracking"
-            allowfullscreen>
-        </iframe>
+            <iframe
+                src="{{ detaljinfo.get('modell') }}"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowfullscreen>
+            </iframe>
 
-    </div>
+        </div>
 
-</section>
+    </section>
+    {% endif %}
 
-{% endif %}
-</div>
+</main>
+
+<script src="{{ url_for('static', filename='js/varn.js') }}"></script>
 
 </body>
 
