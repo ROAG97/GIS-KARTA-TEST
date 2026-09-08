@@ -24,7 +24,7 @@
 <body class="varn-detail-page">
 
 <header>
-    <h1>Kustförsvaret i Skåne</h1>
+    <h1>Skånelinjen</h1>
 
     <nav>
         <a href="/">Karta</a>
@@ -48,19 +48,31 @@
     </a>
 
     <!-- Titel ovanpå bilden -->
-    <section class="hero-content">
+<section class="hero-content">
 
-        <div class="hero-type">
-            {{ varn.properties.Typ }}
-        </div>
+    <div class="hero-type">
+        {{ varn.properties.Typ }}
+    </div>
+
+    <div class="hero-title-row">
 
         <h1>
             Värn {{ varn.properties.Nr }}
         </h1>
 
-        <div class="hero-status">
-            {{ varn.properties.Status or "Status saknas" }}
+        <div class="hero-coordinates">
+
+            <span>
+                {{ "%.6f"|format(varn.geometry.coordinates[1]) }}° N
+            </span>
+
+            <span>
+                {{ "%.6f"|format(varn.geometry.coordinates[0]) }}° E
+            </span>
+
         </div>
+
+    </div>
 
     </section>
 
