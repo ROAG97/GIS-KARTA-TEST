@@ -1249,7 +1249,7 @@ overflow-y: auto;
         overflow-x: hidden !important;
         overflow-y: auto !important;
 
-        overscroll-behavior-y: auto;
+        overscroll-behavior-y: none;
         -webkit-overflow-scrolling: touch;
     }
 
