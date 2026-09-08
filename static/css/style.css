@@ -125,7 +125,8 @@ body.map-page main {
 
     padding: 25px;
 
-    background: white;
+    background: #b8b9aa;
+    color: #242424;
 
     border-right: 1px solid #ccc;
 
@@ -305,7 +306,8 @@ overscroll-behavior: none;
     width: 360px;
     height: 100%;
 
-    background: white;
+    background: #b8b9aa;
+    color: #242424;
 
     border-left: 1px solid #ccc;
 
@@ -397,7 +399,7 @@ overscroll-behavior: contain;
 }
 
 .info-number {
-    color: #666;
+    color: #3f3f3f;
 
     font-size: 14px;
 }
@@ -441,7 +443,7 @@ overscroll-behavior: contain;
 }
 
 .info-row {
-    margin-bottom: 12px;
+    margin-bottom: 15px;
 }
 
 .info-row:last-child {
@@ -451,18 +453,24 @@ overscroll-behavior: contain;
 .info-label {
     display: block;
 
-    margin-bottom: 3px;
+    margin-bottom: 5px;
 
-    font-size: 12px;
-    font-weight: bold;
+    font-size: 14px;
+    font-weight: 700;
 
-    color: #777;
+    color: #000000;
 
     text-transform: uppercase;
+    letter-spacing: 0.8px;
 }
 
 .info-value {
-    font-size: 15px;
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #181818;
+
+    line-height: 1.4;
 }
 
 
