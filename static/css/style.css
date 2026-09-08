@@ -1407,3 +1407,278 @@ body.varn-detail-page {
     }
 
 }
+
+/* =========================================================
+ *   VÄRNSIDA 2.0
+ *   ========================================================= */
+
+body.varn-detail-page{
+    background:#111;
+    color:white;
+}
+
+/* Bakgrundsbild */
+
+.varn-background{
+
+    position:fixed;
+    inset:0;
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    transform:scale(1.05);
+
+    z-index:-3;
+
+}
+
+/* Mörk overlay som styrs av JS */
+
+.varn-background-overlay{
+
+    position:fixed;
+    inset:0;
+
+    background:black;
+    opacity:0;
+
+    transition:opacity .15s linear;
+
+    z-index:-2;
+
+}
+
+/* Hela innehållet */
+
+.varn-page{
+
+    width:min(1200px, calc(100% - 40px));
+
+    margin:auto;
+
+    padding-bottom:100px;
+
+}
+
+/* ===========================
+ *   HERO
+ *   =========================== */
+
+.hero-content{
+
+    min-height:80vh;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+
+    padding-bottom:70px;
+
+}
+
+.hero-type{
+
+    display:inline-block;
+
+    width:max-content;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(10px);
+
+    font-size:13px;
+    letter-spacing:.6px;
+    font-weight:bold;
+    text-transform:uppercase;
+
+}
+
+.hero-content h1{
+
+    margin:18px 0 10px;
+
+    font-size:64px;
+
+    line-height:1;
+
+}
+
+.hero-status{
+
+    font-size:18px;
+
+    color:#e4e4e4;
+
+}
+
+/* ===========================
+ *   INFOGRID
+ *   =========================== */
+
+.info-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:18px;
+
+    margin-bottom:35px;
+
+}
+
+.info-card{
+
+    padding:22px;
+
+    border-radius:18px;
+
+    background:rgba(20,20,20,.58);
+
+    backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.12);
+
+}
+
+.info-title{
+
+    display:block;
+
+    color:#a8a8a8;
+
+    font-size:12px;
+
+    text-transform:uppercase;
+
+    margin-bottom:8px;
+
+    letter-spacing:.5px;
+
+}
+
+.info-card strong{
+
+    font-size:18px;
+
+}
+
+/* ===========================
+ *   STORA INNEHÅLLSKORT
+ *   =========================== */
+
+.content-card{
+
+    padding:35px;
+
+    margin-bottom:30px;
+
+    border-radius:22px;
+
+    background:rgba(18,18,18,.70);
+
+    backdrop-filter:blur(16px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    line-height:1.8;
+
+}
+
+.content-card h2{
+
+    margin-top:0;
+
+    font-size:28px;
+
+}
+
+/* Sketchfab */
+
+.content-card .sketchfab-wrapper{
+
+    margin-top:20px;
+
+}
+
+/* Tillbaka-knappen */
+
+.back-link{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-top:25px;
+
+    color:white;
+
+    text-decoration:none;
+
+    opacity:.9;
+
+}
+
+.back-link:hover{
+
+    opacity:1;
+
+}
+
+/* ===========================
+ *   MOBIL
+ *   =========================== */
+
+@media(max-width:768px){
+
+    .varn-page{
+
+        width:calc(100% - 24px);
+
+    }
+
+    .hero-content{
+
+        min-height:65vh;
+
+        padding-bottom:40px;
+
+    }
+
+    .hero-content h1{
+
+        font-size:42px;
+
+    }
+
+    .info-grid{
+
+        grid-template-columns:repeat(2,1fr);
+
+        gap:12px;
+
+    }
+
+    .info-card{
+
+        padding:18px;
+
+    }
+
+    .content-card{
+
+        padding:22px;
+
+        border-radius:18px;
+
+    }
+
+}
