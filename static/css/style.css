@@ -1463,8 +1463,8 @@ body.varn-detail-page{
 }
 
 /* ===========================
- *   HERO
- *   =========================== */
+ *  HERO
+ *  =========================== */
 
 .hero-content{
 
@@ -1477,6 +1477,7 @@ body.varn-detail-page{
     padding-bottom:70px;
 
 }
+
 
 .hero-type{
 
@@ -1499,9 +1500,25 @@ body.varn-detail-page{
 
 }
 
-.hero-content h1{
 
-    margin:18px 0 10px;
+/* Värnnummer + koordinater på samma rad */
+
+.hero-title-row{
+
+    width:100%;
+
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+
+    gap:30px;
+
+}
+
+
+.hero-title-row h1{
+
+    margin:18px 0 0;
 
     font-size:64px;
 
@@ -1509,14 +1526,23 @@ body.varn-detail-page{
 
 }
 
-.hero-status{
 
-    font-size:18px;
+.hero-coordinates{
 
-    color:#e4e4e4;
+    display:flex;
+
+    gap:14px;
+
+    white-space:nowrap;
+
+    font-size:30px;
+    font-weight:400;
+
+    letter-spacing:.3px;
+
+    color:rgba(255,255,255,.85);
 
 }
-
 /* ===========================
  *   INFOGRID
  *   =========================== */
