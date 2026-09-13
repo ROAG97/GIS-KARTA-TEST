@@ -2970,3 +2970,39 @@ window.addEventListener(
         );
     }
 );
+// =====================================================
+// FÖRHINDRA WEBBLÄSAR-ZOOM I INFO/PUPUP PÅ MOBIL
+// =====================================================
+
+function isInfoArea(target) {
+    return target.closest(
+        ".info-panel, #info-content, .leaflet-popup"
+    );
+}
+
+
+// Safari / iPhone gesture events
+["gesturestart", "gesturechange", "gestureend"].forEach(eventName => {
+
+    document.addEventListener(eventName, event => {
+
+        if (isInfoArea(event.target)) {
+            event.preventDefault();
+        }
+
+    }, { passive: false });
+
+});
+
+
+// Förhindra tvåfingers-zoom inne i infopanelen
+document.addEventListener("touchmove", event => {
+
+    if (
+        event.touches.length > 1 &&
+        isInfoArea(event.target)
+    ) {
+        event.preventDefault();
+    }
+
+}, { passive: false });
