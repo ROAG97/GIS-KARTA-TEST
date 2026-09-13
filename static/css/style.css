@@ -1088,11 +1088,32 @@ body.varn-detail-page {
     overscroll-behavior: none;
     }
 
+    /*
+     *  Leaflet ska själv hantera touch på kartan.
+     *  Webbläsaren ska inte pinch-zooma själva sidan.
+     */
     #map,
     .leaflet-container {
-        touch-action: manipulation;
+        touch-action: none;
     }
 
+    /*
+     *  Informationspanelen får scrollas upp/ned,
+     *  men inte pinch-zooma webbsidan.
+     */
+    .info-panel,
+    #info-content {
+    touch-action: pan-y;
+    }
+
+    /*
+     *  Om Leaflet-popup används någonstans.
+     */
+    .leaflet-popup,
+    .leaflet-popup-content,
+    .leaflet-popup-content-wrapper {
+        touch-action: pan-y;
+    }
 
     /* =====================================================
      *      MOBIL - FILTERKNAPP
