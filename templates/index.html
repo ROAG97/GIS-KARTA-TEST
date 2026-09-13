@@ -30,6 +30,19 @@
     <nav>
         <a href="/">Karta</a>
         <a href="#">Om projektet</a>
+        {% if session.get("user_id") %}
+
+    <a href="{{ url_for('admin') }}">
+        Admin
+    </a>
+
+{% else %}
+
+    <a href="{{ url_for('admin_login') }}">
+        Logga in
+    </a>
+
+{% endif %}
     </nav>
 
     <button

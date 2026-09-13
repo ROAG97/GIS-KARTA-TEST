@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+
+<html lang="sv">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Redigera värn {{ varn.properties.Nr }}
+    </title>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+
+            color: #ffffff;
+        }
+
+
+        .admin-page {
+            width: min(
+                900px,
+                calc(100% - 32px)
+            );
+
+            margin: 40px auto 80px;
+        }
+
+
+        .admin-header {
+            margin-bottom: 30px;
+        }
+
+
+        .admin-type {
+            margin-bottom: 8px;
+
+            font-size: 13px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            color: #bcbcbc;
+        }
+
+
+        h1 {
+            margin: 0;
+
+            font-size: 36px;
+        }
+
+
+        .admin-gis-info {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, 1fr);
+
+            gap: 12px;
+
+            margin-top: 24px;
+        }
+
+
+        .gis-card {
+            padding: 14px;
+
+            background: #292929;
+
+            border-radius: 8px;
+        }
+
+
+        .gis-label {
+            display: block;
+
+            margin-bottom: 5px;
+
+            font-size: 10px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 1px;
+
+            color: #999;
+        }
+
+
+        .gis-value {
+            font-size: 15px;
+        }
+
+
+        .admin-note {
+            margin-top: 15px;
+
+            font-size: 13px;
+
+            color: #aaa;
+        }
+
+
+        form {
+            margin-top: 35px;
+        }
+
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+
+        .form-group.full {
+            grid-column:
+                1 / -1;
+        }
+
+
+        label {
+            display: block;
+
+            margin-bottom: 7px;
+
+            font-size: 12px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: .7px;
+        }
+
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+
+            padding: 12px 14px;
+
+            border: 1px solid #555;
+
+            border-radius: 7px;
+
+            background: #292929;
+
+            color: #ffffff;
+
+            font: inherit;
+        }
+
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+
+            border-color: #aaa;
+        }
+
+
+        textarea {
+            min-height: 220px;
+
+            resize: vertical;
+        }
+
+        .modell-input {
+    min-height: 110px;
+}
+
+        .button-row {
+            display: flex;
+
+            gap: 12px;
+
+            margin-top: 30px;
+        }
+
+
+        button,
+        .button {
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            padding: 12px 22px;
+
+            border: 0;
+
+            border-radius: 7px;
+
+            font-size: 15px;
+
+            font-weight: 700;
+
+            text-decoration: none;
+
+            cursor: pointer;
+        }
+
+
+        .save-button {
+            background: #ffffff;
+
+            color: #111111;
+        }
+
+
+        .cancel-button {
+            background: #333333;
+
+            color: #ffffff;
+        }
+
+
+        @media (max-width: 700px) {
+
+            .admin-page {
+                width: calc(100% - 24px);
+
+                margin-top: 25px;
+            }
+
+
+            h1 {
+                font-size: 30px;
+            }
+
+
+            .admin-gis-info {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .form-grid {
+                grid-template-columns:
+                    1fr;
+            }
+
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<div class="admin-page">
+
+
+    <header class="admin-header">
+
+        <div class="admin-type">
+
+            {{ varn.properties.Typ }}
+
+        </div>
+
+
+        <h1>
+
+            Redigera värn
+            {{ varn.properties.Nr }}
+
+        </h1>
+
+
+        <div class="admin-gis-info">
+
+
+            <div class="gis-card">
+
+                <span class="gis-label">
+                    Nummer
+                </span>
+
+                <span class="gis-value">
+
+                    {{ varn.properties.Nr }}
+
+                </span>
+
+            </div>
+
+
+            <div class="gis-card">
+
+                <span class="gis-label">
+                    Typ
+                </span>
+
+                <span class="gis-value">
+
+                    {{ varn.properties.Typ }}
+
+                </span>
+
+            </div>
+
+
+            <div class="gis-card">
+
+                <span class="gis-label">
+                    Status
+                </span>
+
+                <span class="gis-value">
+
+                    {{ varn.properties.Status or "–" }}
+
+                </span>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="admin-note">
+
+            Nummer, typ, status och koordinater
+            hanteras i QGIS och kan därför inte
+            ändras här.
+
+        </div>
+
+    </header>
+
+
+
+    <form method="POST">
+
+
+        <div class="form-grid">
+
+
+ <div class="form-group">
+
+    <label>
+        Variant
+    </label>
+
+    <input
+        type="text"
+        value="{{ varn.properties.Variant or '' }}"
+        disabled
+    >
+
+</div>
+
+
+            <div class="form-group">
+
+                <label for="byggar">
+                    Byggår
+                </label>
+
+                <input
+                    id="byggar"
+                    name="byggar"
+                    type="text"
+                    value="{{ detaljinfo.byggar or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="parkering">
+                    Parkering
+                </label>
+
+                <input
+                    id="parkering"
+                    name="parkering"
+                    type="text"
+                    value="{{ detaljinfo.parkering or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="tillganglighet">
+                    Tillgänglighet
+                </label>
+
+                <input
+                    id="tillganglighet"
+                    name="tillganglighet"
+                    type="text"
+                    value="{{ detaljinfo.tillganglighet or '' }}"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="plomberad">
+                    Plomberad
+                </label>
+
+                <select
+                    id="plomberad"
+                    name="plomberad"
+                >
+
+                    <option
+                        value=""
+                        {% if not detaljinfo.plomberad %}
+                            selected
+                        {% endif %}
+                    >
+                        Ej angivet
+                    </option>
+
+                    <option
+                        value="JA"
+                        {% if detaljinfo.plomberad == "JA" %}
+                            selected
+                        {% endif %}
+                    >
+                        Ja
+                    </option>
+
+                    <option
+                        value="NEJ"
+                        {% if detaljinfo.plomberad == "NEJ" %}
+                            selected
+                        {% endif %}
+                    >
+                        Nej
+                    </option>
+
+                </select>
+
+            </div>
+
+
+ <div class="form-group">
+
+    <label for="modell">
+        3D-modell / Sketchfab
+    </label>
+
+    <textarea
+        id="modell"
+        name="modell"
+        class="modell-input"
+        placeholder="Klistra in Sketchfab embed-kod eller embed-länk här..."
+    >{{ detaljinfo.modell or '' }}</textarea>
+
+</div>
+
+
+            <div class="form-group full">
+
+                <label for="historik">
+                    Historik
+                </label>
+
+                <textarea
+                    id="historik"
+                    name="historik"
+                >{{ detaljinfo.historik or '' }}</textarea>
+
+            </div>
+
+
+        </div>
+
+
+        <div class="button-row">
+
+            <button
+                class="save-button"
+                type="submit"
+            >
+                Spara ändringar
+            </button>
+
+
+            <a
+                class="button cancel-button"
+                href="{{ url_for('varn', nr=varn.properties.Nr) }}"
+            >
+                Avbryt
+            </a>
+
+        </div>
+
+
+    </form>
+
+
+</div>
+
+</body>
+
+</html>

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html lang="sv">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Admin – Skånelinjen
+    </title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+
+            color: white;
+        }
+
+        .admin-page {
+            width: min(
+                1000px,
+                calc(100% - 32px)
+            );
+
+            margin: 40px auto 80px;
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            margin:
+                0
+                0
+                8px;
+
+            font-size: 38px;
+        }
+
+        .admin-header p {
+            margin: 0;
+
+            color: #aaa;
+        }
+
+        .admin-header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+.logout-button {
+    padding: 9px 14px;
+    border: 1px solid #555;
+    border-radius: 6px;
+    background: #292929;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.logout-button:hover {
+    background: #3a3a3a;
+}
+
+        .search-wrapper {
+            margin-bottom: 25px;
+        }
+
+        .search-input {
+            width: 100%;
+
+            padding: 14px 16px;
+
+            border: 1px solid #555;
+
+            border-radius: 8px;
+
+            background: #292929;
+
+            color: white;
+
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: none;
+
+            border-color: #aaa;
+        }
+
+        .result-count {
+            margin-bottom: 15px;
+
+            color: #999;
+
+            font-size: 13px;
+        }
+
+        .varn-list {
+            display: grid;
+
+            gap: 10px;
+        }
+
+        .varn-item {
+            display: grid;
+
+            grid-template-columns:
+                90px
+                1fr
+                1fr
+                120px
+                auto;
+
+            align-items: center;
+
+            gap: 15px;
+
+            padding: 15px 18px;
+
+            background: #292929;
+
+            border-radius: 8px;
+
+            border: 1px solid #333;
+        }
+
+        .varn-number {
+            font-size: 18px;
+
+            font-weight: 700;
+        }
+
+        .varn-type,
+        .varn-variant,
+        .varn-status {
+            color: #ccc;
+        }
+
+        .edit-button {
+            padding: 9px 14px;
+
+            background: white;
+
+            color: #111;
+
+            border-radius: 6px;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        .edit-button:hover {
+            background: #ddd;
+        }
+
+        .no-results {
+            display: none;
+
+            padding: 30px;
+
+            text-align: center;
+
+            color: #999;
+
+            background: #292929;
+
+            border-radius: 8px;
+        }
+
+        @media (max-width: 750px) {
+
+            .admin-page {
+                width: calc(100% - 24px);
+
+                margin-top: 25px;
+            }
+
+            .admin-header h1 {
+                font-size: 30px;
+            }
+
+            .varn-item {
+                grid-template-columns:
+                    70px
+                    1fr
+                    auto;
+
+                gap: 8px 12px;
+            }
+
+            .varn-variant,
+            .varn-status {
+                grid-column: 2;
+            }
+
+            .edit-button {
+                grid-column: 3;
+                grid-row: 1 / span 3;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div class="admin-page">
+
+<header class="admin-header">
+
+    <div class="admin-header-top">
+
+        <div>
+
+            <h1>
+                Admin
+            </h1>
+
+            <p>
+                Sök efter ett värn och öppna det för redigering.
+            </p>
+
+        </div>
+
+
+        <form
+            action="{{ url_for('admin_logout') }}"
+            method="POST"
+        >
+
+            <button
+                type="submit"
+                class="logout-button"
+            >
+                Logga ut
+            </button>
+
+        </form>
+
+    </div>
+
+</header>
+
+
+    <div class="search-wrapper">
+
+        <input
+            id="admin-search"
+            class="search-input"
+            type="search"
+            placeholder="Sök t.ex. 651, KSP, PV..."
+            autocomplete="off"
+        >
+
+    </div>
+
+
+    <div
+        id="result-count"
+        class="result-count"
+    >
+    </div>
+
+
+    <div
+        id="varn-list"
+        class="varn-list"
+    >
+
+        {% for item in varn_lista %}
+
+        <div
+            class="varn-item"
+            data-search="
+                {{ item.nr }}
+                {{ item.typ }}
+                {{ item.variant }}
+                {{ item.status }}
+            "
+        >
+
+            <div class="varn-number">
+                {{ item.nr }}
+            </div>
+
+            <div class="varn-type">
+                {{ item.typ or "–" }}
+            </div>
+
+            <div class="varn-variant">
+                {{ item.variant or "–" }}
+            </div>
+
+            <div class="varn-status">
+                {{ item.status or "–" }}
+            </div>
+
+            <a
+                class="edit-button"
+                href="{{ url_for('edit_varn', nr=item.nr) }}"
+            >
+                Redigera
+            </a>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <div
+        id="no-results"
+        class="no-results"
+    >
+        Inga värn hittades.
+    </div>
+
+</div>
+
+
+<script>
+
+    const searchInput =
+        document.getElementById(
+            "admin-search"
+        );
+
+    const items =
+        Array.from(
+            document.querySelectorAll(
+                ".varn-item"
+            )
+        );
+
+    const resultCount =
+        document.getElementById(
+            "result-count"
+        );
+
+    const noResults =
+        document.getElementById(
+            "no-results"
+        );
+
+
+    function normalizeText(text) {
+
+        return text
+            .toLowerCase()
+            .normalize("NFD")
+            .replace(
+                /[\u0300-\u036f]/g,
+                ""
+            )
+            .trim();
+
+    }
+
+
+    function updateSearch() {
+
+        const query =
+            normalizeText(
+                searchInput.value
+            );
+
+        let visibleCount = 0;
+
+
+        items.forEach(item => {
+
+            const searchText =
+                normalizeText(
+                    item.dataset.search
+                );
+
+
+            const visible =
+                !query ||
+                searchText.includes(
+                    query
+                );
+
+
+            item.style.display =
+                visible
+                    ? "grid"
+                    : "none";
+
+
+            if (visible) {
+                visibleCount++;
+            }
+
+        });
+
+
+        resultCount.textContent =
+            `${visibleCount} värn`;
+
+
+        noResults.style.display =
+            visibleCount === 0
+                ? "block"
+                : "none";
+
+    }
+
+
+    searchInput.addEventListener(
+        "input",
+        updateSearch
+    );
+
+
+    updateSearch();
+
+</script>
+
+</body>
+
+</html>
