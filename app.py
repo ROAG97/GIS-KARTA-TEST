@@ -6,10 +6,6 @@ import secrets
 
 from functools import wraps
 
-git add .
-git commit -m "Fix secret key"
-git push
-
 from flask import (
     Flask,
     render_template,
