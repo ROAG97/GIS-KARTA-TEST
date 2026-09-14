@@ -1659,6 +1659,10 @@ body.varn-detail-page{
 
 }
 
+.preserve-lines {
+    white-space: pre-wrap;
+}
+
 .content-card h2{
 
     margin-top:0;
