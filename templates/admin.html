@@ -128,6 +128,45 @@
             background: #3a3a3a;
         }
 
+        .admin-tools {
+            display: flex;
+
+            align-items: center;
+
+            margin-bottom: 20px;
+        }
+
+        .log-button {
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            min-height: 42px;
+
+            padding:
+                10px
+                15px;
+
+            border: 1px solid #555;
+
+            border-radius: 7px;
+
+            background: #292929;
+
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 13px;
+
+            font-weight: 700;
+        }
+
+        .log-button:hover {
+            background: #3a3a3a;
+        }
 
         /* =================================
            SÖK
@@ -552,6 +591,16 @@
 
     </header>
 
+        <div class="admin-tools">
+
+        <a
+            href="{{ url_for('admin_logg') }}"
+            class="log-button"
+        >
+            🕘 Ändringslogg
+        </a>
+
+    </div>
 
     <!-- =================================
          SÖK
