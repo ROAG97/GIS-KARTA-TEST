@@ -46,6 +46,14 @@
     <a href="/" class="back-link">
         ← Tillbaka till kartan
     </a>
+    {% if session.get("user_id") %}
+<a
+    href="{{ url_for('edit_varn', nr=varn.properties.Nr) }}"
+    class="varn-edit-link"
+>
+    ✎ Redigera värn
+</a>
+{% endif %}
 
     <!-- Titel ovanpå bilden -->
 <section class="hero-content">
@@ -104,15 +112,15 @@
 
 
     <!-- Historik -->
-    <section class="content-card">
+<section class="content-card">
 
-        <h2>Historik</h2>
+    <h2>Historik</h2>
 
-        <p>
-            {{ detaljinfo.get("historik", "Ingen historik har lagts till ännu.") }}
-        </p>
+    <p class="preserve-lines">
+        {{ detaljinfo.get("historik") or "Ingen historik har lagts till ännu." }}
+    </p>
 
-    </section>
+</section>
 
 
     <!-- 3D Modell -->
