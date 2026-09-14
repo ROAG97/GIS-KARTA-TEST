@@ -1,0 +1,1718 @@
+/* =========================================================
+ *  KUSTFÖRSVARET I SKÅNE
+ *  GEMENSAM STILFIL
+ *
+ *  STRUKTUR:
+ *  1. Grundregler
+ *  2. Header
+ *  3. Kartlayout desktop
+ *  4. Filter
+ *  5. Karta
+ *  6. Infopanel
+ *  7. Värninformation
+ *  8. Markörer
+ *  9. Sök
+ *  10. Värnets detaljsida
+ *  11. Surfplatta
+ *  12. Mobil karta
+ *  13. Mobil detaljsida
+ *  ========================================================= */
+
+
+/* =========================================================
+ *  1. GRUNDREGLER
+ *  ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html {
+    width: 100%;
+    min-height: 100%;
+
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
+}
+
+body {
+    margin: 0;
+
+    min-height: 100%;
+
+    font-family: Arial, sans-serif;
+
+    background: #f2f2f2;
+    color: #222;
+}
+
+
+/*
+ * Kartsidan ska aldrig vara en vanlig
+ * scrollande webbsida.
+ */
+body.map-page {
+    overflow: hidden;
+}
+
+
+/* =========================================================
+ *  2. HEADER
+ *  ========================================================= */
+
+header {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    height: 70px;
+
+    padding: 0 30px;
+
+    background: #222;
+    color: white;
+
+    z-index: 3000;
+}
+
+header h1 {
+    margin: 0;
+
+    font-size: 24px;
+}
+
+nav a {
+    margin-left: 25px;
+
+    color: white;
+
+    text-decoration: none;
+}
+
+nav a:hover {
+    text-decoration: underline;
+}
+
+
+/* =========================================================
+ *  3. KARTLAYOUT - DESKTOP
+ *  ========================================================= */
+
+body.map-page main {
+    position: relative;
+
+    display: flex;
+
+    width: 100%;
+    height: calc(100dvh - 70px);
+
+    overflow: hidden;
+}
+
+
+/* =========================================================
+ *  4. FILTER / VÄNSTERPANEL
+ *  ========================================================= */
+
+.sidebar {
+    position: relative;
+
+    width: 280px;
+
+    flex-shrink: 0;
+
+    padding: 25px;
+
+    background: #b8b9aa;
+    color: #242424;
+
+    border-right: 1px solid #ccc;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+
+    scrollbar-width: thin;
+
+    z-index: 1300;
+}
+
+
+/* -----------------------------
+ *  FILTER RUBRIK
+ *  ----------------------------- */
+
+.sidebar-title {
+    margin-bottom: 10px;
+}
+
+.sidebar-title h2 {
+    margin: 0;
+
+    font-size: 22px;
+}
+
+
+/* -----------------------------
+ *  FILTERSEKTION
+ *  ----------------------------- */
+
+.filter-section {
+    border-bottom: 1px solid #ddd;
+}
+
+.filter-section-title {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 13px 4px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-section-title:hover {
+    background: #f2f2f2;
+}
+
+.filter-arrow {
+    font-size: 13px;
+
+    transition: transform 0.2s ease;
+}
+
+.filter-section-content {
+    display: none;
+
+    padding:
+    2px
+    4px
+    12px
+    4px;
+}
+
+.filter-section.open .filter-section-content {
+    display: block;
+}
+
+.filter-section.open .filter-arrow {
+    transform: rotate(180deg);
+}
+
+
+/* -----------------------------
+ *  FILTERALTERNATIV
+ *  ----------------------------- */
+
+.filter-option {
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 5px 2px;
+
+    cursor: pointer;
+
+    font-size: 14px;
+}
+
+.filter-option:hover {
+    background: #f5f5f5;
+}
+
+.filter-option input {
+    margin: 0;
+
+    cursor: pointer;
+
+    flex-shrink: 0;
+}
+
+.filter-option img {
+    width: 26px;
+    height: 26px;
+
+    object-fit: contain;
+
+    flex-shrink: 0;
+}
+
+.filter-divider {
+    margin: 10px 0;
+
+    border-top: 1px solid #aaa;
+}
+
+.filter-subtitle {
+    margin:
+    8px
+    0
+    5px
+    0;
+
+    font-size: 13px;
+    font-weight: bold;
+}
+
+
+/* =========================================================
+ *  5. KARTA
+ *  ========================================================= */
+
+.map-container {
+    position: relative;
+
+    flex: 1;
+
+    min-width: 0;
+    min-height: 0;
+
+    background: #ddd;
+
+    overflow: hidden;
+
+    overscroll-behavior: none;
+}
+
+#map {
+width: 100%;
+height: 100%;
+
+min-height: 300px;
+
+overflow: hidden;
+
+overscroll-behavior: none;
+}
+
+
+/* =========================================================
+ *  6. INFOPANEL / POPUP DESKTOP
+ *  ========================================================= */
+
+.info-panel {
+    position: absolute;
+
+    top: 0;
+    right: 0;
+
+    width: 360px;
+    height: 100%;
+
+    background: #b8b9aa;
+    color: #242424;
+
+    border-left: 1px solid #ccc;
+
+    transform: translateX(100%);
+
+    transition: transform 0.25s ease;
+
+    overflow: hidden;
+
+    box-shadow:
+    -4px 0 12px
+    rgba(0, 0, 0, 0.18);
+
+    z-index: 1200;
+}
+
+.info-panel.open {
+    transform: translateX(0);
+}
+
+
+/*
+ * ENDA delen av desktop-infopanelen
+ * som får scrolla.
+ */
+#info-content {
+width: 100%;
+height: 100%;
+
+padding: 30px 25px;
+
+overflow-y: auto;
+overflow-x: hidden;
+
+overscroll-behavior: contain;
+
+-webkit-overflow-scrolling: touch;
+}
+
+
+/* -----------------------------
+ *  DRAGHANDTAG
+ *  DOLT PÅ DESKTOP
+ *  ----------------------------- */
+
+.info-drag-handle {
+    display: none;
+}
+
+
+/* -----------------------------
+ *  STÄNG INFOPANEL
+ *  ----------------------------- */
+
+.close-info {
+    position: absolute;
+
+    top: 10px;
+    right: 15px;
+
+    padding: 0;
+
+    border: none;
+
+    background: none;
+
+    font-size: 30px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    z-index: 30;
+}
+
+
+/* =========================================================
+ *  7. VÄRNINFORMATION I POPUP
+ *  ========================================================= */
+
+.info-header {
+    padding-bottom: 20px;
+
+    border-bottom: 1px solid #ddd;
+}
+
+.info-header h2 {
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.info-number {
+    color: #3f3f3f;
+
+    font-size: 14px;
+}
+
+
+/* -----------------------------
+ *  BILD
+ *  ----------------------------- */
+
+.info-image-wrapper {
+    width: 100%;
+
+    margin-top: 20px;
+    margin-bottom: 5px;
+
+    border-radius: 8px;
+
+    overflow: hidden;
+
+    background: #ddd;
+}
+
+.info-image {
+    display: block;
+
+    width: 100%;
+    height: 190px;
+
+    object-fit: cover;
+}
+
+
+/* -----------------------------
+ *  INFORMATION
+ *  ----------------------------- */
+
+.info-section {
+    padding: 20px 0;
+
+    border-bottom: 1px solid #ddd;
+}
+
+.info-row {
+    margin-bottom: 15px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-label {
+    display: block;
+
+    margin-bottom: 5px;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    color: #000000;
+
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+
+    color: #181818;
+
+    line-height: 1.4;
+}
+
+
+/* -----------------------------
+ *  KNAPPAR
+ *  ----------------------------- */
+
+.info-actions {
+    padding-top: 20px;
+}
+
+.info-button {
+    display: block;
+
+    padding: 12px 15px;
+    margin-bottom: 10px;
+
+    background: #222;
+    color: white;
+
+    text-decoration: none;
+    text-align: center;
+
+    border-radius: 4px;
+}
+
+.info-button:hover {
+    background: #444;
+}
+
+.info-placeholder {
+    color: #777;
+}
+
+
+/* =========================================================
+ *  8. VALT VÄRN PÅ KARTAN
+ *  ========================================================= */
+
+.selected-marker {
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    width: 52px;
+    height: 52px;
+
+    padding: 4px;
+
+    border: 3px solid #ffd400;
+
+    border-radius: 7px;
+
+    background:
+    rgba(
+        255,
+         255,
+         255,
+         0.2
+    );
+
+    box-shadow:
+    0 0 8px
+    rgba(
+        255,
+         212,
+         0,
+         0.9
+    );
+}
+
+.selected-marker img {
+    display: block;
+
+    width: 40px;
+    height: 40px;
+
+    object-fit: contain;
+}
+
+
+/* Standard blå Leafletmarkör */
+
+.selected-default-marker {
+    width: 44px;
+    height: 54px;
+}
+
+.selected-default-marker img {
+    width: 25px;
+    height: 41px;
+}
+
+
+/* =========================================================
+ *  9. SÖK VÄRN
+ *  ========================================================= */
+
+.map-search {
+    position: relative;
+
+    padding:
+    0
+    14px
+    14px
+    14px;
+
+    z-index: 1500;
+}
+
+.map-search-input-wrapper {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+.map-search-icon {
+    position: absolute;
+
+    left: 12px;
+
+    font-size: 14px;
+
+    pointer-events: none;
+}
+
+.map-search-input {
+    width: 100%;
+    height: 42px;
+
+    padding:
+    0
+    38px
+    0
+    38px;
+
+    border: 1px solid #ccc;
+    border-radius: 8px;
+
+    background: white;
+
+    font-size: 14px;
+    font-family: inherit;
+
+    outline: none;
+}
+
+.map-search-input:focus {
+    border-color: #666;
+
+    box-shadow:
+    0 0 0 2px
+    rgba(0, 0, 0, 0.08);
+}
+
+
+/* -----------------------------
+ *  RENSA SÖKNING
+ *  ----------------------------- */
+
+.map-search-clear {
+    position: absolute;
+
+    right: 7px;
+
+    width: 28px;
+    height: 28px;
+
+    border: none;
+    border-radius: 50%;
+
+    background: transparent;
+
+    font-size: 22px;
+    line-height: 1;
+
+    cursor: pointer;
+
+    color: #777;
+
+    display: none;
+}
+
+.map-search-clear:hover {
+    background: #eee;
+    color: #222;
+}
+
+.map-search.has-text .map-search-clear {
+    display: block;
+}
+
+
+/* -----------------------------
+ *  SÖKRESULTAT
+ *  ----------------------------- */
+
+.varn-search-results {
+    display: none;
+
+    position: absolute;
+
+    top: 50px;
+    left: 14px;
+    right: 14px;
+
+    max-height: 480px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+
+    background: white;
+
+    border: 1px solid #ccc;
+    border-radius: 10px;
+
+    box-shadow:
+    0 8px 25px
+    rgba(0, 0, 0, 0.22);
+
+    z-index: 2000;
+}
+
+.varn-search-results.open {
+    display: block;
+}
+
+.search-result-heading {
+    padding:
+    10px
+    12px
+    7px
+    12px;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+
+    color: #777;
+
+    background: #f5f5f5;
+}
+
+.search-result-item {
+    display: block;
+
+    width: 100%;
+
+    padding:
+    10px
+    12px;
+
+    border: none;
+    border-bottom: 1px solid #eee;
+
+    background: white;
+
+    text-align: left;
+
+    cursor: pointer;
+
+    font-family: inherit;
+}
+
+.search-result-item:last-child {
+    border-bottom: none;
+}
+
+.search-result-item:hover {
+    background: #f1f1f1;
+}
+
+.search-result-title {
+    display: block;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    color: #222;
+}
+
+.search-result-meta {
+    display: block;
+
+    margin-top: 3px;
+
+    font-size: 12px;
+
+    color: #777;
+}
+
+.search-result-type .search-result-title {
+    font-weight: 700;
+}
+
+.search-no-results {
+    padding: 18px 12px;
+
+    text-align: center;
+
+    color: #777;
+
+    font-size: 13px;
+}
+
+
+/* =========================================================
+ *  10. VÄRNETS DETALJSIDA
+ *  /varn/683 osv.
+ *  ========================================================= */
+
+body.varn-detail-page {
+    width: 100%;
+
+    min-height: 100%;
+
+    overflow-x: hidden;
+
+    overscroll-behavior-x: none;
+    overscroll-behavior-y: none;
+
+    -webkit-overflow-scrolling: touch;
+}
+
+
+/* Själva innehållsytan */
+
+.varn-page {
+    width: min(1100px, calc(100% - 40px));
+
+    margin: 0 auto;
+
+    padding:
+    30px
+    0
+    70px
+    0;
+}
+
+.varn-page h1 {
+    margin-top: 20px;
+
+    line-height: 1.2;
+}
+
+.varn-page h2 {
+    margin-top: 32px;
+    margin-bottom: 12px;
+}
+
+.varn-page p {
+    line-height: 1.6;
+}
+
+.back-link {
+    display: inline-block;
+
+    color: #333;
+
+    text-decoration: none;
+
+    font-weight: 600;
+}
+
+.back-link:hover {
+    text-decoration: underline;
+}
+
+
+/* -----------------------------
+ *  3D-MODELL
+ *  ----------------------------- */
+
+.model-section {
+    margin-top: 30px;
+}
+
+.sketchfab-wrapper {
+    width: 100%;
+
+    aspect-ratio: 16 / 9;
+
+    border-radius: 10px;
+
+    overflow: hidden;
+
+    background: #111;
+}
+
+.sketchfab-wrapper iframe {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+
+    border: none;
+}
+
+
+/* =========================================================
+ *  11. MOBILKNAPPAR
+ *  DOLDA SOM STANDARD
+ *  ========================================================= */
+
+.mobile-menu-button,
+.mobile-filter-button,
+.mobile-menu,
+.close-filter {
+    display: none;
+}
+
+
+/* =========================================================
+ *  12. SURFPLATTA
+ *  ========================================================= */
+
+@media (min-width: 769px) and (max-width: 1100px) {
+
+    header {
+        height: 60px;
+
+        padding: 0 18px;
+    }
+
+    header h1 {
+        font-size: 20px;
+    }
+
+    body.map-page main {
+        height: calc(100dvh - 60px);
+    }
+
+    .sidebar {
+        width: 220px;
+
+        padding: 20px 15px;
+
+        font-size: 13px;
+    }
+
+    .map-container {
+        flex: 1;
+
+        min-width: 0;
+    }
+
+    .info-panel {
+        width: 300px;
+    }
+
+    #info-content {
+    padding: 25px 20px;
+    }
+
+    .info-value {
+        font-size: 14px;
+    }
+
+    .info-button {
+        padding: 10px 12px;
+    }
+
+    .info-image {
+        height: 165px;
+    }
+
+}
+
+
+/* =========================================================
+ *  13. MOBIL
+ *  ========================================================= */
+
+@media (max-width: 768px) {
+
+
+    /* =====================================================
+     *      MOBIL - HEADER
+     *      ===================================================== */
+
+    header {
+        height: 56px;
+
+        padding: 0 15px;
+    }
+
+    header h1 {
+        font-size: 18px;
+    }
+
+    nav {
+        display: none;
+    }
+
+
+    /* =====================================================
+     *      MOBIL KARTSIDA
+     *      HELA SIDAN LÅST
+     *      ===================================================== */
+
+    body.map-page {
+        position: fixed;
+
+        inset: 0;
+
+        width: 100%;
+        height: 100%;
+
+        overflow: hidden !important;
+
+        overscroll-behavior: none;
+    }
+
+    body.map-page main {
+        position: relative;
+
+        display: block;
+
+        width: 100%;
+        height: calc(100dvh - 56px);
+
+        overflow: hidden !important;
+    }
+
+
+    /* =====================================================
+     *      HAMBURGARMENY
+     *      ===================================================== */
+
+    .mobile-menu-button {
+        display: block;
+
+        padding: 0;
+
+        background: none;
+
+        border: none;
+
+        color: white;
+
+        font-size: 26px;
+
+        cursor: pointer;
+    }
+
+    .mobile-menu {
+        display: none;
+
+        position: absolute;
+
+        top: 56px;
+        right: 10px;
+
+        width: 190px;
+
+        background: #222;
+
+        border-radius:
+        0
+        0
+        6px
+        6px;
+
+        overflow: hidden;
+
+        z-index: 4000;
+    }
+
+    .mobile-menu.open {
+        display: block;
+    }
+
+    .mobile-menu a {
+        display: block;
+
+        padding: 15px 20px;
+
+        color: white;
+
+        text-decoration: none;
+
+        border-bottom: 1px solid #444;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - KARTA
+     *      ===================================================== */
+
+    .map-container {
+        position: relative;
+
+        width: 100%;
+        height: 100%;
+
+        overflow: hidden;
+
+        overscroll-behavior: none;
+    }
+
+    #map {
+    width: 100%;
+    height: 100%;
+
+    min-height: 0;
+
+    overflow: hidden;
+
+    overscroll-behavior: none;
+    }
+
+    /*
+     *  Leaflet ska själv hantera touch på kartan.
+     *  Webbläsaren ska inte pinch-zooma själva sidan.
+     */
+    #map,
+    .leaflet-container {
+        touch-action: none;
+    }
+
+    /*
+     *  Informationspanelen får scrollas upp/ned,
+     *  men inte pinch-zooma webbsidan.
+     */
+    .info-panel,
+    #info-content {
+    touch-action: pan-y;
+    }
+
+    /*
+     *  Om Leaflet-popup används någonstans.
+     */
+    .leaflet-popup,
+    .leaflet-popup-content,
+    .leaflet-popup-content-wrapper {
+        touch-action: pan-y;
+    }
+
+    /* =====================================================
+     *      MOBIL - FILTERKNAPP
+     *      ===================================================== */
+
+    .mobile-filter-button {
+        display: block;
+
+        position: absolute;
+
+        left: 15px;
+        bottom: 40px;
+
+        padding: 10px 15px;
+
+        background: #c9c5bc;
+
+        border: none;
+        border-radius: 5px;
+
+        box-shadow:
+        0 1px 5px
+        rgba(0, 0, 0, 0.4);
+
+        font-weight: bold;
+
+        cursor: pointer;
+
+        z-index: 900;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - FILTERPANEL
+     *
+     *      Viktigt:
+     *      Vi använder INTE left:-280px längre.
+     *      Panelen flyttas med transform och är helt
+     *      inaktiv när den är stängd.
+     *      ===================================================== */
+
+    .sidebar {
+        display: block;
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+        bottom: 0;
+
+        width: 280px;
+        max-width: 85vw;
+
+        padding: 25px;
+
+        background: #c9c5bc;
+
+        border-right: none;
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        overscroll-behavior: contain;
+
+        transform: translateX(-100%);
+
+        visibility: hidden;
+        pointer-events: none;
+
+        transition:
+        transform 0.25s ease,
+        visibility 0s linear 0.25s;
+
+        box-shadow:
+        2px 0 8px
+        rgba(0, 0, 0, 0.25);
+
+        z-index: 1500;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+
+        visibility: visible;
+
+        pointer-events: auto;
+
+        transition:
+        transform 0.25s ease,
+        visibility 0s;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - STÄNG FILTER
+     *      ===================================================== */
+
+    .close-filter {
+        display: block;
+
+        position: absolute;
+
+        top: 10px;
+        right: 12px;
+
+        padding: 0;
+
+        background: none;
+
+        border: none;
+
+        font-size: 30px;
+        line-height: 1;
+
+        cursor: pointer;
+
+        z-index: 10;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - INFOPANEL / BOTTOM SHEET
+     *      ===================================================== */
+
+    .info-panel {
+        position: absolute;
+
+        top: auto;
+        left: 0;
+        right: 0;
+        bottom: 0;
+
+        width: 100%;
+        height: 60%;
+
+        background: #c9c5bc;
+
+        border-left: none;
+        border-top: 1px solid #ccc;
+
+        border-radius:
+        18px
+        18px
+        0
+        0;
+
+        transform: translateY(100%);
+
+        transition:
+        transform 0.25s ease,
+        height 0.25s ease;
+
+        overflow: hidden;
+
+        visibility: hidden;
+        pointer-events: none;
+
+        box-shadow:
+        0 -4px 12px
+        rgba(0, 0, 0, 0.18);
+
+        z-index: 1200;
+    }
+
+    .info-panel.open {
+        width: 100%;
+
+        transform: translateY(0);
+
+        visibility: visible;
+
+        pointer-events: auto;
+    }
+
+
+    /*
+     * När panelen dras ska den följa
+     * fingret direkt.
+     */
+
+    .info-panel.dragging {
+        transition: none;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - DRAGHANDTAG
+     *      ===================================================== */
+
+    .info-drag-handle {
+        display: flex;
+
+        position: absolute;
+
+        top: 0;
+        left: 50%;
+
+        transform: translateX(-50%);
+
+        width: 120px;
+        height: 32px;
+
+        align-items: center;
+        justify-content: center;
+
+        cursor: grab;
+
+        touch-action: none;
+
+        z-index: 20;
+    }
+
+    .info-drag-handle:active {
+        cursor: grabbing;
+    }
+
+    .info-drag-bar {
+        width: 48px;
+        height: 5px;
+
+        background: #aaa;
+
+        border-radius: 10px;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - INFOINNEHÅLL
+     *
+     *      Bottom-sheet står still.
+     *      Bara innehållet scrollar.
+     *      ===================================================== */
+
+    #info-content {
+    width: 100%;
+    height: 100%;
+
+    padding:
+    38px
+    20px
+    40px
+    20px;
+
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    overscroll-behavior: contain;
+
+    -webkit-overflow-scrolling: touch;
+    }
+
+    .close-info {
+        top: 8px;
+        right: 15px;
+    }
+
+    .info-image {
+        height: 200px;
+    }
+
+
+    /* =====================================================
+     *      MOBIL - SÖK
+     *      ===================================================== */
+
+    .varn-search-results {
+        max-height: calc(100dvh - 180px);
+    }
+
+
+    /* =====================================================
+     *      MOBIL - VÄRNETS DETALJSIDA
+     *
+     *      Detta gäller /varn/683 osv.
+     *      Den ska INTE bete sig som kartappen.
+     *      ===================================================== */
+
+    body.varn-detail-page {
+        position: static !important;
+
+        width: 100%;
+        height: auto !important;
+        min-height: 100%;
+
+        overflow-x: hidden !important;
+        overflow-y: visible !important;
+
+        overscroll-behavior-x: none;
+        overscroll-behavior-y: none;
+
+        -webkit-overflow-scrolling: touch;
+    }
+
+    body.varn-detail-page .varn-page {
+        width: calc(100% - 30px);
+
+        margin: 0 auto;
+
+        padding:
+        22px
+        0
+        55px
+        0;
+
+        height: auto;
+
+        overflow: visible;
+    }
+
+    body.varn-detail-page .varn-page h2 {
+        font-size: 21px;
+    }
+
+    body.varn-detail-page .sketchfab-wrapper {
+        border-radius: 8px;
+    }
+
+}
+
+/* =========================================================
+ *   VÄRNSIDA 2.0
+ *   ========================================================= */
+
+body.varn-detail-page{
+    background:#111;
+    color:white;
+}
+
+/* Bakgrundsbild */
+
+.varn-background{
+
+    position:fixed;
+    inset:0;
+
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    transform:scale(1.05);
+
+    z-index:-3;
+
+}
+
+/* Mörk overlay som styrs av JS */
+
+.varn-background-overlay{
+
+    position:fixed;
+    inset:0;
+
+    background:black;
+    opacity:0;
+
+    transition:opacity .15s linear;
+
+    z-index:-2;
+
+}
+
+/* Hela innehållet */
+
+.varn-page{
+
+    width:min(1200px, calc(100% - 40px));
+
+    margin:auto;
+
+    padding-bottom:100px;
+
+}
+
+/* ===========================
+ *  HERO
+ *  =========================== */
+
+.hero-content{
+
+    min-height:80vh;
+
+    display:flex;
+    flex-direction:column;
+    justify-content:flex-end;
+
+    padding-bottom:70px;
+
+}
+
+
+.hero-type{
+
+    display:inline-block;
+
+    width:max-content;
+
+    padding:8px 14px;
+
+    border-radius:999px;
+
+    background:rgba(255,255,255,.18);
+
+    backdrop-filter:blur(10px);
+
+    font-size:13px;
+    letter-spacing:.6px;
+    font-weight:bold;
+    text-transform:uppercase;
+
+}
+
+
+/* Värnnummer + koordinater på samma rad */
+
+.hero-title-row{
+
+    width:100%;
+
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+
+    gap:clamp(10px, 3vw, 30px);
+}
+
+.hero-title-row h1{
+    margin:18px 0 0;
+
+    font-size:clamp(36px, 5vw, 64px);
+
+    line-height:1;
+    white-space:nowrap;
+}
+
+.hero-coordinates{
+    display:flex;
+
+    gap:clamp(6px, 1vw, 14px);
+
+    white-space:nowrap;
+
+    font-size:clamp(13px, 1.1vw, 25px);
+    font-weight:400;
+
+    letter-spacing:.3px;
+
+    color:rgba(255,255,255,.85);
+
+}
+/* ===========================
+ *   INFOGRID
+ *   =========================== */
+
+.info-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(4,1fr);
+
+    gap:18px;
+
+    margin-bottom:35px;
+
+}
+
+.info-card{
+
+    padding:22px;
+
+    border-radius:18px;
+
+    background:rgba(20,20,20,.58);
+
+    backdrop-filter:blur(14px);
+
+    border:1px solid rgba(255,255,255,.12);
+
+}
+
+.info-title{
+
+    display:block;
+
+    color:#a8a8a8;
+
+    font-size:12px;
+
+    text-transform:uppercase;
+
+    margin-bottom:8px;
+
+    letter-spacing:.5px;
+
+}
+
+.info-card strong{
+
+    font-size:18px;
+
+}
+
+/* ===========================
+ *   STORA INNEHÅLLSKORT
+ *   =========================== */
+
+.content-card{
+
+    padding:35px;
+
+    margin-bottom:30px;
+
+    border-radius:22px;
+
+    background:rgba(18,18,18,.70);
+
+    backdrop-filter:blur(16px);
+
+    border:1px solid rgba(255,255,255,.08);
+
+    line-height:1.8;
+
+}
+
+.content-card h2{
+
+    margin-top:0;
+
+    font-size:28px;
+
+}
+
+/* Sketchfab */
+
+.content-card .sketchfab-wrapper{
+
+    margin-top:20px;
+
+}
+
+/* Tillbaka-knappen */
+
+.back-link{
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    margin-top:25px;
+
+    color:white;
+
+    text-decoration:none;
+
+    opacity:.9;
+
+}
+
+.back-link:hover{
+
+    opacity:1;
+
+}
+
+/* ===========================
+ *   MOBIL
+ *   =========================== */
+
+@media(max-width:768px){
+
+    .varn-page{
+
+        width:calc(100% - 24px);
+
+    }
+
+    .hero-content{
+
+        min-height:65vh;
+
+        padding-bottom:40px;
+
+    }
+
+    .info-grid{
+        grid-template-columns:repeat(4,1fr);
+        gap:6px;
+    }
+
+    .info-card{
+        padding:12px 6px;
+        text-align:center;
+    }
+
+    .info-title{
+        font-size:9px;
+    }
+
+    .info-card strong{
+        font-size:13px;
+    }

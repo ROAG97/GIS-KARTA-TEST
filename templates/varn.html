@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        {{ varn.properties.Typ }}
+        {{ varn.properties.Nr }}
+    </title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+</head>
+
+
+<body class="varn-detail-page">
+
+<header>
+    <h1>Skånelinjen</h1>
+
+    <nav>
+        <a href="/">Karta</a>
+        <a href="#">Om projektet</a>
+    </nav>
+</header>
+
+<!-- BAKGRUNDSBILD -->
+<div
+    class="varn-background"
+    style="background-image:url('{{ varn.properties.Bild }}');">
+</div>
+
+<!-- Dynamisk mörkning -->
+<div class="varn-background-overlay" id="background-overlay"></div>
+
+<main class="varn-page">
+
+    <a href="/" class="back-link">
+        ← Tillbaka till kartan
+    </a>
+
+    <!-- Titel ovanpå bilden -->
+<section class="hero-content">
+
+    <div class="hero-type">
+        {{ varn.properties.Typ }}
+    </div>
+
+    <div class="hero-title-row">
+
+        <h1>
+            Värn {{ varn.properties.Nr }}
+        </h1>
+
+        <div class="hero-coordinates">
+
+            <span>
+                {{ "%.6f"|format(varn.geometry.coordinates[1]) }}° N
+            </span>
+
+            <span>
+                {{ "%.6f"|format(varn.geometry.coordinates[0]) }}° E
+            </span>
+
+        </div>
+
+    </div>
+
+    </section>
+
+
+    <!-- Kort med grunddata -->
+<section class="info-grid">
+
+    <div class="info-card">
+        <span class="info-title">Variant</span>
+        <strong>{{ varn.properties.Variant or "–" }}</strong>
+    </div>
+
+    <div class="info-card">
+        <span class="info-title">Status</span>
+        <strong>{{ varn.properties.Status or "–" }}</strong>
+    </div>
+
+    <div class="info-card">
+        <span class="info-title">Byggår</span>
+        <strong>{{ detaljinfo.get("byggar") or "–" }}</strong>
+    </div>
+
+    <div class="info-card">
+        <span class="info-title">Tillgänglighet</span>
+        <strong>{{ detaljinfo.get("tillganglighet") or "–" }}</strong>
+    </div>
+
+</section>
+
+
+    <!-- Historik -->
+    <section class="content-card">
+
+        <h2>Historik</h2>
+
+        <p>
+            {{ detaljinfo.get("historik", "Ingen historik har lagts till ännu.") }}
+        </p>
+
+    </section>
+
+
+    <!-- 3D Modell -->
+    {% if detaljinfo.get("modell") %}
+    <section class="content-card">
+
+        <h2>3D-modell</h2>
+
+        <div class="sketchfab-wrapper">
+
+            <iframe
+                src="{{ detaljinfo.get('modell') }}"
+                allow="autoplay; fullscreen; xr-spatial-tracking"
+                allowfullscreen>
+            </iframe>
+
+        </div>
+
+    </section>
+    {% endif %}
+
+</main>
+
+<script src="{{ url_for('static', filename='js/varn.js') }}"></script>
+
+</body>
+
+</html>
