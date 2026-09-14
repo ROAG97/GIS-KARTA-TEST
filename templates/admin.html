@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 
 <html lang="sv">
@@ -43,8 +44,23 @@
             margin: 40px auto 80px;
         }
 
+
+        /* =================================
+           HEADER
+           ================================= */
+
         .admin-header {
             margin-bottom: 30px;
+        }
+
+        .admin-header-top {
+            display: flex;
+
+            align-items: center;
+
+            justify-content: space-between;
+
+            gap: 20px;
         }
 
         .admin-header h1 {
@@ -62,27 +78,60 @@
             color: #aaa;
         }
 
-        .admin-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 20px;
-}
+        .admin-user {
+            display: flex;
 
-.logout-button {
-    padding: 9px 14px;
-    border: 1px solid #555;
-    border-radius: 6px;
-    background: #292929;
-    color: white;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-}
+            align-items: center;
 
-.logout-button:hover {
-    background: #3a3a3a;
-}
+            gap: 14px;
+        }
+
+        .admin-user-info {
+            color: #aaa;
+
+            font-size: 13px;
+
+            white-space: nowrap;
+        }
+
+        .admin-user-info strong {
+            color: white;
+        }
+
+        .logout-form {
+            margin: 0;
+        }
+
+        .logout-button {
+            min-height: 40px;
+
+            padding:
+                9px
+                14px;
+
+            border: 1px solid #555;
+
+            border-radius: 6px;
+
+            background: #292929;
+
+            color: white;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            cursor: pointer;
+        }
+
+        .logout-button:hover {
+            background: #3a3a3a;
+        }
+
+
+        /* =================================
+           SÖK
+           ================================= */
 
         .search-wrapper {
             margin-bottom: 25px;
@@ -91,7 +140,11 @@
         .search-input {
             width: 100%;
 
-            padding: 14px 16px;
+            min-height: 48px;
+
+            padding:
+                14px
+                16px;
 
             border: 1px solid #555;
 
@@ -118,6 +171,11 @@
             font-size: 13px;
         }
 
+
+        /* =================================
+           VÄRNLISTA
+           ================================= */
+
         .varn-list {
             display: grid;
 
@@ -138,7 +196,9 @@
 
             gap: 15px;
 
-            padding: 15px 18px;
+            padding:
+                15px
+                18px;
 
             background: #292929;
 
@@ -159,8 +219,32 @@
             color: #ccc;
         }
 
+        .mobile-label {
+            display: none;
+
+            color: #888;
+
+            font-size: 11px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.4px;
+        }
+
         .edit-button {
-            padding: 9px 14px;
+            display: inline-flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            min-height: 40px;
+
+            padding:
+                9px
+                14px;
 
             background: white;
 
@@ -193,35 +277,212 @@
             border-radius: 8px;
         }
 
+
+        /* =================================
+           SURFPLATTA
+           ================================= */
+
+        @media (
+            min-width: 751px
+        ) and (
+            max-width: 950px
+        ) {
+
+            .admin-page {
+                width: calc(100% - 30px);
+            }
+
+            .varn-item {
+                grid-template-columns:
+                    75px
+                    1fr
+                    1fr
+                    100px
+                    auto;
+
+                gap: 10px;
+
+                padding:
+                    14px
+                    15px;
+            }
+
+            .admin-header h1 {
+                font-size: 34px;
+            }
+
+        }
+
+
+        /* =================================
+           MOBIL
+           ================================= */
+
         @media (max-width: 750px) {
 
             .admin-page {
                 width: calc(100% - 24px);
 
-                margin-top: 25px;
+                margin:
+                    24px
+                    auto
+                    50px;
+            }
+
+
+            /* HEADER */
+
+            .admin-header {
+                margin-bottom: 24px;
+            }
+
+            .admin-header-top {
+                align-items: flex-start;
+
+                gap: 15px;
             }
 
             .admin-header h1 {
                 font-size: 30px;
             }
 
+            .admin-header p {
+                margin-top: 2px;
+
+                font-size: 14px;
+
+                line-height: 1.4;
+            }
+
+            .admin-user {
+                flex-direction: column;
+
+                align-items: flex-end;
+
+                gap: 8px;
+            }
+
+            .admin-user-info {
+                font-size: 11px;
+            }
+
+            .logout-button {
+                min-height: 42px;
+
+                padding:
+                    10px
+                    13px;
+            }
+
+
+            /* SÖK */
+
+            .search-wrapper {
+                margin-bottom: 18px;
+            }
+
+            .search-input {
+                min-height: 50px;
+
+                font-size: 16px;
+            }
+
+
+            /* LISTAN */
+
+            .varn-list {
+                gap: 12px;
+            }
+
             .varn-item {
+                display: grid;
+
                 grid-template-columns:
-                    70px
                     1fr
                     auto;
 
-                gap: 8px 12px;
+                gap:
+                    10px
+                    14px;
+
+                padding: 16px;
+
+                border-radius: 10px;
             }
 
+            .varn-number {
+                grid-column: 1;
+
+                font-size: 22px;
+            }
+
+            .varn-type,
             .varn-variant,
             .varn-status {
-                grid-column: 2;
+                grid-column: 1;
+
+                display: flex;
+
+                flex-direction: column;
+
+                gap: 3px;
+
+                font-size: 14px;
+            }
+
+            .mobile-label {
+                display: block;
             }
 
             .edit-button {
-                grid-column: 3;
-                grid-row: 1 / span 3;
+                grid-column: 2;
+
+                grid-row:
+                    1
+                    / span 4;
+
+                align-self: stretch;
+
+                min-width: 92px;
+
+                min-height: 48px;
+            }
+
+        }
+
+
+        /* =================================
+           MYCKET SMÅ MOBILER
+           ================================= */
+
+        @media (max-width: 430px) {
+
+            .admin-header-top {
+                flex-direction: column;
+            }
+
+            .admin-user {
+                width: 100%;
+
+                flex-direction: row;
+
+                align-items: center;
+
+                justify-content: space-between;
+            }
+
+            .varn-item {
+                grid-template-columns: 1fr;
+            }
+
+            .edit-button {
+                grid-column: 1;
+
+                grid-row: auto;
+
+                width: 100%;
+
+                margin-top: 5px;
             }
 
         }
@@ -230,45 +491,71 @@
 
 </head>
 
+
 <body>
 
 <div class="admin-page">
 
-<header class="admin-header">
 
-    <div class="admin-header-top">
+    <!-- =================================
+         HEADER
+         ================================= -->
 
-        <div>
+    <header class="admin-header">
 
-            <h1>
-                Admin
-            </h1>
+        <div class="admin-header-top">
 
-            <p>
-                Sök efter ett värn och öppna det för redigering.
-            </p>
+            <div>
+
+                <h1>
+                    Admin
+                </h1>
+
+                <p>
+                    Sök efter ett värn och öppna det för redigering.
+                </p>
+
+            </div>
+
+
+            <div class="admin-user">
+
+                <div class="admin-user-info">
+
+                    Inloggad som
+
+                    <strong>
+                        {{ session.get("username") }}
+                    </strong>
+
+                </div>
+
+
+                <form
+                    class="logout-form"
+                    action="{{ url_for('admin_logout') }}"
+                    method="POST"
+                >
+
+                    <button
+                        type="submit"
+                        class="logout-button"
+                    >
+                        Logga ut
+                    </button>
+
+                </form>
+
+            </div>
 
         </div>
 
+    </header>
 
-        <form
-            action="{{ url_for('admin_logout') }}"
-            method="POST"
-        >
 
-            <button
-                type="submit"
-                class="logout-button"
-            >
-                Logga ut
-            </button>
-
-        </form>
-
-    </div>
-
-</header>
-
+    <!-- =================================
+         SÖK
+         ================================= -->
 
     <div class="search-wrapper">
 
@@ -290,6 +577,10 @@
     </div>
 
 
+    <!-- =================================
+         VÄRNLISTA
+         ================================= -->
+
     <div
         id="varn-list"
         class="varn-list"
@@ -308,20 +599,42 @@
         >
 
             <div class="varn-number">
-                {{ item.nr }}
+                Värn {{ item.nr }}
             </div>
+
 
             <div class="varn-type">
+
+                <span class="mobile-label">
+                    Typ
+                </span>
+
                 {{ item.typ or "–" }}
+
             </div>
+
 
             <div class="varn-variant">
+
+                <span class="mobile-label">
+                    Variant
+                </span>
+
                 {{ item.variant or "–" }}
+
             </div>
 
+
             <div class="varn-status">
+
+                <span class="mobile-label">
+                    Status
+                </span>
+
                 {{ item.status or "–" }}
+
             </div>
+
 
             <a
                 class="edit-button"
@@ -449,3 +762,4 @@
 </body>
 
 </html>
+```
