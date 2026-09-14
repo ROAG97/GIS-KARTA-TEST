@@ -73,6 +73,34 @@ def get_db_connection():
     return connection
 
 # =================================
+# ÄNDRINGSLOGG
+# =================================
+
+def create_change_log_table():
+
+    connection = get_db_connection()
+
+    connection.execute(
+        """
+        CREATE TABLE IF NOT EXISTS change_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            varn_nr TEXT NOT NULL,
+            username TEXT NOT NULL,
+            field_name TEXT NOT NULL,
+            old_value TEXT,
+            new_value TEXT,
+            changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+        """
+    )
+
+    connection.commit()
+    connection.close()
+
+
+create_change_log_table()
+
+# =================================
 # LOGIN
 # =================================
 
@@ -419,6 +447,43 @@ def admin():
         "admin.html",
         varn_lista=varn_lista
     )
+# =================================
+# ÄNDRINGSLOGG
+# =================================
+
+@app.route("/admin/logg")
+@login_required
+def admin_logg():
+
+    connection = get_db_connection()
+
+    changes = connection.execute(
+        """
+        SELECT
+            id,
+            varn_nr,
+            username,
+            field_name,
+            old_value,
+            new_value,
+            changed_at
+        FROM change_log
+        ORDER BY changed_at DESC, id DESC
+        LIMIT 500
+        """
+    ).fetchall()
+
+    connection.close()
+
+    changes = [
+        dict(change)
+        for change in changes
+    ]
+
+    return render_template(
+        "admin_logg.html",
+        changes=changes
+    )
 
 # =================================
 # REDIGERA VÄRN
@@ -472,7 +537,19 @@ def edit_varn(nr):
 
     if request.method == "POST":
 
+        old_data = connection.execute(
+            """
+            SELECT *
+            FROM varn
+            WHERE nr = ?
+            """,
+            (str(nr),)
+        ).fetchone()
 
+        if old_data is not None:
+            old_data = dict(old_data)
+        else:
+            old_data = {}
 
         byggar = request.form.get(
             "byggar",
@@ -526,7 +603,64 @@ def edit_varn(nr):
             if match:
                 modell = match.group(1)
 
+        # -----------------------------
+        # REGISTRERA ÄNDRINGAR
+        # -----------------------------
 
+        new_data = {
+            "byggar": byggar,
+            "historik": historik,
+            "parkering": parkering,
+            "tillganglighet": tillganglighet,
+            "plomberad": plomberad,
+            "modell": modell
+        }
+
+        field_labels = {
+            "byggar": "Byggår",
+            "historik": "Historik",
+            "parkering": "Parkering",
+            "tillganglighet": "Tillgänglighet",
+            "plomberad": "Plomberad",
+            "modell": "3D-modell"
+        }
+
+        for field_name, new_value in new_data.items():
+
+            old_value = old_data.get(
+                field_name,
+                ""
+            ) or ""
+
+            new_value = new_value or ""
+
+            if old_value != new_value:
+
+                connection.execute(
+                    """
+                    INSERT INTO change_log (
+                        varn_nr,
+                        username,
+                        field_name,
+                        old_value,
+                        new_value
+                    )
+                    VALUES (?, ?, ?, ?, ?)
+                    """,
+                    (
+                        str(nr),
+                        session.get(
+                            "username",
+                            "okänd"
+                        ),
+                        field_labels.get(
+                            field_name,
+                            field_name
+                        ),
+                        old_value,
+                        new_value
+                    )
+                )
         # -----------------------------
         # SPARA I SQLITE
         # -----------------------------
