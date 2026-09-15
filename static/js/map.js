@@ -65,9 +65,115 @@ let rivnaVisible = false;
 let provisoriskaVisible = false;
 let okandaVisible = false;
 
+/* =================================
+ *  NAMN PÅ VÄRNTYPER
+ *
+ *  QGIS-värde → namn som visas
+ *
+ *  LÄGG TILL NYA TYPER HÄR
+ *  ================================= */
+
+const varnTypeNames = {
+    "SV": "Stadsvärn",
+    "SSP": "Sammanställningsplats",
+    "SPKU": "Splitterkur",
+    "SP": "Strålkastarplattform",
+    "SK": "Skyddsrum",
+    "S-PLATS": "Sammanställningsplats",
+    "PV": "Pansarvärn",
+    "PROV": "Provisoriskt",
+    "PJV": "Pjäsvärn",
+    "Okänd": "Okänd",
+    "OBS": "Observationsvärn",
+    "MS": "Mätstation",
+    "LV": "Luftvärn",
+    "LC": "Ledningscentral",
+    "KV": "Kanonvärn",
+
+    "KSP": "Kulsprutevärn",
+    "KSP I": "Kulsprutevärn I",
+    "KSP II": "Kulsprutevärn II",
+    "KSP III": "Kulsprutevärn III",
+    "KSP IV": "Kulsprutevärn IV",
+    "KSP V": "Kulsprutevärn V",
+    "KSP VII": "Kulsprutevärn VII",
+
+    "Kg-hatt": "Kulsprutegevär-hatt",
+    "KG III": "Kulsprutegevär III",
+    "KG I": "Kulsprutegevär I",
+    "KG": "Kulsprutegevär",
+
+    "KA": "Kustartilleri",
+    "FV": "Fastighetsvärn",
+    "ES": "Eldställning"
+};
+
 
 /* =================================
- *  NORMALISERA IKONNAMN
+ *  HÄMTA VISNINGSNAMN
+ *  ================================= */
+
+function getVarnTypeName(type) {
+
+    if (!type) {
+        return "Okänd";
+    }
+
+    return varnTypeNames[type] || type;
+}
+
+/* =================================
+ *  IKONER FÖR VÄRNTYPER
+ *
+ *  QGIS-värde → SVG-filens namn
+ *
+ *  LÄGG TILL / ÄNDRA IKONER HÄR
+ *  ================================= */
+
+const varnTypeIcons = {
+
+    "KSP": "QGIS",
+    "KSP I": "KSPI",
+    "KSP II": "KSPII",
+    "KSP III": "KSPIII",
+    "KSP IV": "KSPIV",
+    "KSP V": "KSPV",
+    "KSP VII": "QGIS",
+
+    "KG": "KG",
+    "KG I": "KG",
+    "KG III": "KG",
+    "Kg-hatt": "QGIS",
+
+    "PV": "PV",
+    "KV": "QGIS",
+    "PJV": "QGIS",
+
+    "OBS": "Observationsvärn",
+    "SK": "Skyddsrum",
+
+    "LV": "QGIS",
+    "KA": "QGIS",
+    "MS": "QGIS",
+    "LC": "QGIS",
+
+    "SV": "QGIS",
+    "FV": "QGIS",
+
+    "SSP": "QGIS",
+    "S-PLATS": "QGIS",
+
+    "SPKU": "QGIS",
+    "SP": "QGIS",
+    "ES": "QGIS",
+
+    "PROV": "QGIS",
+    "Okänd": "QGIS"
+};
+
+
+/* =================================
+ *  HÄMTA IKONNAMN
  *  ================================= */
 
 function normalizeIconName(type) {
@@ -76,18 +182,8 @@ function normalizeIconName(type) {
         return "";
     }
 
-    let name = type
-    .trim()
-    .replace(/\s+/g, "");
-
-    if (name === "KSP") {
-        name = "QGIS";
-    }
-
-    return name;
+    return varnTypeIcons[type] || "";
 }
-
-
 /* =================================
  *  SKAPA IKON
  *  ================================= */
@@ -687,7 +783,7 @@ function createVarnTypeFilters(
                 );
 
                 text.textContent =
-                type;
+                getVarnTypeName(type);
 
                 label.appendChild(
                     text
