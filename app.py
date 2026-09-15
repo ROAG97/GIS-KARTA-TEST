@@ -73,6 +73,59 @@ def get_db_connection():
     return connection
 
 # =================================
+# VISNINGSNAMN FÖR VÄRNTYPER
+#
+# QGIS-värde -> namn på webbsidan
+#
+# LÄGG TILL NYA TYPER HÄR
+# =================================
+
+VARN_TYPE_NAMES = {
+    "SV": "Stadsvärn",
+    "SSP": "Sammanställningsplats",
+    "SPKU": "Splitterkur",
+    "SP": "Strålkastarplattform",
+    "SK": "Skyddsrum",
+    "S-PLATS": "Sammanställningsplats",
+    "PV": "Pansarvärn",
+    "PROV": "Provisoriskt",
+    "PJV": "Pjäsvärn",
+    "Okänd": "Okänd",
+    "OBS": "Observationsvärn",
+    "MS": "Mätstation",
+    "LV": "Luftvärn",
+    "LC": "Ledningscentral",
+    "KV": "Kanonvärn",
+
+    "KSP": "Kulsprutevärn",
+    "KSP I": "Kulsprutevärn I",
+    "KSP II": "Kulsprutevärn II",
+    "KSP III": "Kulsprutevärn III",
+    "KSP IV": "Kulsprutevärn IV",
+    "KSP V": "Kulsprutevärn V",
+    "KSP VII": "Kulsprutevärn VII",
+
+    "Kg-hatt": "Kulsprutegevär-hatt",
+    "KG": "Kulsprutegevär",
+    "KG I": "Kulsprutegevär I",
+    "KG III": "Kulsprutegevär III",
+
+    "KA": "Kustartilleri",
+    "FV": "Fastighetsvärn",
+    "ES": "Eldställning"
+}
+
+
+def get_varn_type_name(type_name):
+
+    if not type_name:
+        return "Okänd"
+
+    return VARN_TYPE_NAMES.get(
+        type_name,
+        type_name
+    )
+# =================================
 # ÄNDRINGSLOGG
 # =================================
 
@@ -372,10 +425,13 @@ def varn(nr):
     # =========================
 
     return render_template(
-        "varn.html",
-        varn=valt_varn,
-        detaljinfo=detaljinfo
+      "varn.html",
+      varn=valt_varn,
+      detaljinfo=detaljinfo,
+      variant_namn=get_varn_type_name(
+          valt_varn["properties"].get("Variant")
     )
+)
 
 # =================================
 # ADMIN STARTSIDA
