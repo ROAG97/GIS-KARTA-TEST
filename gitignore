@@ -1,3 +1,13 @@
+# Hemligheter / miljövariabler
 .secret_key
+.env
+.env.local
+.env.*
+
+# Neon lokal konfiguration
+.neon/
+
+# Python
 __pycache__/
 *.pyc
+venv/
