@@ -120,6 +120,9 @@ main {
 
     margin-bottom: 35px;
 }
+.visitor-summary {
+    grid-template-columns: repeat(4, 1fr);
+}
 
 .summary-card {
     padding: 25px;
@@ -567,6 +570,96 @@ main {
     color: #888;
 }
 /* =========================
+   BESÖKARSTATISTIK
+   ========================= */
+
+.visitor-chart-container {
+    position: relative;
+
+    width: 100%;
+    height: 320px;
+}
+.subsection-title {
+    margin:
+        25px
+        0
+        15px;
+
+    font-size: 17px;
+
+    color: #ccc;
+}
+
+
+.ranking-list {
+    display: grid;
+
+    gap: 8px;
+}
+
+
+.ranking-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 20px;
+
+    padding: 14px 18px;
+
+    background: #1c1c1c;
+
+    border: 1px solid #333;
+    border-radius: 8px;
+
+    color: #ddd;
+
+    text-decoration: none;
+
+    transition:
+        background .15s ease,
+        border-color .15s ease;
+}
+
+
+.ranking-row:hover {
+    background: #252525;
+    border-color: #555;
+}
+
+
+.ranking-row strong {
+    color: white;
+
+    white-space: nowrap;
+}
+
+
+.view-row {
+    color: #ccc;
+
+    text-decoration: none;
+}
+
+
+.view-row:hover {
+    color: white;
+}
+
+
+.empty-stat {
+    padding: 25px;
+
+    background: #1c1c1c;
+
+    border: 1px solid #333;
+    border-radius: 10px;
+
+    color: #888;
+
+    text-align: center;
+}
+/* =========================
    MOBIL
    ========================= */
 
@@ -623,6 +716,9 @@ main {
 
     gap: 5px;
 }
+.visitor-summary {
+    grid-template-columns: 1fr;
+}
 
 }
     </style>
@@ -661,7 +757,7 @@ main {
 
     <!-- TOTALER -->
 
-    <section class="summary-grid">
+<section class="summary-grid visitor-summary">
 
         <div class="summary-card">
 
@@ -969,7 +1065,311 @@ main {
     {% endfor %}
 
 </section>
+<!-- =================================
+     PUBLIK BESÖKARSTATISTIK
+     ================================= -->
+
+<h2 class="section-title">
+    🌍 Besökarstatistik
+</h2>
+
+<section class="summary-grid">
+
+    <div class="summary-card">
+        <span class="summary-label">
+            Idag
+        </span>
+
+        <span class="summary-value">
+            {{ visitor_stats.idag }}
+        </span>
+    </div>
+
+
+    <div class="summary-card">
+        <span class="summary-label">
+            7 dagar
+        </span>
+
+        <span class="summary-value">
+            {{ visitor_stats.sju_dagar }}
+        </span>
+    </div>
+
+
+    <div class="summary-card">
+        <span class="summary-label">
+            30 dagar
+        </span>
+
+        <span class="summary-value">
+            {{ visitor_stats.trettio_dagar }}
+        </span>
+    </div>
+
+
+    <div class="summary-card">
+        <span class="summary-label">
+            Totalt
+        </span>
+
+        <span class="summary-value">
+            {{ visitor_stats.totalt }}
+        </span>
+    </div>
+
+</section>
+
+
+<h3 class="subsection-title">
+    Besök senaste 30 dagarna
+</h3>
+
+<section class="database-card">
+
+    <div class="visitor-chart-container">
+
+        <canvas id="visitorChart"></canvas>
+
+    </div>
+
+</section>
+
+
+<h3 class="subsection-title">
+    Mest visade värn
+</h3>
+
+<section class="ranking-list">
+
+    {% for varn in most_viewed_public %}
+
+        <a
+            href="{{ url_for('varn', nr=varn.varn_nr) }}"
+            class="ranking-row"
+        >
+
+            <span>
+                Värn {{ varn.varn_nr }}
+            </span>
+
+            <strong>
+                {{ varn.antal }} visningar
+            </strong>
+
+        </a>
+
+    {% else %}
+
+        <div class="empty-stat">
+            Inga publika värnvisningar ännu.
+        </div>
+
+    {% endfor %}
+
+</section>
+<!-- =================================
+     SKAPARNAS VISNINGAR
+     ================================= -->
+
+<h2 class="section-title">
+    👷 Våra visningar
+</h2>
+
+<section class="creator-grid">
+
+    {% for creator in admin_view_totals %}
+
+        <article class="creator-card">
+
+            <h3>
+                {{ creator.username }}
+            </h3>
+
+
+            <div class="creator-main-stats">
+
+                <div class="creator-stat">
+
+                    <span>
+                        Visningar
+                    </span>
+
+                    <strong>
+                        {{ creator.totalt }}
+                    </strong>
+
+                </div>
+
+
+                <div class="creator-stat">
+
+                    <span>
+                        Olika värn
+                    </span>
+
+                    <strong>
+                        {{ creator.antal_varn }}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="field-list">
+
+                {% for varn in admin_most_viewed %}
+
+                    {% if varn.username == creator.username %}
+
+                        <a
+                            href="{{ url_for(
+                                'varn',
+                                nr=varn.varn_nr
+                            ) }}"
+                            class="field-row view-row"
+                        >
+
+                            <span>
+                                Värn {{ varn.varn_nr }}
+                            </span>
+
+                            <strong>
+                                {{ varn.antal }}
+                            </strong>
+
+                        </a>
+
+                    {% endif %}
+
+                {% endfor %}
+
+            </div>
+
+
+            {% if creator.senaste_visning %}
+
+                <div class="last-activity">
+
+                    Senaste visning:
+                    {{ creator.senaste_visning }}
+
+                </div>
+
+            {% endif %}
+
+        </article>
+
+    {% else %}
+
+        <div class="empty-stat">
+            Inga adminvisningar registrerade ännu.
+        </div>
+
+    {% endfor %}
+
+</section>
+
 </main>
+
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    const dailyVisitors = {{ daily_visitors | tojson }};
+
+    const visitorLabels = dailyVisitors.map(
+        item => item.datum
+    );
+
+    const visitorValues = dailyVisitors.map(
+        item => item.antal
+    );
+
+
+    const visitorCanvas = document.getElementById(
+        "visitorChart"
+    );
+
+
+    if (visitorCanvas) {
+
+        new Chart(
+            visitorCanvas,
+            {
+                type: "line",
+
+                data: {
+                    labels: visitorLabels,
+
+                    datasets: [
+                        {
+                            label: "Besök",
+
+                            data: visitorValues,
+
+                            borderColor: "#ffffff",
+
+                            backgroundColor:
+                                "rgba(255, 255, 255, 0.08)",
+
+                            borderWidth: 2,
+
+                            pointRadius: 4,
+
+                            pointHoverRadius: 6,
+
+                            tension: 0.25,
+
+                            fill: true
+                        }
+                    ]
+                },
+
+                options: {
+                    responsive: true,
+
+                    maintainAspectRatio: false,
+
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: "#999"
+                            },
+
+                            grid: {
+                                color: "#2d2d2d"
+                            }
+                        },
+
+                        y: {
+                            beginAtZero: true,
+
+                            ticks: {
+                                color: "#999",
+
+                                precision: 0
+                            },
+
+                            grid: {
+                                color: "#2d2d2d"
+                            }
+                        }
+                    }
+                }
+            }
+        );
+
+    }
+</script>
+
 
 </body>
 
