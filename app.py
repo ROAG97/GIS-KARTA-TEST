@@ -481,6 +481,83 @@ def admin():
         varn_lista=varn_lista
     )
 # =================================
+# STATISTIK
+# =================================
+
+@app.route("/admin/statistik")
+@login_required
+def admin_statistik():
+
+    connection = get_db_connection()
+
+    # ---------------------------------
+    # Statistik per skapare
+    # ---------------------------------
+
+    creators = connection.execute(
+        """
+        SELECT
+            username,
+            COUNT(*) AS antal_andringar,
+            COUNT(DISTINCT varn_nr) AS antal_varn,
+            MAX(changed_at) AS senaste_aktivitet
+        FROM change_log
+        GROUP BY username
+        ORDER BY antal_andringar DESC
+        """
+    ).fetchall()
+
+    # ---------------------------------
+    # Statistik per fält / skapare
+    # ---------------------------------
+
+    field_stats = connection.execute(
+        """
+        SELECT
+            username,
+            field_name,
+            COUNT(*) AS antal
+        FROM change_log
+        GROUP BY username, field_name
+        ORDER BY username, antal DESC
+        """
+    ).fetchall()
+
+    # ---------------------------------
+    # Totalsiffror
+    # ---------------------------------
+
+    totals = connection.execute(
+        """
+        SELECT
+            COUNT(*) AS antal_andringar,
+            COUNT(DISTINCT varn_nr) AS antal_varn,
+            COUNT(DISTINCT username) AS antal_skapare
+        FROM change_log
+        """
+    ).fetchone()
+
+    connection.close()
+
+    creators = [
+        dict(row)
+        for row in creators
+    ]
+
+    field_stats = [
+        dict(row)
+        for row in field_stats
+    ]
+
+    totals = dict(totals)
+
+    return render_template(
+        "admin_statistik.html",
+        creators=creators,
+        field_stats=field_stats,
+        totals=totals
+    )
+# =================================
 # ÄNDRINGSLOGG
 # =================================
 
