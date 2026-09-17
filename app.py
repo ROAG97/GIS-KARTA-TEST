@@ -490,9 +490,9 @@ def admin_statistik():
 
     connection = get_db_connection()
 
-    # ---------------------------------
-    # Statistik per skapare
-    # ---------------------------------
+    # =================================
+    # SKAPARSTATISTIK
+    # =================================
 
     creators = connection.execute(
         """
@@ -507,9 +507,6 @@ def admin_statistik():
         """
     ).fetchall()
 
-    # ---------------------------------
-    # Statistik per fält / skapare
-    # ---------------------------------
 
     field_stats = connection.execute(
         """
@@ -523,9 +520,6 @@ def admin_statistik():
         """
     ).fetchall()
 
-    # ---------------------------------
-    # Totalsiffror
-    # ---------------------------------
 
     totals = connection.execute(
         """
@@ -537,7 +531,139 @@ def admin_statistik():
         """
     ).fetchone()
 
+
+    # =================================
+    # DATABASSTATUS
+    # =================================
+
+    database_stats = connection.execute(
+        """
+        SELECT
+            COUNT(*) AS totalt,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(historik), '') IS NOT NULL
+            ) AS historik,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(byggar), '') IS NOT NULL
+            ) AS byggar,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(parkering), '') IS NOT NULL
+            ) AS parkering,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(tillganglighet), '') IS NOT NULL
+            ) AS tillganglighet,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(plomberad), '') IS NOT NULL
+            ) AS plomberad,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(modell), '') IS NOT NULL
+            ) AS modell,
+
+            COUNT(*) FILTER (
+                WHERE
+                    NULLIF(TRIM(historik), '') IS NULL
+                    AND NULLIF(TRIM(byggar), '') IS NULL
+                    AND NULLIF(TRIM(parkering), '') IS NULL
+                    AND NULLIF(TRIM(tillganglighet), '') IS NULL
+                    AND NULLIF(TRIM(plomberad), '') IS NULL
+                    AND NULLIF(TRIM(modell), '') IS NULL
+            ) AS ororda,
+
+            COUNT(*) FILTER (
+                WHERE
+                    NULLIF(TRIM(historik), '') IS NOT NULL
+                    OR NULLIF(TRIM(byggar), '') IS NOT NULL
+                    OR NULLIF(TRIM(parkering), '') IS NOT NULL
+                    OR NULLIF(TRIM(tillganglighet), '') IS NOT NULL
+                    OR NULLIF(TRIM(plomberad), '') IS NOT NULL
+                    OR NULLIF(TRIM(modell), '') IS NOT NULL
+            ) AS paborjade
+
+        FROM varn
+        """
+    ).fetchone()
+
+
+    # =================================
+    # MEST ARBETADE VÄRN
+    # =================================
+
+    most_edited = connection.execute(
+        """
+        SELECT
+            varn_nr,
+            COUNT(*) AS antal
+        FROM change_log
+        GROUP BY varn_nr
+        ORDER BY antal DESC, varn_nr
+        LIMIT 10
+        """
+    ).fetchall()
+
+
     connection.close()
+
+
+    # =================================
+    # GEOJSON-STATISTIK
+    # =================================
+
+    with open(
+        "data/BunkerLayer.geojson",
+        "r",
+        encoding="utf-8"
+    ) as file:
+
+        geojson_data = json.load(file)
+
+
+    type_counts = {}
+    status_counts = {}
+
+
+    for feature in geojson_data.get("features", []):
+
+        properties = feature.get(
+            "properties",
+            {}
+        )
+
+        typ = properties.get("Typ") or "Okänd"
+        status = properties.get("Status") or "Okänd"
+
+        typ = get_varn_type_name(typ)
+
+        type_counts[typ] = (
+            type_counts.get(typ, 0) + 1
+        )
+
+        status_counts[status] = (
+            status_counts.get(status, 0) + 1
+        )
+
+
+    type_stats = sorted(
+        type_counts.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+    status_stats = sorted(
+        status_counts.items(),
+        key=lambda item: item[1],
+        reverse=True
+    )
+
+
+    # =================================
+    # GÖR DB-RADER TILL DICTS
+    # =================================
 
     creators = [
         dict(row)
@@ -551,11 +677,125 @@ def admin_statistik():
 
     totals = dict(totals)
 
+    database_stats = dict(database_stats)
+
+    most_edited = [
+        dict(row)
+        for row in most_edited
+    ]
+
+
     return render_template(
         "admin_statistik.html",
         creators=creators,
         field_stats=field_stats,
-        totals=totals
+        totals=totals,
+        database_stats=database_stats,
+        most_edited=most_edited,
+        type_stats=type_stats,
+        status_stats=status_stats
+    )
+# =================================
+# SAKNAD INFORMATION
+# =================================
+
+@app.route("/admin/statistik/saknas/<field_name>")
+@login_required
+def admin_statistik_saknas(field_name):
+
+    allowed_fields = {
+        "historik": "Historik",
+        "byggar": "Byggår",
+        "parkering": "Parkering",
+        "tillganglighet": "Tillgänglighet",
+        "plomberad": "Plombering",
+        "modell": "3D-modell"
+    }
+
+    if field_name not in allowed_fields:
+        abort(404)
+
+    connection = get_db_connection()
+
+    missing_rows = connection.execute(
+        f"""
+        SELECT nr
+        FROM varn
+        WHERE NULLIF(TRIM({field_name}), '') IS NULL
+        ORDER BY nr
+        """
+    ).fetchall()
+
+    connection.close()
+
+    missing_numbers = {
+        str(row["nr"])
+        for row in missing_rows
+    }
+
+
+    # =================================
+    # KOMPLETTERA MED GEOJSON
+    # =================================
+
+    with open(
+        "data/BunkerLayer.geojson",
+        "r",
+        encoding="utf-8"
+    ) as file:
+        geojson_data = json.load(file)
+
+
+    missing_varn = []
+
+    for feature in geojson_data.get("features", []):
+
+        properties = feature.get(
+            "properties",
+            {}
+        )
+
+        nr = properties.get("Nr")
+
+        if nr is None:
+            continue
+
+        nr = str(nr).strip()
+
+        if nr not in missing_numbers:
+            continue
+
+        typ = properties.get("Typ") or "Okänd"
+        status = properties.get("Status") or "Okänd"
+
+        missing_varn.append({
+            "nr": nr,
+            "typ": get_varn_type_name(typ),
+            "status": status
+        })
+
+
+    # Naturligare sortering av värnnummer
+    def sort_key(item):
+
+        nr = item["nr"]
+
+        try:
+            return (0, int(nr))
+        except ValueError:
+            return (1, nr)
+
+
+    missing_varn.sort(
+        key=sort_key
+    )
+
+
+    return render_template(
+        "admin_statistik_saknas.html",
+        field_name=field_name,
+        field_label=allowed_fields[field_name],
+        missing_varn=missing_varn
     )
 # =================================
 # ÄNDRINGSLOGG
@@ -582,6 +822,43 @@ def admin_logg():
         LIMIT 500
         """
     ).fetchall()
+
+    # ---------------------------------
+    # Databasstatus
+    # ---------------------------------
+
+    database_stats = connection.execute(
+        """
+        SELECT
+            COUNT(*) AS totalt,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(historik), '') IS NOT NULL
+            ) AS historik,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(byggar), '') IS NOT NULL
+            ) AS byggar,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(parkering), '') IS NOT NULL
+            ) AS parkering,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(tillganglighet), '') IS NOT NULL
+            ) AS tillganglighet,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(plomberad), '') IS NOT NULL
+            ) AS plomberad,
+
+            COUNT(*) FILTER (
+                WHERE NULLIF(TRIM(modell), '') IS NOT NULL
+            ) AS modell
+
+        FROM varn
+        """
+    ).fetchone()
 
     connection.close()
 
