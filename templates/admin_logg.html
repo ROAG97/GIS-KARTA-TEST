@@ -52,23 +52,37 @@
            ================================= */
 
         .log-header {
+            position: relative;
+
             margin-bottom: 30px;
         }
 
         .back-link {
-            display: inline-flex;
+            position: absolute;
 
-            margin-bottom: 20px;
+            top: 0;
+            right: 0;
 
-            color: #aaa;
+            padding: 10px 15px;
+
+            background: #292929;
+            color: white;
+
+            border: 1px solid #444;
+            border-radius: 6px;
 
             text-decoration: none;
-
             font-size: 14px;
+            font-weight: bold;
+
+            transition:
+                background .15s ease,
+                border-color .15s ease;
         }
 
         .back-link:hover {
-            color: white;
+            background: #383838;
+            border-color: #666;
         }
 
         .log-header h1 {
@@ -265,6 +279,11 @@
 
                 transform: rotate(90deg);
             }
+            .back-link {
+            position: static;
+
+            margin-bottom: 18px;
+            }
 
         }
 
@@ -283,7 +302,7 @@
             href="{{ url_for('admin') }}"
             class="back-link"
         >
-            ← Tillbaka till admin
+            ← Admin
         </a>
 
         <h1>

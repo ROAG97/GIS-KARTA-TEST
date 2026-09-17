@@ -133,6 +133,8 @@
 
             align-items: center;
 
+            gap: 10px;
+
             margin-bottom: 20px;
         }
 
@@ -591,16 +593,23 @@
 
     </header>
 
-        <div class="admin-tools">
+<div class="admin-tools">
 
-        <a
-            href="{{ url_for('admin_logg') }}"
-            class="log-button"
-        >
-            🕘 Ändringslogg
-        </a>
+    <a
+        href="{{ url_for('admin_logg') }}"
+        class="log-button"
+    >
+        🕘 Ändringslogg
+    </a>
 
-    </div>
+    <a
+        href="{{ url_for('admin_statistik') }}"
+        class="log-button"
+    >
+        📊 Statistik
+    </a>
+
+</div>
 
     <!-- =================================
          SÖK
