@@ -2,6 +2,7 @@ import os
 import json
 import re
 import secrets
+import time
 
 from functools import wraps
 
@@ -332,6 +333,7 @@ def icons():
 
 @app.route("/varn/<nr>")
 def varn(nr):
+    start_total = time.perf_counter()
     # =========================
     # 1. HÄMTA GIS-DATA
     # =========================
@@ -355,12 +357,59 @@ def varn(nr):
     if valt_varn is None:
         abort(404)
 
+    after_geojson = time.perf_counter()
 
     # =========================
-    # 2. HÄMTA DATA FRÅN SQLITE
+    # 2. NEON
+    #
+    # Samma anslutning används
+    # både för visningsstatistik
+    # och värnets information.
     # =========================
 
+    before_neon = time.perf_counter()
     connection = get_db_connection()
+    after_connect = time.perf_counter()
+
+    # -------------------------
+    # Registrera visning
+    # -------------------------
+
+    if session.get("user_id"):
+
+        connection.execute(
+            """
+            INSERT INTO admin_varn_views (
+                varn_nr,
+                username
+            )
+            VALUES (%s, %s)
+            """,
+            (
+                str(nr),
+                session.get("username")
+            )
+        )
+
+    else:
+
+        connection.execute(
+            """
+            INSERT INTO varn_views (
+                varn_nr
+            )
+            VALUES (%s)
+            """,
+            (str(nr),)
+        )
+
+
+    after_insert = time.perf_counter()
+
+
+    # -------------------------
+    # Hämta värnets information
+    # -------------------------
 
     detaljinfo = connection.execute(
         """
@@ -371,7 +420,32 @@ def varn(nr):
         (str(nr),)
     ).fetchone()
 
+
+    after_select = time.perf_counter()
+
+
+     # -------------------------
+    # Spara statistik och stäng
+    # -------------------------
+
+    connection.commit()
     connection.close()
+
+
+    after_database = time.perf_counter()
+
+    total_time = (
+        after_database
+        - start_total
+    )
+
+    if total_time > 2.0:
+
+        print(
+            "[SLOW REQUEST] "
+            f"Värn {nr} | "
+            f"Total: {total_time:.3f}s"
+        )
 
 
     # =========================
@@ -606,6 +680,95 @@ def admin_statistik():
         """
     ).fetchall()
 
+    # =================================
+    # PUBLIK BESÖKARSTATISTIK
+    # =================================
+
+    visitor_stats = connection.execute(
+        """
+        SELECT
+            COUNT(*) AS totalt,
+
+            COUNT(*) FILTER (
+                WHERE viewed_at >= CURRENT_DATE
+            ) AS idag,
+
+            COUNT(*) FILTER (
+                WHERE viewed_at >= CURRENT_TIMESTAMP
+                    - INTERVAL '7 days'
+            ) AS sju_dagar,
+
+            COUNT(*) FILTER (
+                WHERE viewed_at >= CURRENT_TIMESTAMP
+                    - INTERVAL '30 days'
+            ) AS trettio_dagar
+
+        FROM varn_views
+        """
+    ).fetchone()
+
+
+    most_viewed_public = connection.execute(
+        """
+        SELECT
+            varn_nr,
+            COUNT(*) AS antal
+        FROM varn_views
+        GROUP BY varn_nr
+        ORDER BY antal DESC, varn_nr
+        LIMIT 10
+        """
+    ).fetchall()
+
+
+    # =================================
+    # BESÖK PER DAG – 30 DAGAR
+    # =================================
+
+    daily_visitors = connection.execute(
+        """
+        SELECT
+            DATE(viewed_at) AS datum,
+            COUNT(*) AS antal
+        FROM varn_views
+        WHERE viewed_at >= CURRENT_DATE
+            - INTERVAL '29 days'
+        GROUP BY DATE(viewed_at)
+        ORDER BY datum
+        """
+    ).fetchall()
+
+
+    # =================================
+    # ROBERT / MATTEO – VISNINGAR
+    # =================================
+
+    admin_view_totals = connection.execute(
+        """
+        SELECT
+            username,
+            COUNT(*) AS totalt,
+            COUNT(DISTINCT varn_nr) AS antal_varn,
+            MAX(viewed_at) AS senaste_visning
+        FROM admin_varn_views
+        GROUP BY username
+        ORDER BY totalt DESC
+        """
+    ).fetchall()
+
+
+    admin_most_viewed = connection.execute(
+        """
+        SELECT
+            username,
+            varn_nr,
+            COUNT(*) AS antal
+        FROM admin_varn_views
+        GROUP BY username, varn_nr
+        ORDER BY username, antal DESC, varn_nr
+        """
+    ).fetchall()
+
 
     connection.close()
 
@@ -684,6 +847,30 @@ def admin_statistik():
         for row in most_edited
     ]
 
+    visitor_stats = dict(
+        visitor_stats
+    )
+
+    most_viewed_public = [
+        dict(row)
+        for row in most_viewed_public
+    ]
+
+
+    daily_visitors = [
+        dict(row)
+        for row in daily_visitors
+    ]
+
+    admin_view_totals = [
+        dict(row)
+        for row in admin_view_totals
+    ]
+
+    admin_most_viewed = [
+        dict(row)
+        for row in admin_most_viewed
+    ]
 
     return render_template(
         "admin_statistik.html",
@@ -693,7 +880,12 @@ def admin_statistik():
         database_stats=database_stats,
         most_edited=most_edited,
         type_stats=type_stats,
-        status_stats=status_stats
+        status_stats=status_stats,
+        visitor_stats=visitor_stats,
+        most_viewed_public=most_viewed_public,
+        daily_visitors=daily_visitors,
+        admin_view_totals=admin_view_totals,
+        admin_most_viewed=admin_most_viewed
     )
 # =================================
 # SAKNAD INFORMATION

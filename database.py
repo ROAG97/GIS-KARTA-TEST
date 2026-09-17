@@ -3,6 +3,7 @@ import os
 
 import psycopg
 from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
 from dotenv import load_dotenv
 
 
@@ -29,16 +30,69 @@ if not DATABASE_URL:
 
 
 # =================================
+# CONNECTION POOL
+# =================================
+
+pool = ConnectionPool(
+    conninfo=DATABASE_URL,
+    min_size=1,
+    max_size=10,
+    kwargs={
+        "row_factory": dict_row
+    }
+)
+
+
+# =================================
 # DATABASANSLUTNING
 # =================================
 
+class PooledConnection:
+
+    def __init__(self, pool):
+        self.pool = pool
+        self.connection = pool.getconn()
+
+
+    def execute(self, *args, **kwargs):
+
+        return self.connection.execute(
+            *args,
+            **kwargs
+        )
+
+
+    def executemany(self, *args, **kwargs):
+
+        return self.connection.executemany(
+            *args,
+            **kwargs
+        )
+
+
+    def commit(self):
+
+        return self.connection.commit()
+
+    def rollback(self):
+
+        return self.connection.rollback()
+
+
+    def close(self):
+
+        if self.connection is not None:
+
+            self.pool.putconn(
+                self.connection
+            )
+
+            self.connection = None
+
+
 def get_db_connection():
 
-    return psycopg.connect(
-        DATABASE_URL,
-        row_factory=dict_row
-    )
-
+    return PooledConnection(pool)
 
 # =================================
 # SKAPA DATABASTABELL
@@ -61,6 +115,62 @@ def create_database():
         )
     """)
 
+    # =================================
+    # BESÖKSSTATISTIK
+    # =================================
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS varn_views (
+            id BIGSERIAL PRIMARY KEY,
+            varn_nr TEXT NOT NULL,
+            viewed_at TIMESTAMPTZ NOT NULL
+                DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_varn_views_varn_nr
+        ON varn_views (varn_nr)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_varn_views_viewed_at
+        ON varn_views (viewed_at)
+    """)
+
+    # =================================
+    # ADMIN-VISNINGAR
+    # =================================
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS admin_varn_views (
+            id BIGSERIAL PRIMARY KEY,
+            varn_nr TEXT NOT NULL,
+            username TEXT NOT NULL,
+            viewed_at TIMESTAMPTZ NOT NULL
+                DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_admin_varn_views_username
+        ON admin_varn_views (username)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_admin_varn_views_varn_nr
+        ON admin_varn_views (varn_nr)
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_admin_varn_views_viewed_at
+        ON admin_varn_views (viewed_at)
+    """)
     connection.commit()
     connection.close()
 
