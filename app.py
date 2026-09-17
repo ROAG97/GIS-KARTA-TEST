@@ -1,6 +1,5 @@
 import os
 import json
-import sqlite3
 import re
 import secrets
 
@@ -22,7 +21,11 @@ from werkzeug.security import check_password_hash
 
 from auth import create_user_table
 
-from database import create_database, sync_geojson_to_database
+from database import (
+    create_database,
+    sync_geojson_to_database,
+    get_db_connection
+)
 
 app = Flask(__name__)
 
@@ -67,10 +70,6 @@ create_database()
 sync_geojson_to_database()
 create_user_table()
 
-def get_db_connection():
-    connection = sqlite3.connect("data/varn.db")
-    connection.row_factory = sqlite3.Row
-    return connection
 
 # =================================
 # VISNINGSNAMN FÖR VÄRNTYPER
@@ -129,29 +128,7 @@ def get_varn_type_name(type_name):
 # ÄNDRINGSLOGG
 # =================================
 
-def create_change_log_table():
 
-    connection = get_db_connection()
-
-    connection.execute(
-        """
-        CREATE TABLE IF NOT EXISTS change_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            varn_nr TEXT NOT NULL,
-            username TEXT NOT NULL,
-            field_name TEXT NOT NULL,
-            old_value TEXT,
-            new_value TEXT,
-            changed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-        )
-        """
-    )
-
-    connection.commit()
-    connection.close()
-
-
-create_change_log_table()
 
 # =================================
 # LOGIN
@@ -212,7 +189,7 @@ def admin_login():
             """
             SELECT *
             FROM users
-            WHERE username = ?
+            WHERE username = %s
             AND active = 1
             """,
             (username,)
@@ -389,7 +366,7 @@ def varn(nr):
         """
         SELECT *
         FROM varn
-        WHERE nr = ?
+        WHERE nr = %s
         """,
         (str(nr),)
     ).fetchone()
@@ -597,7 +574,7 @@ def edit_varn(nr):
             """
             SELECT *
             FROM varn
-            WHERE nr = ?
+            WHERE nr = %s
             """,
             (str(nr),)
         ).fetchone()
@@ -701,7 +678,7 @@ def edit_varn(nr):
                         old_value,
                         new_value
                     )
-                    VALUES (?, ?, ?, ?, ?)
+                    VALUES (%s, %s, %s, %s, %s)
                     """,
                     (
                         str(nr),
@@ -733,7 +710,7 @@ INSERT INTO varn (
     modell
 )
 
-VALUES (?, ?, ?, ?, ?, ?, ?)
+VALUES (%s, %s, %s, %s, %s, %s, %s)
 
 ON CONFLICT(nr)
 DO UPDATE SET
@@ -778,7 +755,7 @@ DO UPDATE SET
         """
         SELECT *
         FROM varn
-        WHERE nr = ?
+        WHERE nr = %s
         """,
         (str(nr),)
     ).fetchone()

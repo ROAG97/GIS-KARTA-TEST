@@ -1,10 +1,31 @@
-import sqlite3
 import json
 import os
 
+import psycopg
+from psycopg.rows import dict_row
+from dotenv import load_dotenv
 
-DB_PATH = "data/varn.db"
+
 GEOJSON_PATH = "data/BunkerLayer.geojson"
+
+
+# =================================
+# LADDA MILJÖVARIABLER
+# =================================
+
+# Används lokalt på Fedora.
+# På Render kommer DATABASE_URL från
+# Render Environment Variables.
+load_dotenv(".env.local")
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL saknas. "
+        "Kontrollera .env.local eller "
+        "Render Environment Variables."
+    )
 
 
 # =================================
@@ -13,15 +34,14 @@ GEOJSON_PATH = "data/BunkerLayer.geojson"
 
 def get_db_connection():
 
-    connection = sqlite3.connect(DB_PATH)
-
-    connection.row_factory = sqlite3.Row
-
-    return connection
+    return psycopg.connect(
+        DATABASE_URL,
+        row_factory=dict_row
+    )
 
 
 # =================================
-# SKAPA DATABAS
+# SKAPA DATABASTABELL
 # =================================
 
 def create_database():
@@ -42,12 +62,15 @@ def create_database():
     """)
 
     connection.commit()
-
     connection.close()
 
 
 # =================================
-# SYNKA GEOJSON → SQLITE
+# SYNKA GEOJSON → NEON
+#
+# Skapar ENDAST värn som saknas.
+# Befintlig admininformation skrivs
+# aldrig över.
 # =================================
 
 def sync_geojson_to_database():
@@ -75,14 +98,11 @@ def sync_geojson_to_database():
         geojson_data = json.load(file)
 
 
-    connection = get_db_connection()
-
-    nya_varn = []
-
-
     # -----------------------------
-    # Gå igenom alla värn
+    # Samla alla nummer från GeoJSON
     # -----------------------------
+
+    geojson_nr = set()
 
     for feature in geojson_data.get(
         "features",
@@ -96,54 +116,65 @@ def sync_geojson_to_database():
 
         nr = properties.get("Nr")
 
-
-        # Hoppa över objekt utan nummer
-
         if nr is None:
             continue
 
-
         nr = str(nr).strip()
 
+        if nr:
+            geojson_nr.add(nr)
 
-        if not nr:
-            continue
+
+    # -----------------------------
+    # Hämta befintliga nummer
+    # från Neon EN GÅNG
+    # -----------------------------
+
+    connection = get_db_connection()
+
+    rows = connection.execute(
+        """
+        SELECT nr
+        FROM varn
+        """
+    ).fetchall()
+
+    existing_nr = {
+        row["nr"]
+        for row in rows
+    }
 
 
-        # -------------------------
-        # Finns värnet redan?
-        # -------------------------
+    # -----------------------------
+    # Jämför lokalt
+    # -----------------------------
 
-        existing = connection.execute(
+    nya_varn = sorted(
+        geojson_nr - existing_nr
+    )
+
+
+    # -----------------------------
+    # Lägg endast till nya värn
+    # -----------------------------
+
+    if nya_varn:
+
+        connection.executemany(
             """
-            SELECT nr
-            FROM varn
-            WHERE nr = ?
+            INSERT INTO varn (nr)
+            VALUES (%s)
+            ON CONFLICT (nr)
+            DO NOTHING
             """,
-            (nr,)
-        ).fetchone()
-
-
-        # -------------------------
-        # Skapa endast om det saknas
-        # -------------------------
-
-        if existing is None:
-
-            connection.execute(
-                """
-                INSERT INTO varn (
-                    nr
-                )
-                VALUES (?)
-                """,
+            [
                 (nr,)
-            )
+                for nr in nya_varn
+            ]
+        )
 
-            nya_varn.append(nr)
+        connection.commit()
 
-
-    connection.commit()
 
     connection.close()
 
@@ -156,7 +187,7 @@ def sync_geojson_to_database():
 
         print(
             f"{len(nya_varn)} nya värn "
-            f"lades till i SQLite:"
+            f"lades till i Neon:"
         )
 
         for nr in nya_varn:
@@ -165,7 +196,7 @@ def sync_geojson_to_database():
     else:
 
         print(
-            "SQLite är redan synkad "
+            "Neon är redan synkad "
             "med GeoJSON."
         )
 
