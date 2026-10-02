@@ -1738,6 +1738,98 @@ body.varn-detail-page{
     border-color: rgba(255,255,255,.45);
 }
 
+/* =================================
+ *  DATABAS - BILDGALLERI
+ *  ================================= */
+
+.database-gallery {
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 40px;
+
+    overflow: hidden;
+}
+
+.database-gallery h2 {
+    margin:
+    5px
+    0
+    0;
+}
+
+.database-section-kicker {
+    color: #888;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: .8px;
+}
+
+.database-gallery-grid {
+    display: grid;
+
+    grid-template-columns:
+    repeat(
+        auto-fill,
+        minmax(200px, 1fr)
+    );
+
+    gap: 16px;
+
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 18px;
+}
+
+.database-gallery-item {
+    min-width: 0;
+
+    margin: 0;
+
+    overflow: hidden;
+}
+
+.database-gallery-image-button {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid #383838;
+    border-radius: 10px;
+
+    background: #222;
+
+    cursor: pointer;
+}
+
+.database-gallery-image-button img {
+    display: block;
+
+    width: 100%;
+    height: 180px;
+    max-width: 100%;
+
+    object-fit: cover;
+}
+
+.database-gallery-item figcaption {
+    margin-top: 8px;
+
+    color: #aaa;
+
+    font-size: 14px;
+    line-height: 1.4;
+}
+
 /* ===========================
  *   MOBIL
  *   =========================== */
