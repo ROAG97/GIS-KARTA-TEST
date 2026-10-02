@@ -3,6 +3,11 @@ import json
 import re
 import secrets
 import time
+import io
+import boto3
+
+from PIL import Image, ImageOps
+from dotenv import load_dotenv
 
 from functools import wraps
 
@@ -29,6 +34,31 @@ from database import (
 )
 
 app = Flask(__name__)
+load_dotenv()
+
+
+# =================================
+# CLOUDFLARE R2
+# =================================
+
+R2_ACCOUNT_ID = os.getenv("R2_ACCOUNT_ID")
+R2_ACCESS_KEY_ID = os.getenv("R2_ACCESS_KEY_ID")
+R2_SECRET_ACCESS_KEY = os.getenv("R2_SECRET_ACCESS_KEY")
+R2_BUCKET_NAME = os.getenv("R2_BUCKET_NAME")
+R2_PUBLIC_URL = os.getenv("R2_PUBLIC_URL")
+
+
+r2_client = boto3.client(
+    "s3",
+    endpoint_url=(
+        f"https://{R2_ACCOUNT_ID}"
+        ".r2.cloudflarestorage.com"
+    ),
+    aws_access_key_id=R2_ACCESS_KEY_ID,
+    aws_secret_access_key=R2_SECRET_ACCESS_KEY,
+    region_name="auto"
+)
+
 
 # =================================
 # SESSION / SECRET KEY
@@ -159,6 +189,116 @@ def login_required(function):
     return decorated_function
 
 # =================================
+# BILDUPPLADDNING TILL R2
+# =================================
+
+def upload_database_image(image_file, slug):
+
+    image = Image.open(image_file)
+
+    # Korrigera rotation från exempelvis mobilbilder
+    image = ImageOps.exif_transpose(image)
+
+    # Konvertera till lämpligt färgläge
+    if image.mode not in ("RGB", "RGBA"):
+        image = image.convert("RGB")
+
+    # Max 3000 px på längsta sidan
+    image.thumbnail(
+        (3000, 3000),
+        Image.Resampling.LANCZOS
+    )
+
+    # Skapa WebP i minnet
+    output = io.BytesIO()
+
+    image.save(
+        output,
+        format="WEBP",
+        quality=92,
+        method=6
+    )
+
+    output.seek(0)
+
+    # Plats i R2
+    object_key = (
+        f"databas/{slug}/huvudbild.webp"
+    )
+
+    # Ladda upp till R2
+    r2_client.upload_fileobj(
+        output,
+        R2_BUCKET_NAME,
+        object_key,
+        ExtraArgs={
+            "ContentType": "image/webp"
+        }
+    )
+
+    # Returnera publik URL
+    return (
+        f"{R2_PUBLIC_URL.rstrip('/')}/"
+        f"{object_key}"
+    )
+
+def get_r2_image_library():
+
+    images = []
+
+    continuation_token = None
+
+    while True:
+
+        params = {
+            "Bucket": R2_BUCKET_NAME,
+            "MaxKeys": 1000
+        }
+
+        if continuation_token:
+            params["ContinuationToken"] = continuation_token
+
+        response = r2_client.list_objects_v2(
+            **params
+        )
+
+        for item in response.get("Contents", []):
+
+            key = item["Key"]
+
+            if key.endswith("/"):
+                continue
+
+            if not key.lower().endswith(
+                (".jpg", ".jpeg", ".png", ".webp")
+            ):
+                continue
+
+            images.append({
+                "key": key,
+                "url": (
+                    f"{R2_PUBLIC_URL.rstrip('/')}/"
+                    f"{key}"
+                ),
+                "size": item["Size"],
+                "modified": item["LastModified"]
+            })
+
+        if not response.get("IsTruncated"):
+            break
+
+        continuation_token = response.get(
+            "NextContinuationToken"
+        )
+
+    images.sort(
+        key=lambda image: image["modified"],
+        reverse=True
+    )
+
+    return images
+
+# =================================
 # ADMIN LOGIN
 # =================================
 
@@ -258,6 +398,122 @@ def admin_logout():
 def index():
     return render_template("index.html")
 
+
+# =================================
+# DATABAS
+# =================================
+
+@app.route("/databas")
+def databas():
+
+    connection = get_db_connection()
+
+    posts = connection.execute(
+        """
+        SELECT
+            slug,
+            title,
+            category,
+            description,
+            image_url
+        FROM database_posts
+        WHERE published = TRUE
+        ORDER BY title
+        """
+    ).fetchall()
+
+    connection.close()
+
+    posts = [
+        dict(post)
+        for post in posts
+    ]
+
+    return render_template(
+        "databas.html",
+        posts=posts
+    )
+@app.route("/databas/<slug>")
+def databas_post(slug):
+
+    connection = get_db_connection()
+
+    post = connection.execute(
+        """
+        SELECT *
+        FROM database_posts
+        WHERE slug = %s
+        AND published = TRUE
+        """,
+        (slug,)
+    ).fetchone()
+
+
+    if post is None:
+
+        connection.close()
+
+        abort(404)
+
+
+    # =================================
+    # FAKTARADER
+    # =================================
+
+    facts = connection.execute(
+        """
+        SELECT
+            label,
+            value
+        FROM database_post_facts
+        WHERE post_id = %s
+        ORDER BY sort_order, id
+        """,
+        (post["id"],)
+    ).fetchall()
+
+
+    # =================================
+    # BILDGALLERI
+    # =================================
+
+    gallery_images = connection.execute(
+        """
+        SELECT
+            id,
+            image_url,
+            caption,
+            sort_order
+        FROM database_post_images
+        WHERE post_id = %s
+        ORDER BY sort_order, id
+        """,
+        (post["id"],)
+    ).fetchall()
+
+
+    connection.close()
+
+
+    post = dict(post)
+
+    facts = [
+        dict(fact)
+        for fact in facts
+    ]
+
+    gallery_images = [
+        dict(image)
+        for image in gallery_images
+    ]
+
+
+    return render_template(
+        "databas_post.html",
+        post=post,
+        facts=facts,
+        gallery_images=gallery_images
+    )
 
 # =================================
 # GEOJSON
@@ -483,6 +739,549 @@ def varn(nr):
           valt_varn["properties"].get("Variant")
     )
 )
+
+# =================================
+# ADMIN - DATABAS
+# =================================
+
+@app.route("/admin/databas")
+@login_required
+def admin_databas():
+
+    connection = get_db_connection()
+
+    posts = connection.execute(
+        """
+        SELECT
+            id,
+            slug,
+            title,
+            category,
+            published,
+            updated_at
+        FROM database_posts
+        ORDER BY title
+        """
+    ).fetchall()
+
+    connection.close()
+
+    posts = [
+        dict(post)
+        for post in posts
+    ]
+
+    return render_template(
+        "admin_databas.html",
+        posts=posts
+    )
+# =================================
+# ADMIN - NY DATABASPOST
+# =================================
+
+@app.route(
+    "/admin/databas/ny",
+    methods=["GET", "POST"]
+)
+@login_required
+def admin_databas_new():
+
+    if request.method == "POST":
+
+        title = request.form.get(
+            "title",
+            ""
+        ).strip()
+
+        slug = request.form.get(
+            "slug",
+            ""
+        ).strip().lower()
+
+        category = request.form.get(
+            "category",
+            ""
+        ).strip()
+
+        image_url = request.form.get(
+            "image_url",
+            ""
+        ).strip()
+
+        main_image = request.files.get(
+            "main_image"
+        )
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        intro = request.form.get(
+            "intro",
+            ""
+        ).strip()
+
+        connection_text = request.form.get(
+            "connection_text",
+            ""
+        ).strip()
+
+        history = request.form.get(
+            "history",
+            ""
+        ).strip()
+
+        published = (
+            request.form.get("published")
+            == "on"
+        )
+
+
+        # =================================
+        # HUVUDBILD
+        # =================================
+
+        if main_image and main_image.filename:
+
+            image_url = upload_database_image(
+                main_image,
+                slug
+            )
+
+
+        connection = get_db_connection()
+
+        new_post = connection.execute(
+            """
+            INSERT INTO database_posts (
+                slug,
+                title,
+                category,
+                description,
+                image_url,
+                intro,
+                history,
+                connection_text,
+                published
+            )
+            VALUES (
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s,
+                %s
+            )
+            RETURNING id
+            """,
+            (
+                slug,
+                title,
+                category,
+                description or None,
+                image_url or None,
+                intro or None,
+                history or None,
+                connection_text or None,
+                published
+            )
+        ).fetchone()
+
+
+        post_id = new_post["id"]
+
+        # =================================
+        # SPARA FAKTARADER
+        # =================================
+
+        fact_labels = request.form.getlist(
+            "fact_label[]"
+        )
+
+        fact_values = request.form.getlist(
+            "fact_value[]"
+        )
+
+
+        for sort_order, (label, value) in enumerate(
+            zip(fact_labels, fact_values),
+            start=1
+        ):
+
+            label = label.strip()
+            value = value.strip()
+
+            if not label or not value:
+                continue
+
+
+            connection.execute(
+                """
+                INSERT INTO database_post_facts (
+                    post_id,
+                    label,
+                    value,
+                    sort_order
+                )
+                VALUES (%s, %s, %s, %s)
+                """,
+                (
+                    post_id,
+                    label,
+                    value,
+                    sort_order
+                )
+            )
+
+        connection.commit()
+        connection.close()
+
+        return redirect(
+            url_for("admin_databas")
+        )
+
+
+    return render_template(
+        "admin_databas_form.html",
+        post=None,
+        facts=[],
+        gallery_images=[],
+        image_library=get_r2_image_library()
+    )
+
+
+@app.route(
+    "/admin/databas/<int:post_id>/redigera",
+    methods=["GET", "POST"]
+)
+@login_required
+def admin_databas_edit(post_id):
+
+    connection = get_db_connection()
+
+    post = connection.execute(
+        """
+        SELECT *
+        FROM database_posts
+        WHERE id = %s
+        """,
+        (post_id,)
+    ).fetchone()
+
+    if post is None:
+
+        connection.close()
+        abort(404)
+
+    if request.method == "POST":
+
+        title = request.form.get(
+            "title",
+            ""
+        ).strip()
+
+        slug = request.form.get(
+            "slug",
+            ""
+        ).strip().lower()
+
+        category = request.form.get(
+            "category",
+            ""
+        ).strip()
+
+        image_url = request.form.get(
+            "image_url",
+            ""
+        ).strip()
+
+        main_image = request.files.get(
+            "main_image"
+        )
+
+        description = request.form.get(
+            "description",
+            ""
+        ).strip()
+
+        intro = request.form.get(
+            "intro",
+            ""
+        ).strip()
+
+        connection_text = request.form.get(
+            "connection_text",
+            ""
+        ).strip()
+
+        history = request.form.get(
+            "history",
+            ""
+        ).strip()
+
+        published = (
+            request.form.get("published")
+            == "on"
+        )
+
+        # =================================
+        # NY HUVUDBILD
+        # =================================
+
+        if main_image and main_image.filename:
+
+            image_url = upload_database_image(
+                main_image,
+                slug
+            )
+
+        # =================================
+        # UPPDATERA DATABASPOST
+        # =================================
+
+        connection.execute(
+            """
+            UPDATE database_posts
+            SET
+                slug = %s,
+                title = %s,
+                category = %s,
+                description = %s,
+                image_url = %s,
+                intro = %s,
+                history = %s,
+                connection_text = %s,
+                published = %s,
+                updated_at = CURRENT_TIMESTAMP
+            WHERE id = %s
+            """,
+            (
+                slug,
+                title,
+                category,
+                description or None,
+                image_url or None,
+                intro or None,
+                history or None,
+                connection_text or None,
+                published,
+                post_id
+            )
+        )
+
+        # =================================
+        # SPARA FAKTARADER
+        # =================================
+
+        fact_labels = request.form.getlist(
+            "fact_label[]"
+        )
+
+        fact_values = request.form.getlist(
+            "fact_value[]"
+        )
+
+        # =================================
+        # HÄMTA GALLERIBILDER FRÅN FORMULÄRET
+        # =================================
+
+        gallery_urls = request.form.getlist(
+            "gallery_image_url[]"
+        )
+
+        gallery_captions = request.form.getlist(
+            "gallery_caption[]"
+        )
+
+        connection.execute(
+            """
+            DELETE FROM database_post_facts
+            WHERE post_id = %s
+            """,
+            (post_id,)
+        )
+
+        for sort_order, (label, value) in enumerate(
+            zip(fact_labels, fact_values),
+            start=1
+        ):
+
+            label = label.strip()
+            value = value.strip()
+
+            if not label or not value:
+                continue
+
+            connection.execute(
+                """
+                INSERT INTO database_post_facts (
+                    post_id,
+                    label,
+                    value,
+                    sort_order
+                )
+                VALUES (%s, %s, %s, %s)
+                """,
+                (
+                    post_id,
+                    label,
+                    value,
+                    sort_order
+                )
+            )
+
+        # =================================
+        # SPARA BILDGALLERI
+        # =================================
+
+        connection.execute(
+            """
+            DELETE FROM database_post_images
+            WHERE post_id = %s
+            """,
+            (post_id,)
+        )
+
+
+        for sort_order, (image_url, caption) in enumerate(
+            zip(gallery_urls, gallery_captions),
+            start=1
+        ):
+
+            image_url = image_url.strip()
+            caption = caption.strip()
+
+            if not image_url:
+                continue
+
+
+            connection.execute(
+                """
+                INSERT INTO database_post_images (
+                    post_id,
+                    image_url,
+                    caption,
+                    sort_order
+                )
+                VALUES (%s, %s, %s, %s)
+                """,
+                (
+                    post_id,
+                    image_url,
+                    caption or None,
+                    sort_order
+                )
+            )
+
+        connection.commit()
+        connection.close()
+
+        return redirect(
+            url_for("admin_databas")
+        )
+
+    # =================================
+    # HÄMTA FAKTARADER FÖR FORMULÄRET
+    # =================================
+
+    facts = connection.execute(
+        """
+        SELECT
+            id,
+            label,
+            value,
+            sort_order
+        FROM database_post_facts
+        WHERE post_id = %s
+        ORDER BY sort_order, id
+        """,
+        (post_id,)
+    ).fetchall()
+
+# =================================
+# HÄMTA GALLERIBILDER
+# =================================
+
+    gallery_images = connection.execute(
+        """
+        SELECT
+            id,
+            image_url,
+            caption,
+            sort_order
+        FROM database_post_images
+        WHERE post_id = %s
+        ORDER BY sort_order, id
+        """,
+        (post_id,)
+    ).fetchall()
+
+    connection.close()
+
+    post = dict(post)
+
+    facts = [
+        dict(fact)
+        for fact in facts
+    ]
+
+    return render_template(
+        "admin_databas_form.html",
+        post=post,
+        facts=facts,
+        gallery_images=gallery_images,
+        image_library=get_r2_image_library()
+    )
+
+# =================================
+# ADMIN - RADERA DATABASPOST
+# =================================
+
+@app.route(
+    "/admin/databas/<int:post_id>/radera",
+    methods=["POST"]
+)
+@login_required
+def admin_databas_delete(post_id):
+
+    connection = get_db_connection()
+
+    post = connection.execute(
+        """
+        SELECT title
+        FROM database_posts
+        WHERE id = %s
+        """,
+        (post_id,)
+    ).fetchone()
+
+
+    if post is None:
+
+        connection.close()
+
+        abort(404)
+
+
+    connection.execute(
+        """
+        DELETE FROM database_posts
+        WHERE id = %s
+        """,
+        (post_id,)
+    )
+
+    connection.commit()
+    connection.close()
+
+
+    return redirect(
+        url_for("admin_databas")
+    )
 
 # =================================
 # ADMIN STARTSIDA

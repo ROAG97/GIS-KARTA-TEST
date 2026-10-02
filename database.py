@@ -171,6 +171,77 @@ def create_database():
         idx_admin_varn_views_viewed_at
         ON admin_varn_views (viewed_at)
     """)
+    # =================================
+    # DATABASPOSTER
+    # =================================
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS database_posts (
+            id BIGSERIAL PRIMARY KEY,
+            slug TEXT UNIQUE NOT NULL,
+            title TEXT NOT NULL,
+            category TEXT NOT NULL,
+            description TEXT,
+            image_url TEXT,
+            intro TEXT,
+            history TEXT,
+            connection_text TEXT,
+            published BOOLEAN NOT NULL DEFAULT TRUE,
+            created_at TIMESTAMPTZ NOT NULL
+                DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMPTZ NOT NULL
+                DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    # =================================
+    # DATABASPOSTER - FAKTA
+    # =================================
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS database_post_facts (
+            id BIGSERIAL PRIMARY KEY,
+
+            post_id BIGINT NOT NULL
+                REFERENCES database_posts(id)
+                ON DELETE CASCADE,
+
+            label TEXT NOT NULL,
+            value TEXT NOT NULL,
+
+            sort_order INTEGER NOT NULL
+                DEFAULT 0
+        )
+    """)
+
+    # =================================
+    # DATABASPOSTER - BILDGALLERI
+    # =================================
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS database_post_images (
+            id BIGSERIAL PRIMARY KEY,
+
+            post_id BIGINT NOT NULL
+                REFERENCES database_posts(id)
+                ON DELETE CASCADE,
+
+            image_url TEXT NOT NULL,
+
+            caption TEXT,
+
+            sort_order INTEGER NOT NULL
+                DEFAULT 0,
+
+        created_at TIMESTAMPTZ NOT NULL
+        DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_database_post_facts_post_id
+        ON database_post_facts (post_id)
+    """)
     connection.commit()
     connection.close()
 
