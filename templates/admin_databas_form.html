@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+<title>
+    {% if post %}
+        Redigera {{ post.title }} – Admin
+    {% else %}
+        Ny databaspost – Admin
+    {% endif %}
+</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+            color: white;
+        }
+
+
+        /* =================================
+           SIDA
+           ================================= */
+
+        .admin-page {
+            width: min(
+                900px,
+                calc(100% - 32px)
+            );
+
+            margin:
+                40px
+                auto
+                80px;
+        }
+
+
+        /* =================================
+           TOPP
+           ================================= */
+
+        .back-link {
+            display: inline-flex;
+
+            margin-bottom: 22px;
+
+            color: #aaa;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            margin:
+                0
+                0
+                8px;
+
+            font-size: 36px;
+        }
+
+        .admin-header p {
+            margin: 0;
+
+            color: #999;
+        }
+
+
+        /* =================================
+           FORMULÄR
+           ================================= */
+
+        .form-card {
+            padding: 25px;
+
+            border: 1px solid #383838;
+            border-radius: 12px;
+
+            background: #292929;
+        }
+
+        .form-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+
+            gap: 8px;
+        }
+
+        .form-group.full {
+            grid-column: 1 / -1;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            font-weight: 700;
+
+            color: #ccc;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+
+            padding: 12px 13px;
+
+            border: 1px solid #444;
+            border-radius: 7px;
+
+            outline: none;
+
+            background: #202020;
+            color: white;
+
+            font: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #777;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+
+            resize: vertical;
+        }
+
+        .form-group textarea.large {
+            min-height: 220px;
+        }
+
+        .field-help {
+            margin: 0;
+
+            color: #777;
+
+            font-size: 12px;
+            line-height: 1.4;
+        }
+
+
+        /* =================================
+           PUBLICERING
+           ================================= */
+
+        .checkbox-row {
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+
+            padding: 15px 0;
+        }
+
+        .checkbox-row input {
+            width: auto;
+
+            margin: 0;
+        }
+
+        .checkbox-row label {
+            cursor: pointer;
+        }
+
+
+        /* =================================
+           KNAPPAR
+           ================================= */
+
+        .form-actions {
+            display: flex;
+
+            justify-content: flex-end;
+
+            gap: 10px;
+
+            margin-top: 25px;
+
+            padding-top: 20px;
+
+            border-top: 1px solid #383838;
+        }
+
+        .button {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 11px 18px;
+
+            border: 1px solid #555;
+            border-radius: 8px;
+
+            background: #292929;
+            color: white;
+
+            text-decoration: none;
+
+            font: inherit;
+            font-size: 14px;
+
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #353535;
+        }
+
+        .button-primary {
+            background: white;
+            border-color: white;
+
+            color: #1d1d1d;
+
+            font-weight: 700;
+        }
+
+        .button-primary:hover {
+            background: #ddd;
+        }
+
+/* =================================
+   FAKTAEDITOR
+   ================================= */
+
+.fact-editor-row {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr)
+        auto;
+
+    gap: 10px;
+
+    margin-bottom: 10px;
+}
+
+.fact-editor-row input {
+    width: 100%;
+
+    padding: 12px 13px;
+
+    border: 1px solid #444;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #202020;
+    color: white;
+
+    font: inherit;
+}
+
+.fact-editor-row input:focus {
+    border-color: #777;
+}
+
+.remove-fact-button {
+    padding: 0 13px;
+
+    border: 1px solid #555;
+    border-radius: 7px;
+
+    background: #292929;
+    color: #bbb;
+
+    cursor: pointer;
+}
+
+.remove-fact-button:hover {
+    color: white;
+
+    border-color: #777;
+}
+
+.add-fact-button {
+    margin-top: 5px;
+}
+
+
+/* =================================
+   RADERA POST
+   ================================= */
+
+.delete-form {
+    margin-top: 30px;
+
+    padding-top: 20px;
+
+    border-top: 1px solid #383838;
+
+    text-align: right;
+}
+
+.button-danger {
+    border-color: #7a3535;
+
+    background: #3a2020;
+    color: #ffb3b3;
+}
+
+.button-danger:hover {
+    background: #522626;
+    border-color: #a94444;
+
+    color: white;
+}
+
+/* =================================
+   BILDBIBLIOTEK
+   ================================= */
+
+.image-library {
+    grid-column: 1 / -1;
+
+    padding: 18px;
+
+    border: 1px solid #444;
+    border-radius: 10px;
+
+    background: #202020;
+}
+
+.image-library-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+
+    color: #ccc;
+}
+
+.image-library-header span {
+    color: #777;
+
+    font-size: 13px;
+}
+
+.image-library-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(140px, 1fr)
+        );
+
+    gap: 12px;
+}
+
+.image-library-item {
+    min-width: 0;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid #444;
+    border-radius: 8px;
+
+    background: #292929;
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.image-library-item:hover {
+    border-color: #888;
+}
+
+.image-library-item img {
+    display: block;
+
+    width: 100%;
+    height: 110px;
+
+    object-fit: cover;
+
+    background: #111;
+}
+
+.image-library-item span {
+    display: block;
+
+    padding: 8px;
+
+    overflow: hidden;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.admin-image-preview {
+    display: block;
+
+    width: min(100%, 500px);
+    max-height: 320px;
+
+    object-fit: cover;
+
+    border: 1px solid #444;
+    border-radius: 10px;
+}
+
+/* =================================
+   BILDGALLERI
+   ================================= */
+
+.gallery-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 20px;
+}
+
+.selected-gallery-images {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(180px, 1fr)
+        );
+
+    gap: 15px;
+
+    margin-top: 10px;
+}
+
+.selected-gallery-item {
+    overflow: hidden;
+
+    border: 1px solid #444;
+    border-radius: 9px;
+
+    background: #202020;
+}
+
+.selected-gallery-item img {
+    display: block;
+
+    width: 100%;
+    height: 140px;
+
+    object-fit: cover;
+}
+
+.selected-gallery-item input {
+    width: calc(100% - 16px);
+
+    margin: 8px;
+
+    padding: 9px;
+
+    border: 1px solid #444;
+    border-radius: 6px;
+
+    background: #292929;
+    color: white;
+}
+
+.remove-gallery-image {
+    width: calc(100% - 16px);
+
+    margin:
+        0
+        8px
+        8px;
+
+    padding: 8px;
+
+    border: 1px solid #633;
+    border-radius: 6px;
+
+    background: #352020;
+    color: #ffb3b3;
+
+    cursor: pointer;
+}
+
+.image-library-search {
+    width: 100%;
+
+    margin-bottom: 12px;
+
+    padding: 12px;
+
+    border: 1px solid #444;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #292929;
+    color: white;
+
+    font: inherit;
+}
+
+.image-library-search:focus {
+    border-color: #777;
+}
+
+.image-library-filters {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-bottom: 15px;
+}
+
+.image-filter {
+    padding: 7px 12px;
+
+    border: 1px solid #444;
+    border-radius: 20px;
+
+    background: #292929;
+    color: #bbb;
+
+    cursor: pointer;
+}
+
+.image-filter:hover,
+.image-filter.active {
+    border-color: #888;
+
+    background: #444;
+    color: white;
+}
+
+.gallery-library-item.selected {
+    border-color: white;
+}
+
+        /* =================================
+           MOBIL
+           ================================= */
+
+        @media (max-width: 650px) {
+
+            .admin-page {
+                width: calc(100% - 24px);
+
+                margin-top: 24px;
+            }
+
+            .admin-header h1 {
+                font-size: 30px;
+            }
+
+            .form-card {
+                padding: 18px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-group.full {
+                grid-column: auto;
+            }
+
+            .form-actions {
+                flex-direction: column-reverse;
+            }
+
+            .button {
+                width: 100%;
+            }
+            .fact-editor-row {
+    grid-template-columns: 1fr;
+}
+
+.remove-fact-button {
+    padding: 11px 13px;
+}
+
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<main class="admin-page">
+
+    <a
+        href="{{ url_for('admin_databas') }}"
+        class="back-link"
+    >
+        ← Tillbaka till databasen
+    </a>
+
+
+    <header class="admin-header">
+
+<h1>
+    {% if post %}
+        Redigera {{ post.title }}
+    {% else %}
+        Ny databaspost
+    {% endif %}
+</h1>
+
+<p>
+    {% if post %}
+        Redigera informationen för den här databasposten.
+    {% else %}
+        Skapa ett nytt objekt i Skånelinjens databas.
+    {% endif %}
+</p>
+    </header>
+
+
+<form
+    method="POST"
+    enctype="multipart/form-data"
+    class="form-card"
+>
+
+        <div class="form-grid">
+
+
+            <div class="form-group">
+
+                <label for="title">
+                    Titel
+                </label>
+
+<input
+    type="text"
+    id="title"
+    name="title"
+    value="{{ post.title if post else '' }}"
+    required
+>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="slug">
+                    URL-namn
+                </label>
+
+ <input
+    type="text"
+    id="slug"
+    name="slug"
+    value="{{ post.slug if post else '' }}"
+    placeholder="stridsvagn-m40"
+    required
+>
+
+                <p class="field-help">
+                    Använd små bokstäver och bindestreck.
+                </p>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="category">
+                    Kategori
+                </label>
+
+<select
+    id="category"
+    name="category"
+    required
+>
+
+    <option
+        value="fordon"
+        {% if post and post.category == "fordon" %}selected{% endif %}
+    >
+        Fordon
+    </option>
+
+    <option
+        value="vapen"
+        {% if post and post.category == "vapen" %}selected{% endif %}
+    >
+        Vapen
+    </option>
+
+    <option
+        value="utrustning"
+        {% if post and post.category == "utrustning" %}selected{% endif %}
+    >
+        Utrustning
+    </option>
+
+    <option
+        value="forsvarsverk"
+        {% if post and post.category == "forsvarsverk" %}selected{% endif %}
+    >
+        Försvarsverk
+    </option>
+
+</select>
+
+            </div>
+
+
+<!-- =================================
+     HUVUDBILD
+     ================================= -->
+
+<div class="form-group full">
+
+    <label for="image_url">
+        Huvudbild
+    </label>
+
+    <input
+        type="url"
+        id="image_url"
+        name="image_url"
+        value="{{ post.image_url if post and post.image_url else '' }}"
+        placeholder="https://..."
+    >
+
+    <p class="field-help">
+        Ladda upp en ny bild eller välj en befintlig bild från biblioteket.
+    </p>
+
+</div>
+
+
+<div class="form-group full">
+
+    <label for="main_image">
+        Ladda upp ny bild
+    </label>
+
+    <input
+        type="file"
+        id="main_image"
+        name="main_image"
+        accept="image/jpeg,image/png,image/webp"
+    >
+
+    <p class="field-help">
+        JPG, PNG eller WebP. Bilden optimeras till WebP och laddas upp till R2.
+    </p>
+
+</div>
+
+
+<div class="form-group full">
+
+    <button
+        type="button"
+        id="toggle-image-library"
+        class="button"
+    >
+        🖼️ Välj från bildbibliotek
+    </button>
+
+</div>
+
+
+<div
+    id="image-library"
+    class="image-library"
+    hidden
+>
+
+    <div class="image-library-header">
+
+        <strong>
+            Bildbibliotek
+        </strong>
+
+        <span>
+            {{ image_library|length }} bilder
+        </span>
+
+    </div>
+
+
+    <div class="image-library-grid">
+
+        {% for image in image_library %}
+
+        <button
+            type="button"
+            class="image-library-item"
+            data-image-url="{{ image.url }}"
+            title="{{ image.key }}"
+        >
+
+            <img
+                src="{{ image.url }}"
+                alt="{{ image.key }}"
+                loading="lazy"
+            >
+
+            <span>
+                {{ image.key }}
+            </span>
+
+        </button>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+{% if post and post.image_url %}
+
+<div class="form-group full">
+
+    <label>
+        Nuvarande huvudbild
+    </label>
+
+    <img
+        id="current-image-preview"
+        src="{{ post.image_url }}?v={{ post.updated_at }}"
+        alt="{{ post.title }}"
+        class="admin-image-preview"
+    >
+
+</div>
+
+{% endif %}
+
+<!-- =================================
+     BILDGALLERI
+     ================================= -->
+
+<div class="form-group full gallery-section">
+
+    <div class="gallery-title-row">
+
+        <div>
+            <label>
+                Bildgalleri
+            </label>
+
+            <p class="field-help">
+                Bilder som visas på objektets informationssida.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            id="open-gallery-library"
+            class="button"
+        >
+            + Lägg till från bildbibliotek
+        </button>
+
+    </div>
+
+
+    <div
+        id="selected-gallery-images"
+        class="selected-gallery-images"
+    >
+
+        {% for image in gallery_images %}
+
+        <div
+            class="selected-gallery-item"
+            data-image-url="{{ image.image_url }}"
+        >
+
+            <img
+                src="{{ image.image_url }}"
+                alt=""
+                loading="lazy"
+            >
+
+            <input
+                type="hidden"
+                name="gallery_image_url[]"
+                value="{{ image.image_url }}"
+            >
+
+            <input
+                type="text"
+                name="gallery_caption[]"
+                value="{{ image.caption or '' }}"
+                placeholder="Bildtext (valfritt)"
+            >
+
+            <button
+                type="button"
+                class="remove-gallery-image"
+            >
+                Ta bort
+            </button>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+
+<!-- =================================
+     GALLERI - BILDBIBLIOTEK
+     ================================= -->
+
+<div
+    id="gallery-image-library"
+    class="image-library"
+    hidden
+>
+
+    <div class="image-library-header">
+
+        <strong>
+            Välj bilder till galleriet
+        </strong>
+
+        <button
+            type="button"
+            id="close-gallery-library"
+            class="button"
+        >
+            Stäng
+        </button>
+
+    </div>
+
+
+    <input
+        type="search"
+        id="gallery-image-search"
+        class="image-library-search"
+        placeholder="Sök bild, värnnummer, namn..."
+        autocomplete="off"
+    >
+
+
+    <div class="image-library-filters">
+
+        <button
+            type="button"
+            class="image-filter active"
+            data-prefix=""
+        >
+            Alla
+        </button>
+
+        <button
+            type="button"
+            class="image-filter"
+            data-prefix="databas/"
+        >
+            Databas
+        </button>
+
+        <button
+            type="button"
+            class="image-filter"
+            data-prefix="varn/"
+        >
+            Värn
+        </button>
+
+        <button
+            type="button"
+            class="image-filter"
+            data-prefix="stridsvagn/"
+        >
+            Övrigt
+        </button>
+
+    </div>
+
+
+    <div class="image-library-grid">
+
+        {% for image in image_library %}
+
+        <button
+            type="button"
+            class="image-library-item gallery-library-item"
+            data-image-url="{{ image.url }}"
+            data-image-key="{{ image.key|lower }}"
+            title="{{ image.key }}"
+        >
+
+            <img
+                src="{{ image.url }}"
+                alt="{{ image.key }}"
+                loading="lazy"
+            >
+
+            <span>
+                {{ image.key }}
+            </span>
+
+        </button>
+
+        {% endfor %}
+
+    </div>
+
+</div>
+
+            <div class="form-group full">
+
+                <label for="description">
+                    Kort beskrivning
+                </label>
+
+<textarea
+    id="description"
+    name="description"
+>{{ post.description if post and post.description else '' }}</textarea>
+
+                <p class="field-help">
+                    Visas på kortet i databasen.
+                </p>
+
+            </div>
+
+
+            <div class="form-group full">
+
+                <label for="intro">
+                    Introduktion
+                </label>
+
+<textarea
+    id="intro"
+    name="intro"
+>{{ post.intro if post and post.intro else '' }}</textarea>
+
+                <p class="field-help">
+                    Visas högst upp på objektets informationssida.
+                </p>
+
+            </div>
+
+
+            <div class="form-group full">
+
+                <label for="connection_text">
+                    Koppling till Skånelinjen
+                </label>
+
+<textarea
+    id="connection_text"
+    name="connection_text"
+    class="large"
+>{{ post.connection_text if post and post.connection_text else '' }}</textarea>
+
+            </div>
+
+
+            <div class="form-group full">
+
+                <label for="history">
+                    Historik
+                </label>
+
+<textarea
+    id="history"
+    name="history"
+    class="large"
+>{{ post.history if post and post.history else '' }}</textarea>
+
+            </div>
+
+            <div class="form-group full">
+
+    <label>
+        Fakta
+    </label>
+
+    <p class="field-help">
+        Lägg till valfria faktarader för objektet.
+    </p>
+
+
+    <div id="facts-container">
+
+        {% for fact in facts %}
+
+        <div class="fact-editor-row">
+
+            <input
+                type="text"
+                name="fact_label[]"
+                value="{{ fact.label }}"
+                placeholder="Exempel: Kaliber"
+            >
+
+            <input
+                type="text"
+                name="fact_value[]"
+                value="{{ fact.value }}"
+                placeholder="Exempel: 8 mm"
+            >
+
+            <button
+                type="button"
+                class="remove-fact-button"
+            >
+                Ta bort
+            </button>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+    <button
+        type="button"
+        id="add-fact-button"
+        class="button add-fact-button"
+    >
+        + Lägg till fakta
+    </button>
+
+</div>
+
+
+            <div class="form-group full">
+
+                <div class="checkbox-row">
+
+<input
+    type="checkbox"
+    id="published"
+    name="published"
+    {% if not post or post.published %}checked{% endif %}
+>
+
+                    <label for="published">
+                        Publicerad
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-actions">
+
+            <a
+                href="{{ url_for('admin_databas') }}"
+                class="button"
+            >
+                Avbryt
+            </a>
+
+<button
+    type="submit"
+    class="button button-primary"
+>
+    {% if post %}
+        Spara ändringar
+    {% else %}
+        Skapa databaspost
+    {% endif %}
+</button>
+
+        </div>
+
+    </form>
+
+    {% if post %}
+
+<form
+    method="POST"
+    action="{{ url_for('admin_databas_delete', post_id=post.id) }}"
+    class="delete-form"
+    onsubmit="return confirm('Är du säker på att du vill radera denna databaspost? Detta kan inte ångras.');"
+>
+
+    <button
+        type="submit"
+        class="button button-danger"
+    >
+        Radera post
+    </button>
+
+</form>
+
+{% endif %}
+
+</main>
+
+<script>
+
+    const factsContainer =
+        document.getElementById("facts-container");
+
+    const addFactButton =
+        document.getElementById("add-fact-button");
+
+
+    function connectRemoveButton(button) {
+
+        button.addEventListener("click", () => {
+
+            button
+                .closest(".fact-editor-row")
+                .remove();
+
+        });
+
+    }
+
+
+    document
+        .querySelectorAll(".remove-fact-button")
+        .forEach(connectRemoveButton);
+
+
+    addFactButton.addEventListener("click", () => {
+
+        const row =
+            document.createElement("div");
+
+        row.className = "fact-editor-row";
+
+
+        row.innerHTML = `
+            <input
+                type="text"
+                name="fact_label[]"
+                placeholder="Exempel: Kaliber"
+            >
+
+            <input
+                type="text"
+                name="fact_value[]"
+                placeholder="Exempel: 8 mm"
+            >
+
+            <button
+                type="button"
+                class="remove-fact-button"
+            >
+                Ta bort
+            </button>
+        `;
+
+
+        factsContainer.appendChild(row);
+
+
+        connectRemoveButton(
+            row.querySelector(
+                ".remove-fact-button"
+            )
+        );
+
+    });
+
+
+    // =================================
+    // BILDBIBLIOTEK
+    // =================================
+
+    const imageLibraryButton =
+        document.getElementById(
+            "toggle-image-library"
+        );
+
+    const imageLibrary =
+        document.getElementById(
+            "image-library"
+        );
+
+    const imageUrlInput =
+        document.getElementById(
+            "image_url"
+        );
+
+        const mainImageInput =
+    document.getElementById(
+        "main_image"
+    );
+
+    imageLibraryButton.addEventListener(
+        "click",
+        () => {
+
+            imageLibrary.hidden =
+                !imageLibrary.hidden;
+
+        }
+    );
+
+
+    document
+        .querySelectorAll(
+            ".image-library-item"
+        )
+        .forEach((item) => {
+
+            item.addEventListener(
+                "click",
+                () => {
+
+                    const imageUrl =
+                        item.dataset.imageUrl;
+
+                   imageUrlInput.value =
+    imageUrl;
+
+// Om en lokal fil tidigare valts,
+// avmarkera den.
+mainImageInput.value = "";
+
+imageLibrary.hidden =
+    true;
+
+                }
+            );
+
+        });
+
+// =================================
+// NY LOKAL HUVUDBILD
+// =================================
+
+mainImageInput.addEventListener(
+    "change",
+    () => {
+
+        if (
+            mainImageInput.files &&
+            mainImageInput.files.length > 0
+        ) {
+
+            // En ny uppladdning har valts.
+            // Ta bort eventuell vald
+            // biblioteksadress.
+            imageUrlInput.value = "";
+
+        }
+
+    }
+);
+
+
+    // =================================
+    // GALLERI - ÖPPNA / STÄNG BIBLIOTEK
+    // =================================
+
+    const openGalleryLibraryButton =
+        document.getElementById(
+            "open-gallery-library"
+        );
+
+    const closeGalleryLibraryButton =
+        document.getElementById(
+            "close-gallery-library"
+        );
+
+    const galleryImageLibrary =
+        document.getElementById(
+            "gallery-image-library"
+        );
+
+
+    openGalleryLibraryButton.addEventListener(
+        "click",
+        () => {
+
+            galleryImageLibrary.hidden = false;
+
+        }
+    );
+
+
+    closeGalleryLibraryButton.addEventListener(
+        "click",
+        () => {
+
+            galleryImageLibrary.hidden = true;
+
+        }
+    );
+
+
+        // =================================
+    // GALLERI - SÖK OCH FILTER
+    // =================================
+
+    const galleryImageSearch =
+        document.getElementById(
+            "gallery-image-search"
+        );
+
+    const galleryLibraryItems =
+        document.querySelectorAll(
+            ".gallery-library-item"
+        );
+
+    const galleryFilterButtons =
+        document.querySelectorAll(
+            ".image-filter"
+        );
+
+    const selectedGalleryImages =
+        document.getElementById(
+            "selected-gallery-images"
+        );
+
+    let activeGalleryPrefix = "";
+
+
+    function filterGalleryLibrary() {
+
+        const searchText =
+            galleryImageSearch
+                .value
+                .trim()
+                .toLowerCase();
+
+
+        galleryLibraryItems.forEach(
+            (item) => {
+
+                const key =
+                    item.dataset.imageKey || "";
+
+                const matchesSearch =
+                    key.includes(searchText);
+
+                const matchesPrefix =
+                    !activeGalleryPrefix ||
+                    key.startsWith(
+                        activeGalleryPrefix
+                    );
+
+
+                item.hidden =
+                    !(
+                        matchesSearch &&
+                        matchesPrefix
+                    );
+
+            }
+        );
+
+    }
+
+
+    galleryImageSearch.addEventListener(
+        "input",
+        filterGalleryLibrary
+    );
+
+
+    galleryFilterButtons.forEach(
+        (button) => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    galleryFilterButtons
+                        .forEach(
+                            (otherButton) => {
+
+                                otherButton
+                                    .classList
+                                    .remove("active");
+
+                            }
+                        );
+
+
+                    button
+                        .classList
+                        .add("active");
+
+
+                    activeGalleryPrefix =
+                        button.dataset.prefix || "";
+
+
+                    filterGalleryLibrary();
+
+                }
+            );
+
+        }
+    );
+
+
+    // =================================
+    // GALLERI - LÄGG TILL BILD
+    // =================================
+
+    function connectGalleryRemoveButton(
+        button
+    ) {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                button
+                    .closest(
+                        ".selected-gallery-item"
+                    )
+                    .remove();
+
+            }
+        );
+
+    }
+
+
+    document
+        .querySelectorAll(
+            ".remove-gallery-image"
+        )
+        .forEach(
+            connectGalleryRemoveButton
+        );
+
+
+    galleryLibraryItems.forEach(
+        (item) => {
+
+            item.addEventListener(
+                "click",
+                () => {
+
+                    const imageUrl =
+                        item.dataset.imageUrl;
+
+
+                    // Lägg inte till samma bild
+                    // två gånger.
+
+                    const alreadyExists =
+                        Array
+                            .from(
+                                selectedGalleryImages
+                                    .querySelectorAll(
+                                        ".selected-gallery-item"
+                                    )
+                            )
+                            .some(
+                                (selectedItem) =>
+                                    selectedItem
+                                        .dataset
+                                        .imageUrl
+                                        === imageUrl
+                            );
+
+
+                    if (alreadyExists) {
+                        return;
+                    }
+
+
+                    const galleryItem =
+                        document.createElement(
+                            "div"
+                        );
+
+                    galleryItem.className =
+                        "selected-gallery-item";
+
+                    galleryItem.dataset.imageUrl =
+                        imageUrl;
+
+
+                    galleryItem.innerHTML = `
+                        <img
+                            src="${imageUrl}"
+                            alt=""
+                            loading="lazy"
+                        >
+
+                        <input
+                            type="hidden"
+                            name="gallery_image_url[]"
+                            value="${imageUrl}"
+                        >
+
+                        <input
+                            type="text"
+                            name="gallery_caption[]"
+                            placeholder="Bildtext (valfritt)"
+                        >
+
+                        <button
+                            type="button"
+                            class="remove-gallery-image"
+                        >
+                            Ta bort
+                        </button>
+                    `;
+
+
+                    selectedGalleryImages
+                        .appendChild(
+                            galleryItem
+                        );
+
+
+                    connectGalleryRemoveButton(
+                        galleryItem
+                            .querySelector(
+                                ".remove-gallery-image"
+                            )
+                    );
+
+
+                    item
+                        .classList
+                        .add("selected");
+
+                }
+            );
+
+        }
+    );
+
+
+</script>
+
+</body>
+
+</html>

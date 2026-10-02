@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Stridsvagn m/40 – Skånelinjen</title>
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+            color: white;
+        }
+
+
+        /* =================================
+           SIDA
+           ================================= */
+
+        .info-page {
+            width: min(
+                1000px,
+                calc(100% - 32px)
+            );
+
+            margin:
+                40px
+                auto
+                80px;
+        }
+
+
+        /* =================================
+           TILLBAKA
+           ================================= */
+
+        .back-link {
+            display: inline-flex;
+
+            margin-bottom: 22px;
+
+            color: #aaa;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+
+        /* =================================
+           HERO
+           ================================= */
+
+        .hero {
+            overflow: hidden;
+
+            margin-bottom: 24px;
+
+            border: 1px solid #383838;
+            border-radius: 14px;
+
+            background: #292929;
+        }
+
+        .hero-image {
+            display: block;
+
+            width: 100%;
+            max-height: 520px;
+
+            object-fit: cover;
+        }
+
+        .hero-content {
+            padding: 25px;
+        }
+
+        .hero-category {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #999;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+
+        .hero h1 {
+            margin:
+                0
+                0
+                10px;
+
+            font-size: 38px;
+        }
+
+        .hero-intro {
+            max-width: 750px;
+
+            margin: 0;
+
+            color: #bbb;
+
+            line-height: 1.6;
+        }
+
+
+        /* =================================
+           INNEHÅLL
+           ================================= */
+
+        .info-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .info-block {
+            padding: 24px;
+
+            border: 1px solid #383838;
+            border-radius: 12px;
+
+            background: #292929;
+        }
+
+        .info-block.full {
+            grid-column: 1 / -1;
+        }
+
+        .info-block h2 {
+            margin:
+                0
+                0
+                17px;
+
+            font-size: 20px;
+        }
+
+        .info-block p {
+            margin: 0;
+
+            color: #bbb;
+
+            line-height: 1.7;
+        }
+
+
+        /* =================================
+           FAKTA
+           ================================= */
+
+        .fact-list {
+            display: grid;
+
+            gap: 0;
+        }
+
+        .fact-row {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding: 11px 0;
+
+            border-bottom: 1px solid #383838;
+        }
+
+        .fact-row:first-child {
+            padding-top: 0;
+        }
+
+        .fact-row:last-child {
+            padding-bottom: 0;
+
+            border-bottom: 0;
+        }
+
+        .fact-label {
+            color: #888;
+        }
+
+        .fact-value {
+            color: white;
+
+            font-weight: 700;
+
+            text-align: right;
+        }
+
+                /* =================================
+           BILDGALLERI
+           ================================= */
+
+        .database-gallery {
+            width: 100%;
+            margin-top: 30px;
+        }
+
+        .database-gallery-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(3, minmax(0, 1fr));
+
+            gap: 16px;
+
+            width: 100%;
+        }
+
+        .database-gallery-item {
+            min-width: 0;
+            margin: 0;
+        }
+
+        .database-gallery-image-button {
+            display: block;
+
+            width: 100%;
+            height: 180px;
+
+            padding: 0;
+
+            overflow: hidden;
+
+            border: 0;
+            border-radius: 10px;
+
+            background: #292929;
+
+            cursor: pointer;
+        }
+
+        .database-gallery-image-button img {
+            display: block;
+
+            width: 100%;
+            height: 100%;
+
+            max-width: 100%;
+
+            object-fit: cover;
+        }
+
+        .database-gallery-item figcaption {
+            margin-top: 8px;
+
+            color: #aaa;
+
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+/* =================================
+   LIGHTBOX
+   ================================= */
+
+#gallery-lightbox {
+    position: fixed !important;
+    inset: 0 !important;
+
+    width: 100vw !important;
+    height: 100vh !important;
+
+    z-index: 999999 !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 60px 80px !important;
+
+    background: rgba(0, 0, 0, 0.90) !important;
+}
+
+#gallery-lightbox[hidden] {
+    display: none !important;
+}
+
+#gallery-lightbox .gallery-lightbox-content {
+    display: flex;
+
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    max-width: calc(100vw - 180px);
+    max-height: calc(100vh - 100px);
+}
+
+#gallery-lightbox #gallery-lightbox-image {
+    display: block;
+
+    width: auto !important;
+    height: auto !important;
+
+    max-width: 100% !important;
+    max-height: calc(100vh - 180px) !important;
+
+    object-fit: contain;
+
+    border-radius: 8px;
+
+    box-shadow:
+        0 10px 50px
+        rgba(0, 0, 0, 0.7);
+}
+
+#gallery-lightbox .gallery-lightbox-caption {
+    margin: 14px 0 0;
+
+    color: white;
+
+    font-size: 15px;
+    text-align: center;
+}
+
+#gallery-lightbox .gallery-lightbox-close,
+#gallery-lightbox .gallery-lightbox-prev,
+#gallery-lightbox .gallery-lightbox-next {
+    position: absolute;
+
+    z-index: 1000000;
+
+    border: 0;
+
+    background: rgba(25, 25, 25, 0.75);
+    color: white;
+
+    cursor: pointer;
+}
+
+#gallery-lightbox .gallery-lightbox-close {
+    top: 20px;
+    right: 25px;
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 50%;
+
+    font-size: 34px;
+}
+
+#gallery-lightbox .gallery-lightbox-prev,
+#gallery-lightbox .gallery-lightbox-next {
+    top: 50%;
+
+    width: 52px;
+    height: 70px;
+
+    transform: translateY(-50%);
+
+    border-radius: 8px;
+
+    font-size: 44px;
+}
+
+#gallery-lightbox .gallery-lightbox-prev {
+    left: 18px;
+}
+
+#gallery-lightbox .gallery-lightbox-next {
+    right: 18px;
+}
+
+#gallery-lightbox .gallery-lightbox-close:hover,
+#gallery-lightbox .gallery-lightbox-prev:hover,
+#gallery-lightbox .gallery-lightbox-next:hover {
+    background: rgba(70, 70, 70, 0.95);
+}
+
+        /* =================================
+           MOBIL
+           ================================= */
+
+        @media (max-width: 700px) {
+
+            .info-page {
+                width: calc(100% - 24px);
+
+                margin-top: 24px;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .hero-content {
+                padding: 20px;
+            }
+
+            .hero-image {
+                max-height: 350px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-block.full {
+                grid-column: auto;
+            }
+                        .database-gallery-grid {
+                grid-template-columns:
+                    repeat(2, minmax(0, 1fr));
+            }
+
+            .database-gallery-image-button {
+                height: 140px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<main class="info-page">
+
+    <a
+        href="{{ url_for('databas') }}"
+        class="back-link"
+    >
+        ← Tillbaka till databasen
+    </a>
+
+
+<section class="hero">
+
+    {% if post.image_url %}
+
+        <img
+            src="{{ post.image_url }}"
+            alt="{{ post.title }}"
+            class="hero-image"
+        >
+
+    {% endif %}
+
+
+    <div class="hero-content">
+
+        <span class="hero-category">
+            {{ post.category }}
+        </span>
+
+        <h1>
+            {{ post.title }}
+        </h1>
+
+        <p class="hero-intro">
+            {{ post.intro or post.description or '' }}
+        </p>
+
+    </div>
+
+</section>
+
+
+<div class="info-grid">
+
+{% if facts %}
+
+<section class="info-block">
+
+    <h2>
+        Fakta
+    </h2>
+
+    <div class="fact-list">
+
+        {% for fact in facts %}
+
+        <div class="fact-row">
+
+            <span class="fact-label">
+                {{ fact.label }}
+            </span>
+
+            <span class="fact-value">
+                {{ fact.value }}
+            </span>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+
+{% if post.connection_text %}
+
+<section class="info-block">
+
+    <h2>
+        Koppling till Skånelinjen
+    </h2>
+
+    <p>
+        {{ post.connection_text }}
+    </p>
+
+</section>
+
+{% endif %}
+
+
+{% if post.history %}
+
+<section class="info-block full">
+
+    <h2>
+        Historik
+    </h2>
+
+    <p>
+        {{ post.history }}
+    </p>
+
+</section>
+
+{% endif %}
+
+    </div>
+
+    {% if gallery_images %}
+
+<section class="database-gallery">
+
+    <div class="database-section-heading">
+
+        <span class="database-section-kicker">
+            Bildmaterial
+        </span>
+
+        <h2>
+            Galleri
+        </h2>
+
+    </div>
+
+
+    <div class="database-gallery-grid">
+
+        {% for image in gallery_images %}
+
+        <figure class="database-gallery-item">
+
+            <button
+                type="button"
+                class="database-gallery-image-button"
+                data-image-url="{{ image.image_url }}"
+                data-image-caption="{{ image.caption or '' }}"
+            >
+
+                <img
+                    src="{{ image.image_url }}"
+                    alt="{{ image.caption or post.title }}"
+                    loading="lazy"
+                >
+
+            </button>
+
+
+            {% if image.caption %}
+
+            <figcaption>
+                {{ image.caption }}
+            </figcaption>
+
+            {% endif %}
+
+        </figure>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
+</main>
+
+<!-- =================================
+     BILD LIGHTBOX
+     ================================= -->
+
+<div
+    id="gallery-lightbox"
+    class="gallery-lightbox"
+    hidden
+>
+
+    <button
+        type="button"
+        class="gallery-lightbox-close"
+        aria-label="Stäng bild"
+    >
+        ×
+    </button>
+
+
+    <button
+        type="button"
+        class="gallery-lightbox-prev"
+        aria-label="Föregående bild"
+    >
+        ‹
+    </button>
+
+
+    <div class="gallery-lightbox-content">
+
+        <img
+            id="gallery-lightbox-image"
+            src=""
+            alt=""
+        >
+
+        <p
+            id="gallery-lightbox-caption"
+            class="gallery-lightbox-caption"
+        ></p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="gallery-lightbox-next"
+        aria-label="Nästa bild"
+    >
+        ›
+    </button>
+
+</div>
+
+<script>
+
+    // =================================
+    // GALLERI - LIGHTBOX
+    // =================================
+
+    const galleryButtons =
+        Array.from(
+            document.querySelectorAll(
+                ".database-gallery-image-button"
+            )
+        );
+
+    const lightbox =
+        document.getElementById(
+            "gallery-lightbox"
+        );
+        // Flytta lightboxen direkt under body.
+// Då kan inget annat element skapa ett lager ovanför den.
+if (lightbox) {
+    document.body.appendChild(lightbox);
+}
+
+    const lightboxImage =
+        document.getElementById(
+            "gallery-lightbox-image"
+        );
+
+    const lightboxCaption =
+        document.getElementById(
+            "gallery-lightbox-caption"
+        );
+
+    const closeLightboxButton =
+        document.querySelector(
+            ".gallery-lightbox-close"
+        );
+
+    const previousButton =
+        document.querySelector(
+            ".gallery-lightbox-prev"
+        );
+
+    const nextButton =
+        document.querySelector(
+            ".gallery-lightbox-next"
+        );
+
+    let currentGalleryIndex = 0;
+
+
+    function showGalleryImage(index) {
+
+        if (!galleryButtons.length) {
+            return;
+        }
+
+        if (index < 0) {
+            index = galleryButtons.length - 1;
+        }
+
+        if (index >= galleryButtons.length) {
+            index = 0;
+        }
+
+        currentGalleryIndex = index;
+
+        const button =
+            galleryButtons[index];
+
+        const imageUrl =
+            button.dataset.imageUrl;
+
+        const caption =
+            button.dataset.imageCaption || "";
+
+        lightboxImage.src =
+            imageUrl;
+
+        lightboxImage.alt =
+            caption;
+
+        lightboxCaption.textContent =
+            caption;
+
+        lightboxCaption.hidden =
+            !caption;
+    }
+
+
+    function openGalleryLightbox(index) {
+
+        showGalleryImage(index);
+
+        lightbox.hidden = false;
+
+        document.body.style.overflow =
+            "hidden";
+    }
+
+
+    function closeGalleryLightbox() {
+
+        lightbox.hidden = true;
+
+        document.body.style.overflow =
+            "";
+    }
+
+
+    galleryButtons.forEach(
+        (button, index) => {
+
+            button.addEventListener(
+                "click",
+                () => {
+                    openGalleryLightbox(index);
+                }
+            );
+
+        }
+    );
+
+
+    closeLightboxButton.addEventListener(
+        "click",
+        closeGalleryLightbox
+    );
+
+
+    previousButton.addEventListener(
+        "click",
+        () => {
+            showGalleryImage(
+                currentGalleryIndex - 1
+            );
+        }
+    );
+
+
+    nextButton.addEventListener(
+        "click",
+        () => {
+            showGalleryImage(
+                currentGalleryIndex + 1
+            );
+        }
+    );
+
+
+    lightbox.addEventListener(
+        "click",
+        (event) => {
+
+            if (event.target === lightbox) {
+                closeGalleryLightbox();
+            }
+
+        }
+    );
+
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (lightbox.hidden) {
+                return;
+            }
+
+            if (event.key === "Escape") {
+                closeGalleryLightbox();
+            }
+
+            if (event.key === "ArrowLeft") {
+                showGalleryImage(
+                    currentGalleryIndex - 1
+                );
+            }
+
+            if (event.key === "ArrowRight") {
+                showGalleryImage(
+                    currentGalleryIndex + 1
+                );
+            }
+
+        }
+    );
+
+</script>
+
+
+</body>
+
+</html>

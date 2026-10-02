@@ -27,9 +27,10 @@
 
     <h1>Skånelinjen</h1>
 
-    <nav>
-        <a href="/">Karta</a>
-        <a href="#">Om projektet</a>
+<nav>
+    <a href="/">Karta</a>
+    <a href="{{ url_for('databas') }}">Databas</a>
+    <a href="#">Om projektet</a>
         {% if session.get("user_id") %}
 
     <a href="{{ url_for('admin') }}">
