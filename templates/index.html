@@ -27,9 +27,10 @@
 
     <h1>Skånelinjen</h1>
 
-    <nav>
-        <a href="/">Karta</a>
-        <a href="#">Om projektet</a>
+<nav>
+    <a href="/">Karta</a>
+    <a href="{{ url_for('databas') }}">Databas</a>
+    <a href="#">Om projektet</a>
         {% if session.get("user_id") %}
 
     <a href="{{ url_for('admin') }}">
@@ -61,7 +62,37 @@
     class="mobile-menu"
 >
     <a href="/">Karta</a>
-    <a href="#">Om projektet</a>
+
+    <a href="#">
+        Om projektet
+    </a>
+
+    {% if session.get("user_id") %}
+
+        <a href="{{ url_for('admin') }}">
+            Admin
+        </a>
+
+        <form
+            action="{{ url_for('admin_logout') }}"
+            method="POST"
+            class="mobile-logout-form"
+        >
+            <button
+                type="submit"
+                class="mobile-logout-button"
+            >
+                Logga ut
+            </button>
+        </form>
+
+    {% else %}
+
+        <a href="{{ url_for('admin_login') }}">
+            Logga in
+        </a>
+
+    {% endif %}
 </div>
 
 
@@ -509,6 +540,14 @@
 <script
     src="{{ url_for('static', filename='js/map.js') }}"
 ></script>
+
+<!-- Cloudflare Web Analytics -->
+<script
+    type="module"
+    src="https://static.cloudflareinsights.com/beacon.min.js"
+    data-cf-beacon='{"token": "7a3a734869724b63bdcc59c8a85e208d"}'>
+</script>
+<!-- End Cloudflare Web Analytics -->
 
 </body>
 

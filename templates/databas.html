@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Databas – Skånelinjen</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+            color: white;
+        }
+
+
+        /* =================================
+           SIDA
+           ================================= */
+
+        .database-page {
+            width: min(
+                1200px,
+                calc(100% - 32px)
+            );
+
+            margin:
+                40px
+                auto
+                80px;
+        }
+
+
+        /* =================================
+           HEADER
+           ================================= */
+
+        .database-header {
+            margin-bottom: 35px;
+        }
+
+        .back-link {
+            display: inline-flex;
+
+            margin-bottom: 22px;
+
+            color: #aaa;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        .database-header h1 {
+            margin:
+                0
+                0
+                10px;
+
+            font-size: 40px;
+        }
+
+        .database-header p {
+            max-width: 700px;
+
+            margin: 0;
+
+            color: #aaa;
+
+            font-size: 16px;
+            line-height: 1.6;
+        }
+
+        /* =================================
+           SÖK OCH FILTER
+           ================================= */
+
+        .database-tools {
+            margin-bottom: 32px;
+        }
+
+        .search-box {
+            margin-bottom: 15px;
+        }
+
+        .search-box input {
+            width: 100%;
+
+            padding: 15px 17px;
+
+            border: 1px solid #3d3d3d;
+            border-radius: 9px;
+
+            outline: none;
+
+            background: #292929;
+            color: white;
+
+            font-family: inherit;
+            font-size: 16px;
+        }
+
+        .search-box input::placeholder {
+            color: #888;
+        }
+
+        .search-box input:focus {
+            border-color: #777;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+
+            gap: 9px;
+        }
+
+        .filter-button {
+            padding: 9px 14px;
+
+            border: 1px solid #444;
+            border-radius: 20px;
+
+            background: #292929;
+            color: #bbb;
+
+            font-family: inherit;
+            font-size: 13px;
+
+            cursor: pointer;
+
+            transition:
+                background .15s ease,
+                border-color .15s ease,
+                color .15s ease;
+        }
+
+        .filter-button:hover {
+            border-color: #666;
+
+            color: white;
+        }
+
+        .filter-button.active {
+            background: white;
+            border-color: white;
+
+            color: #1d1d1d;
+
+            font-weight: 700;
+        }
+
+        /* =================================
+           KORT
+           ================================= */
+
+        .database-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fill,
+                    minmax(280px, 1fr)
+                );
+
+            gap: 20px;
+        }
+
+        .database-card {
+            overflow: hidden;
+
+            background: #292929;
+
+            border: 1px solid #383838;
+            border-radius: 12px;
+
+            text-decoration: none;
+            color: white;
+
+            transition:
+                transform .15s ease,
+                border-color .15s ease;
+        }
+
+        .database-card:hover {
+            transform: translateY(-3px);
+
+            border-color: #666;
+        }
+
+        .card-image {
+            width: 100%;
+            height: 210px;
+
+            object-fit: cover;
+
+            display: block;
+
+            background: #202020;
+        }
+
+        .card-content {
+            padding: 18px;
+        }
+
+        .card-category {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #999;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: .7px;
+        }
+
+        .card-title {
+            margin:
+                0
+                0
+                9px;
+
+            font-size: 21px;
+        }
+
+        .card-description {
+            margin: 0;
+
+            color: #bbb;
+
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+
+        /* =================================
+           MOBIL
+           ================================= */
+
+        @media (max-width: 650px) {
+
+            .database-page {
+                width: calc(100% - 24px);
+
+                margin-top: 24px;
+            }
+
+            .database-header h1 {
+                font-size: 32px;
+            }
+
+            .database-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card-image {
+                height: 200px;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<main class="database-page">
+
+    <header class="database-header">
+
+        <a
+            href="{{ url_for('index') }}"
+            class="back-link"
+        >
+            ← Tillbaka till kartan
+        </a>
+
+        <h1>
+            Databas
+        </h1>
+
+        <p>
+            Utforska vapen, fordon, utrustning och andra
+            delar med anknytning till Skånelinjen.
+        </p>
+
+     </header>
+
+
+    <!-- =================================
+         SÖK OCH FILTER
+         ================================= -->
+
+    <section class="database-tools">
+
+        <div class="search-box">
+
+            <input
+                type="search"
+                id="databaseSearch"
+                placeholder="Sök i databasen..."
+                autocomplete="off"
+            >
+
+        </div>
+
+
+        <div class="filter-row">
+
+            <button
+                type="button"
+                class="filter-button active"
+                data-filter="alla"
+            >
+                Alla
+            </button>
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="vapen"
+            >
+                Vapen
+            </button>
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="fordon"
+            >
+                Fordon
+            </button>
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="utrustning"
+            >
+                Utrustning
+            </button>
+
+            <button
+                type="button"
+                class="filter-button"
+                data-filter="forsvarsverk"
+            >
+                Försvarsverk
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <section class="database-grid">
+
+{% for post in posts %}
+
+<a
+    href="/databas/{{ post.slug }}"
+    class="database-card"
+    data-category="{{ post.category }}"
+    data-search="{{ post.title }} {{ post.category }} {{ post.description or '' }}"
+>
+
+    {% if post.image_url %}
+
+        <img
+            src="{{ post.image_url }}"
+            alt="{{ post.title }}"
+            class="card-image"
+            loading="lazy"
+        >
+
+    {% endif %}
+
+
+    <div class="card-content">
+
+        <span class="card-category">
+            {{ post.category }}
+        </span>
+
+        <h2 class="card-title">
+            {{ post.title }}
+        </h2>
+
+        <p class="card-description">
+            {{ post.description or '' }}
+        </p>
+
+    </div>
+
+</a>
+
+{% endfor %}
+
+    </section>
+
+</main>
+
+
+<script>
+    const searchInput = document.getElementById(
+        "databaseSearch"
+    );
+
+    const filterButtons = document.querySelectorAll(
+        ".filter-button"
+    );
+
+    const databaseCards = document.querySelectorAll(
+        ".database-card"
+    );
+
+    let activeFilter = "alla";
+
+
+    function filterDatabase() {
+
+        const searchValue = searchInput.value
+            .trim()
+            .toLowerCase();
+
+
+        databaseCards.forEach(card => {
+
+            const category = (
+                card.dataset.category || ""
+            ).toLowerCase();
+
+            const searchText = (
+                card.dataset.search || ""
+            ).toLowerCase();
+
+
+            const matchesCategory =
+                activeFilter === "alla"
+                || category === activeFilter;
+
+
+            const matchesSearch =
+                searchValue === ""
+                || searchText.includes(searchValue);
+
+
+            if (
+                matchesCategory
+                && matchesSearch
+            ) {
+
+                card.style.display = "";
+
+            } else {
+
+                card.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+    searchInput.addEventListener(
+        "input",
+        filterDatabase
+    );
+
+
+    filterButtons.forEach(button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                filterButtons.forEach(
+                    otherButton => {
+                        otherButton.classList.remove(
+                            "active"
+                        );
+                    }
+                );
+
+
+                button.classList.add(
+                    "active"
+                );
+
+
+                activeFilter =
+                    button.dataset.filter;
+
+
+                filterDatabase();
+
+            }
+        );
+
+    });
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Stridsvagn m/40 – Skånelinjen</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+            color: white;
+        }
+
+
+        /* =================================
+           SIDA
+           ================================= */
+
+        .info-page {
+            width: min(
+                1000px,
+                calc(100% - 32px)
+            );
+
+            margin:
+                40px
+                auto
+                80px;
+        }
+
+
+        /* =================================
+           TILLBAKA
+           ================================= */
+
+        .back-link {
+            display: inline-flex;
+
+            margin-bottom: 22px;
+
+            color: #aaa;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+
+        /* =================================
+           HERO
+           ================================= */
+
+        .hero {
+            overflow: hidden;
+
+            margin-bottom: 24px;
+
+            border: 1px solid #383838;
+            border-radius: 14px;
+
+            background: #292929;
+        }
+
+        .hero-image {
+            display: block;
+
+            width: 100%;
+            max-height: 520px;
+
+            object-fit: cover;
+        }
+
+        .hero-content {
+            padding: 25px;
+        }
+
+        .hero-category {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #999;
+
+            font-size: 11px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            letter-spacing: .8px;
+        }
+
+        .hero h1 {
+            margin:
+                0
+                0
+                10px;
+
+            font-size: 38px;
+        }
+
+        .hero-intro {
+            max-width: 750px;
+
+            margin: 0;
+
+            color: #bbb;
+
+            line-height: 1.6;
+        }
+
+
+        /* =================================
+           INNEHÅLL
+           ================================= */
+
+        .info-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(2, 1fr);
+
+            gap: 20px;
+        }
+
+        .info-block {
+            padding: 24px;
+
+            border: 1px solid #383838;
+            border-radius: 12px;
+
+            background: #292929;
+        }
+
+        .info-block.full {
+            grid-column: 1 / -1;
+        }
+
+        .info-block h2 {
+            margin:
+                0
+                0
+                17px;
+
+            font-size: 20px;
+        }
+
+        .info-block p {
+            margin: 0;
+
+            color: #bbb;
+
+            line-height: 1.7;
+        }
+
+
+        /* =================================
+           FAKTA
+           ================================= */
+
+        .fact-list {
+            display: grid;
+
+            gap: 0;
+        }
+
+        .fact-row {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding: 11px 0;
+
+            border-bottom: 1px solid #383838;
+        }
+
+        .fact-row:first-child {
+            padding-top: 0;
+        }
+
+        .fact-row:last-child {
+            padding-bottom: 0;
+
+            border-bottom: 0;
+        }
+
+        .fact-label {
+            color: #888;
+        }
+
+        .fact-value {
+            color: white;
+
+            font-weight: 700;
+
+            text-align: right;
+        }
+
+
+        /* =================================
+           MOBIL
+           ================================= */
+
+        @media (max-width: 700px) {
+
+            .info-page {
+                width: calc(100% - 24px);
+
+                margin-top: 24px;
+            }
+
+            .hero h1 {
+                font-size: 30px;
+            }
+
+            .hero-content {
+                padding: 20px;
+            }
+
+            .hero-image {
+                max-height: 350px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-block.full {
+                grid-column: auto;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<main class="info-page">
+
+    <a
+        href="{{ url_for('databas') }}"
+        class="back-link"
+    >
+        ← Tillbaka till databasen
+    </a>
+
+
+    <section class="hero">
+
+        <img
+            src="https://pub-d8bbe1209afd400b84a4e6fc215c1898.r2.dev/stridsvagn/strvm-40.jpg"
+            alt="Stridsvagn m/40"
+            class="hero-image"
+        >
+
+        <div class="hero-content">
+
+            <span class="hero-category">
+                Fordon
+            </span>
+
+            <h1>
+                Stridsvagn m/40
+            </h1>
+
+            <p class="hero-intro">
+                Svensk stridsvagn från andra världskrigets
+                beredskapsår.
+            </p>
+
+        </div>
+
+    </section>
+
+
+    <div class="info-grid">
+
+        <section class="info-block">
+
+            <h2>
+                Fakta
+            </h2>
+
+            <div class="fact-list">
+
+                <div class="fact-row">
+                    <span class="fact-label">Typ</span>
+                    <span class="fact-value">Stridsvagn</span>
+                </div>
+
+                <div class="fact-row">
+                    <span class="fact-label">Beteckning</span>
+                    <span class="fact-value">Strv m/40</span>
+                </div>
+
+                <div class="fact-row">
+                    <span class="fact-label">Land</span>
+                    <span class="fact-value">Sverige</span>
+                </div>
+
+                <div class="fact-row">
+                    <span class="fact-label">Period</span>
+                    <span class="fact-value">Beredskapstiden</span>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <section class="info-block">
+
+            <h2>
+                Koppling till Skånelinjen
+            </h2>
+
+            <p>
+                Här kan information om fordonets koppling till
+                Skånelinjen, förbanden i området och dess användning
+                under beredskapstiden beskrivas.
+            </p>
+
+        </section>
+
+
+        <section class="info-block full">
+
+            <h2>
+                Historik
+            </h2>
+
+            <p>
+                Här kommer den längre historiska texten om
+                Stridsvagn m/40 att ligga.
+            </p>
+
+        </section>
+
+    </div>
+
+</main>
+
+</body>
+
+</html>

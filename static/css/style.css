@@ -1061,6 +1061,33 @@ body.varn-detail-page {
         border-bottom: 1px solid #444;
     }
 
+    .mobile-logout-form {
+        margin: 0;
+    }
+
+    .mobile-logout-button {
+        display: block;
+
+        width: 100%;
+
+        padding: 15px 20px;
+
+        border: none;
+        border-bottom: 1px solid #444;
+
+        background: #222;
+        color: white;
+
+        text-align: left;
+
+        font: inherit;
+
+        cursor: pointer;
+    }
+
+    .mobile-logout-button:hover {
+        background: #333;
+    }
 
     /* =====================================================
      *      MOBIL - KARTA
@@ -1567,16 +1594,11 @@ body.varn-detail-page{
  *   INFOGRID
  *   =========================== */
 
-.info-grid{
-
-    display:grid;
-
-    grid-template-columns:repeat(4,1fr);
-
-    gap:18px;
-
-    margin-bottom:35px;
-
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    margin-bottom: 35px;
 }
 
 .info-card{
@@ -1637,6 +1659,10 @@ body.varn-detail-page{
 
 }
 
+.preserve-lines {
+    white-space: pre-wrap;
+}
+
 .content-card h2{
 
     margin-top:0;
@@ -1678,6 +1704,131 @@ body.varn-detail-page{
     opacity:1;
 
 }
+/* Redigera-knappen */
+
+.varn-edit-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 25px;
+    margin-left: 12px;
+
+    padding: 9px 14px;
+
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 8px;
+
+    background: rgba(20,20,20,.55);
+    backdrop-filter: blur(10px);
+
+    color: white;
+    text-decoration: none;
+
+    font-size: 14px;
+    font-weight: 700;
+
+    transition:
+    background .15s ease,
+    border-color .15s ease;
+}
+
+.varn-edit-link:hover {
+    background: rgba(255,255,255,.15);
+    border-color: rgba(255,255,255,.45);
+}
+
+/* =================================
+ *  DATABAS - BILDGALLERI
+ *  ================================= */
+
+.database-gallery {
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 40px;
+
+    overflow: hidden;
+}
+
+.database-gallery h2 {
+    margin:
+    5px
+    0
+    0;
+}
+
+.database-section-kicker {
+    color: #888;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: .8px;
+}
+
+.database-gallery-grid {
+    display: grid;
+
+    grid-template-columns:
+    repeat(
+        auto-fill,
+        minmax(200px, 1fr)
+    );
+
+    gap: 16px;
+
+    width: 100%;
+    max-width: 100%;
+
+    margin-top: 18px;
+}
+
+.database-gallery-item {
+    min-width: 0;
+
+    margin: 0;
+
+    overflow: hidden;
+}
+
+.database-gallery-image-button {
+    display: block;
+
+    width: 100%;
+    max-width: 100%;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid #383838;
+    border-radius: 10px;
+
+    background: #222;
+
+    cursor: pointer;
+}
+
+.database-gallery-image-button img {
+    display: block;
+
+    width: 100%;
+    height: 180px;
+    max-width: 100%;
+
+    object-fit: cover;
+}
+
+.database-gallery-item figcaption {
+    margin-top: 8px;
+
+    color: #aaa;
+
+    font-size: 14px;
+    line-height: 1.4;
+}
 
 /* ===========================
  *   MOBIL
@@ -1715,4 +1866,9 @@ body.varn-detail-page{
 
     .info-card strong{
         font-size:13px;
+    }
+
+    .varn-edit-link {
+        margin-top: 12px;
+        margin-left: 0;
     }
