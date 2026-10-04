@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html lang="sv">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Bildbibliotek – Admin</title>
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background: #1d1d1d;
+            color: white;
+        }
+
+
+        /* =================================
+           SIDA
+           ================================= */
+
+        .admin-page {
+            width: min(
+                1100px,
+                calc(100% - 32px)
+            );
+
+            margin:
+                40px
+                auto
+                80px;
+        }
+
+
+        /* =================================
+           TOPP
+           ================================= */
+
+        .back-link {
+            display: inline-flex;
+
+            margin-bottom: 22px;
+
+            color: #aaa;
+
+            text-decoration: none;
+
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: white;
+        }
+
+        .admin-header {
+            margin-bottom: 30px;
+        }
+
+        .admin-header h1 {
+            margin:
+                0
+                0
+                8px;
+
+            font-size: 36px;
+        }
+
+        .admin-header p {
+            margin: 0;
+
+            color: #999;
+
+            line-height: 1.5;
+        }
+
+
+        /* =================================
+           KORT
+           ================================= */
+
+        .admin-card {
+            padding: 24px;
+
+            margin-bottom: 22px;
+
+            border: 1px solid #383838;
+            border-radius: 10px;
+
+            background: #292929;
+        }
+
+        .admin-card h2 {
+            margin:
+                0
+                0
+                20px;
+
+            font-size: 20px;
+        }
+
+
+        /* =================================
+           FORMULÄR
+           ================================= */
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        .form-group label {
+            display: block;
+
+            margin-bottom: 8px;
+
+            color: #aaa;
+
+            font-size: 12px;
+            font-weight: 700;
+
+            text-transform: uppercase;
+            letter-spacing: .7px;
+        }
+
+        select,
+        input[type="file"] {
+            width: 100%;
+
+            padding: 12px;
+
+            border: 1px solid #555;
+            border-radius: 8px;
+
+            background: #1d1d1d;
+            color: white;
+
+            font: inherit;
+        }
+
+        select:focus,
+        input[type="file"]:focus {
+            outline: none;
+            border-color: #888;
+        }
+
+
+        /* =================================
+           FILVÄLJARE
+           ================================= */
+
+        .image-upload-info {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 15px;
+
+            margin-top: 9px;
+
+            color: #888;
+
+            font-size: 13px;
+        }
+
+        .selected-images {
+            display: grid;
+
+            gap: 6px;
+
+            margin-bottom: 20px;
+        }
+
+        .selected-image-name {
+            padding:
+                8px
+                10px;
+
+            border-radius: 6px;
+
+            background: #222;
+
+            color: #aaa;
+
+            font-size: 13px;
+
+            overflow-wrap: anywhere;
+        }
+
+
+        /* =================================
+           KNAPPAR
+           ================================= */
+
+        .button {
+            display: inline-flex;
+
+            align-items: center;
+            justify-content: center;
+
+            padding: 11px 17px;
+
+            border: 1px solid #555;
+            border-radius: 8px;
+
+            background: #292929;
+            color: white;
+
+            text-decoration: none;
+
+            font-size: 14px;
+
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background: #353535;
+        }
+
+        .button-primary {
+            background: white;
+            border-color: white;
+
+            color: #1d1d1d;
+
+            font-weight: 700;
+        }
+
+        .button-primary:hover {
+            background: #ddd;
+        }
+
+        .button:disabled {
+            opacity: .4;
+
+            cursor: not-allowed;
+        }
+
+
+        /* =================================
+           RESULTAT
+           ================================= */
+
+        .upload-results {
+            display: grid;
+
+            gap: 8px;
+        }
+
+        .upload-result {
+            display: flex;
+
+            justify-content: space-between;
+
+            gap: 20px;
+
+            padding:
+                12px
+                14px;
+
+            border: 1px solid #383838;
+            border-radius: 8px;
+
+            background: #222;
+
+            font-size: 13px;
+        }
+
+        .upload-result span {
+            color: #aaa;
+
+            text-align: right;
+        }
+
+        .upload-result-success span {
+            color: #b7d8b7;
+        }
+
+        .upload-result-duplicate span {
+            color: #e0c487;
+        }
+
+        .upload-result-error span {
+            color: #e39b9b;
+        }
+
+
+        /* =================================
+           FLASH
+           ================================= */
+
+        .flash-message {
+            padding: 14px 16px;
+
+            margin-bottom: 20px;
+
+            border: 1px solid #555;
+            border-radius: 8px;
+
+            background: #292929;
+
+            color: #ddd;
+        }
+
+
+        /* =================================
+           BILDBIBLIOTEK TOPP
+           ================================= */
+
+        .library-header {
+            display: flex;
+
+            justify-content: space-between;
+            align-items: flex-end;
+
+            gap: 20px;
+
+            margin-bottom: 20px;
+        }
+
+        .library-header h2 {
+            margin:
+                0
+                0
+                5px;
+        }
+
+        .library-count {
+            margin: 0;
+
+            color: #888;
+
+            font-size: 13px;
+        }
+
+        .library-filter {
+            width: auto;
+            min-width: 190px;
+        }
+
+
+        /* =================================
+           BILDER
+           ================================= */
+
+        .image-library-grid {
+            display: grid;
+
+            grid-template-columns:
+                repeat(
+                    auto-fill,
+                    minmax(190px, 1fr)
+                );
+
+            gap: 16px;
+        }
+
+        .image-library-item {
+            min-width: 0;
+
+            overflow: hidden;
+
+            border: 1px solid #383838;
+            border-radius: 10px;
+
+            background: #222;
+        }
+
+        .image-library-item img {
+            display: block;
+
+            width: 100%;
+            height: 170px;
+
+            object-fit: cover;
+
+            background: #111;
+        }
+
+        .image-library-info {
+            padding: 12px;
+        }
+
+        .image-library-name {
+            display: block;
+
+            margin-bottom: 5px;
+
+            overflow: hidden;
+
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            font-size: 13px;
+        }
+
+        .image-library-category {
+            display: block;
+
+            margin-bottom: 12px;
+
+            color: #888;
+
+            font-size: 11px;
+
+            text-transform: uppercase;
+            letter-spacing: .6px;
+        }
+
+        .copy-image-url {
+            width: 100%;
+        }
+
+.image-library-info > .button {
+    margin-top: 7px;
+}
+
+.edit-image-button {
+    width: 100%;
+}
+
+.image-delete-form {
+    margin-top: 7px;
+}
+
+.delete-image-button {
+    width: 100%;
+
+    color: #d89a9a;
+
+    border-color: #553b3b;
+}
+
+.delete-image-button:hover {
+    background: #3a2929;
+
+    color: white;
+}
+
+.image-edit-form {
+    margin-top: 14px;
+
+    padding-top: 14px;
+
+    border-top: 1px solid #383838;
+}
+
+.image-edit-form[hidden] {
+    display: none;
+}
+
+.image-edit-field {
+    margin-bottom: 12px;
+}
+
+.image-edit-field label {
+    display: block;
+
+    margin-bottom: 6px;
+
+    color: #888;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: .6px;
+}
+
+.image-edit-field input,
+.image-edit-field select {
+    width: 100%;
+
+    padding: 9px;
+
+    border: 1px solid #555;
+    border-radius: 6px;
+
+    background: #1d1d1d;
+    color: white;
+
+    font: inherit;
+    font-size: 13px;
+}
+
+.filename-input {
+    display: flex;
+
+    align-items: center;
+}
+
+.filename-input input {
+    min-width: 0;
+
+    border-radius:
+        6px
+        0
+        0
+        6px;
+}
+
+.filename-input span {
+    padding:
+        9px
+        8px;
+
+    border:
+        1px
+        solid
+        #555;
+
+    border-left: 0;
+
+    border-radius:
+        0
+        6px
+        6px
+        0;
+
+    background: #252525;
+    color: #888;
+
+    font-size: 13px;
+}
+
+.image-edit-actions {
+    display: grid;
+
+    grid-template-columns:
+        1fr
+        1fr;
+
+    gap: 8px;
+}
+
+.image-edit-actions .button {
+    width: 100%;
+}
+        /* =================================
+           TOMT BIBLIOTEK
+           ================================= */
+
+        .empty-state {
+            padding: 30px;
+
+            border: 1px solid #383838;
+            border-radius: 10px;
+
+            background: #222;
+
+            color: #aaa;
+
+            text-align: center;
+
+            grid-column: 1 / -1;
+        }
+
+
+        /* =================================
+           MOBIL
+           ================================= */
+
+        @media (max-width: 650px) {
+
+            .admin-page {
+                width: calc(100% - 24px);
+
+                margin-top: 24px;
+            }
+
+            .admin-header h1 {
+                font-size: 30px;
+            }
+
+            .admin-card {
+                padding: 18px;
+            }
+
+            .library-header {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .library-filter {
+                width: 100%;
+            }
+
+            .image-library-grid {
+                grid-template-columns:
+                    repeat(
+                        2,
+                        minmax(0, 1fr)
+                    );
+
+                gap: 10px;
+            }
+
+            .image-library-item img {
+                height: 135px;
+            }
+
+            .upload-result {
+                flex-direction: column;
+
+                gap: 5px;
+            }
+
+            .upload-result span {
+                text-align: left;
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+<main class="admin-page">
+
+    <a
+        href="{{ url_for('admin') }}"
+        class="back-link"
+    >
+        ← Tillbaka till admin
+    </a>
+
+
+    <header class="admin-header">
+
+        <h1>
+            Bildbibliotek
+        </h1>
+
+        <p>
+            Ladda upp och hantera bilder som används
+            på webbplatsen.
+        </p>
+
+    </header>
+
+
+    <!-- =================================
+         FLASH
+         ================================= -->
+
+    {% with messages =
+        get_flashed_messages(with_categories=true)
+    %}
+
+        {% if messages %}
+
+            {% for category, message in messages %}
+
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+
+            {% endfor %}
+
+        {% endif %}
+
+    {% endwith %}
+
+
+    <!-- =================================
+         UPPLADDNING
+         ================================= -->
+
+    <section class="admin-card">
+
+        <h2>
+            Ladda upp bilder
+        </h2>
+
+        <form
+            method="POST"
+            enctype="multipart/form-data"
+            id="image-upload-form"
+        >
+
+            <div class="form-group">
+
+                <label for="category">
+                    Kategori
+                </label>
+
+                <select
+                    id="category"
+                    name="category"
+                    required
+                >
+
+                    <option value="">
+                        Välj kategori
+                    </option>
+
+                    <option value="varn">
+                        Värn
+                    </option>
+
+                    <option value="stridsvagnar">
+                        Stridsvagnar
+                    </option>
+
+                    <option value="stralkastare">
+                        Strålkastare
+                    </option>
+
+                    <option value="draktander">
+                        Draktänder
+                    </option>
+
+                    <option value="ovrigt">
+                        Övrigt
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="images">
+                    Bilder
+                </label>
+
+                <input
+                    type="file"
+                    id="images"
+                    name="images"
+                    accept="image/*"
+                    multiple
+                    required
+                >
+
+                <div class="image-upload-info">
+
+                    <span>
+                        Max 20 bilder
+                    </span>
+
+                    <strong id="image-count">
+                        0 / 20
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div
+                id="selected-images"
+                class="selected-images"
+            ></div>
+
+
+            <button
+                type="submit"
+                class="button button-primary"
+                id="upload-button"
+            >
+                Ladda upp
+            </button>
+
+        </form>
+
+    </section>
+
+
+    <!-- =================================
+         RESULTAT
+         ================================= -->
+
+    {% if upload_results %}
+
+        <section class="admin-card">
+
+            <h2>
+                Resultat
+            </h2>
+
+            <div class="upload-results">
+
+                {% for result in upload_results %}
+
+                    <div
+                        class="
+                            upload-result
+                            upload-result-{{ result.status }}
+                        "
+                    >
+
+                        <strong>
+                            {{ result.filename }}
+                        </strong>
+
+                        <span>
+
+                            {% if result.status == "success" %}
+                                ✓
+                            {% elif result.status == "duplicate" %}
+                                ⚠
+                            {% else %}
+                                ✕
+                            {% endif %}
+
+                            {{ result.message }}
+
+                        </span>
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+        </section>
+
+    {% endif %}
+
+
+    <!-- =================================
+         BILDBIBLIOTEK
+         ================================= -->
+
+    <section class="admin-card">
+
+        <div class="library-header">
+
+            <div>
+
+                <h2>
+                    Bildbibliotek
+                </h2>
+
+                <p class="library-count">
+                    {{ image_library|length }} bilder
+                </p>
+
+            </div>
+
+
+            <select
+                id="library-filter"
+                class="library-filter"
+            >
+
+                <option value="all">
+                    Alla kategorier
+                </option>
+
+                <option value="varn">
+                    Värn
+                </option>
+
+                <option value="stridsvagnar">
+                    Stridsvagnar
+                </option>
+
+                <option value="stralkastare">
+                    Strålkastare
+                </option>
+
+                <option value="draktander">
+                    Draktänder
+                </option>
+
+                <option value="ovrigt">
+                    Övrigt
+                </option>
+
+            </select>
+
+        </div>
+
+
+        <div class="image-library-grid">
+
+            {% for image in image_library %}
+
+                {% set key_parts =
+                    image.key.split('/')
+                %}
+
+                {% set image_category =
+                    key_parts[1]
+                    if key_parts|length > 2
+                    else 'ovrigt'
+                %}
+
+
+                <article
+                    class="image-library-item"
+                    data-category="{{ image_category }}"
+                >
+
+                    <img
+                        src="{{ image.url }}"
+                        alt=""
+                        loading="lazy"
+                    >
+
+
+                    <div class="image-library-info">
+
+                        <strong
+                            class="image-library-name"
+                            title="{{ image.key.split('/')[-1] }}"
+                        >
+                            {{ image.key.split('/')[-1] }}
+                        </strong>
+
+                        <span
+                            class="image-library-category"
+                        >
+                            {{ image_category }}
+                        </span>
+
+                        <button
+                            type="button"
+                            class="
+                                button
+                                copy-image-url
+                            "
+                            data-url="{{ image.url }}"
+                        >
+                            Kopiera URL
+                        </button>
+
+                        <button
+    type="button"
+    class="button edit-image-button"
+>
+    Redigera
+</button>
+
+<form
+    method="POST"
+    action="{{ url_for('admin_bilder_delete') }}"
+    class="image-delete-form"
+>
+
+    <input
+        type="hidden"
+        name="image_key"
+        value="{{ image.key }}"
+    >
+
+    <button
+        type="submit"
+        class="button delete-image-button"
+    >
+        Radera
+    </button>
+
+</form>
+
+<form
+    method="POST"
+    action="{{ url_for('admin_bilder_edit') }}"
+    class="image-edit-form"
+    hidden
+>
+
+    <input
+        type="hidden"
+        name="old_key"
+        value="{{ image.key }}"
+    >
+
+
+    <div class="image-edit-field">
+
+        <label>
+            Filnamn
+        </label>
+
+        <div class="filename-input">
+
+            <input
+                type="text"
+                name="new_name"
+                value="{{ image.key.split('/')[-1].rsplit('.', 1)[0] }}"
+                required
+            >
+
+            <span>
+                .webp
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <div class="image-edit-field">
+
+        <label>
+            Kategori
+        </label>
+
+        <select
+            name="new_category"
+            required
+        >
+
+            <option
+                value="varn"
+                {% if image_category == "varn" %}
+                    selected
+                {% endif %}
+            >
+                Värn
+            </option>
+
+            <option
+                value="stridsvagnar"
+                {% if image_category == "stridsvagnar" %}
+                    selected
+                {% endif %}
+            >
+                Stridsvagnar
+            </option>
+
+            <option
+                value="stralkastare"
+                {% if image_category == "stralkastare" %}
+                    selected
+                {% endif %}
+            >
+                Strålkastare
+            </option>
+
+            <option
+                value="draktander"
+                {% if image_category == "draktander" %}
+                    selected
+                {% endif %}
+            >
+                Draktänder
+            </option>
+
+            <option
+                value="ovrigt"
+                {% if image_category == "ovrigt" %}
+                    selected
+                {% endif %}
+            >
+                Övrigt
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div class="image-edit-actions">
+
+        <button
+            type="button"
+            class="button cancel-image-edit"
+        >
+            Avbryt
+        </button>
+
+        <button
+            type="submit"
+            class="button button-primary"
+        >
+            Spara
+        </button>
+
+    </div>
+
+</form>
+
+                    </div>
+
+                </article>
+
+
+            {% else %}
+
+                <div class="empty-state">
+                    Det finns inga bilder i
+                    bildbiblioteket ännu.
+                </div>
+
+            {% endfor %}
+
+        </div>
+
+    </section>
+
+</main>
+
+
+<script>
+
+/* =================================
+ * VALDA BILDER
+ * ================================= */
+
+const imageInput =
+document.getElementById("images");
+
+const imageCount =
+document.getElementById("image-count");
+
+const selectedImages =
+document.getElementById("selected-images");
+
+const uploadButton =
+document.getElementById("upload-button");
+
+
+imageInput.addEventListener(
+    "change",
+    () => {
+
+        const files =
+        Array.from(imageInput.files);
+
+        imageCount.textContent =
+        `${files.length} / 20`;
+
+        selectedImages.innerHTML = "";
+
+
+        if (files.length > 20) {
+
+            imageCount.textContent =
+            `${files.length} / 20 – för många`;
+
+            uploadButton.disabled = true;
+
+        } else {
+
+            uploadButton.disabled = false;
+
+        }
+
+
+        files.forEach(
+            file => {
+
+                const item =
+                document.createElement("div");
+
+                item.className =
+                "selected-image-name";
+
+                item.textContent =
+                file.name;
+
+                selectedImages.appendChild(
+                    item
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =================================
+ * FILTRERA BILDER
+ * ================================= */
+
+const libraryFilter =
+document.getElementById(
+    "library-filter"
+);
+
+
+libraryFilter.addEventListener(
+    "change",
+    () => {
+
+        const category =
+        libraryFilter.value;
+
+        document
+        .querySelectorAll(
+            ".image-library-item"
+        )
+        .forEach(
+            item => {
+
+                if (
+                    category === "all" ||
+                    item.dataset.category ===
+                    category
+                ) {
+
+                    item.style.display = "";
+
+                } else {
+
+                    item.style.display = "none";
+
+                }
+
+            }
+        );
+
+    }
+);
+
+
+/* =================================
+ * KOPIERA URL
+ * ================================= */
+
+document
+.querySelectorAll(
+    ".copy-image-url"
+)
+.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            async () => {
+
+                await navigator.clipboard.writeText(
+                    button.dataset.url
+                );
+
+                const oldText =
+                button.textContent;
+
+                button.textContent =
+                "Kopierad ✓";
+
+                setTimeout(
+                    () => {
+
+                        button.textContent =
+                        oldText;
+
+                    },
+                    1500
+                );
+
+            }
+        );
+
+    }
+);
+
+/* =================================
+ * REDIGERA BILD
+ * ================================= */
+
+document
+.querySelectorAll(
+    ".edit-image-button"
+)
+.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const card =
+                button.closest(
+                    ".image-library-item"
+                );
+
+                const form =
+                card.querySelector(
+                    ".image-edit-form"
+                );
+
+                form.hidden = false;
+
+                button.hidden = true;
+
+            }
+        );
+
+    }
+);
+
+
+/* =================================
+ * AVBRYT REDIGERING
+ * ================================= */
+
+document
+.querySelectorAll(
+    ".cancel-image-edit"
+)
+.forEach(
+    button => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                const card =
+                button.closest(
+                    ".image-library-item"
+                );
+
+                const form =
+                card.querySelector(
+                    ".image-edit-form"
+                );
+
+                const editButton =
+                card.querySelector(
+                    ".edit-image-button"
+                );
+
+                form.hidden = true;
+
+                editButton.hidden = false;
+
+            }
+        );
+
+    }
+);
+
+
+/* =================================
+ * RADERA BILD
+ * ================================= */
+
+document
+.querySelectorAll(
+    ".image-delete-form"
+)
+.forEach(
+    form => {
+
+        form.addEventListener(
+            "submit",
+            event => {
+
+                const card =
+                form.closest(
+                    ".image-library-item"
+                );
+
+                const filename =
+                card.querySelector(
+                    ".image-library-name"
+                ).textContent.trim();
+
+
+                const confirmed =
+                window.confirm(
+                    `Radera "${filename}" permanent från bildbiblioteket?\n\nDetta går inte att ångra.`
+                );
+
+
+                if (!confirmed) {
+
+                    event.preventDefault();
+
+                }
+
+            }
+        );
+
+    }
+);
+
+</script>
+
+</body>
+
+</html>

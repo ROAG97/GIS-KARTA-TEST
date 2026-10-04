@@ -20,7 +20,8 @@ from flask import (
     request,
     redirect,
     url_for,
-    session
+    session,
+    flash
 )
 
 from werkzeug.security import check_password_hash
@@ -191,6 +192,301 @@ def login_required(function):
 # =================================
 # BILDUPPLADDNING TILL R2
 # =================================
+
+def upload_r2_library_image(image_file, category):
+
+    # =================================
+    # KATEGORI
+    # =================================
+
+    allowed_categories = {
+        "varn",
+        "stridsvagnar",
+        "stralkastare",
+        "draktander",
+        "ovrigt"
+    }
+
+    if category not in allowed_categories:
+        raise ValueError("Ogiltig bildkategori.")
+
+    # =================================
+    # FILNAMN
+    # =================================
+
+    original_name = os.path.splitext(
+        image_file.filename
+    )[0]
+
+    safe_name = re.sub(
+        r"[^a-zA-Z0-9_-]+",
+        "-",
+        original_name
+    ).strip("-")
+
+    if not safe_name:
+        raise ValueError(
+            "Bilden saknar ett giltigt filnamn."
+        )
+
+    filename = f"{safe_name}.webp"
+
+    object_key = (
+        f"bilder/{category}/{filename}"
+    )
+
+    # =================================
+    # KONTROLLERA DUBBLETT
+    # =================================
+
+    try:
+
+        r2_client.head_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=object_key
+        )
+
+        raise FileExistsError(
+            f"{filename} finns redan i {category}."
+        )
+
+    except r2_client.exceptions.ClientError as error:
+
+        error_code = (
+            error.response
+            .get("Error", {})
+            .get("Code")
+        )
+
+        if error_code not in (
+            "404",
+            "NoSuchKey",
+            "NotFound"
+        ):
+            raise
+
+    # =================================
+    # ÖPPNA OCH BEARBETA BILD
+    # =================================
+
+    image = Image.open(image_file)
+
+    image = ImageOps.exif_transpose(image)
+
+    if image.mode not in ("RGB", "RGBA"):
+        image = image.convert("RGB")
+
+    image.thumbnail(
+        (3000, 3000),
+        Image.Resampling.LANCZOS
+    )
+
+    # =================================
+    # WEBP
+    # =================================
+
+    output = io.BytesIO()
+
+    image.save(
+        output,
+        format="WEBP",
+        quality=92,
+        method=6
+    )
+
+    output.seek(0)
+
+    # =================================
+    # LADDA UPP TILL R2
+    # =================================
+
+    r2_client.upload_fileobj(
+        output,
+        R2_BUCKET_NAME,
+        object_key,
+        ExtraArgs={
+            "ContentType": "image/webp"
+        }
+    )
+
+    return {
+        "filename": filename,
+        "category": category,
+        "key": object_key,
+        "url": (
+            f"{R2_PUBLIC_URL.rstrip('/')}/"
+            f"{object_key}"
+        )
+    }
+
+def move_r2_library_image(
+    old_key,
+    new_name,
+    new_category
+):
+
+    # =================================
+    # TILLÅTNA KATEGORIER
+    # =================================
+
+    allowed_categories = {
+        "varn",
+        "stridsvagnar",
+        "stralkastare",
+        "draktander",
+        "ovrigt"
+    }
+
+    if new_category not in allowed_categories:
+        raise ValueError(
+            "Ogiltig bildkategori."
+        )
+
+
+    # =================================
+    # SÄKERT FILNAMN
+    # =================================
+
+    # Om .webp skrivits i fältet
+    # tar vi bort ändelsen först.
+    new_name = os.path.splitext(
+        new_name
+    )[0]
+
+    safe_name = re.sub(
+        r"[^a-zA-Z0-9_-]+",
+        "-",
+        new_name
+    ).strip("-")
+
+    if not safe_name:
+        raise ValueError(
+            "Bilden måste ha ett giltigt namn."
+        )
+
+
+    # =================================
+    # NY SÖKVÄG I R2
+    # =================================
+
+    new_key = (
+        f"bilder/"
+        f"{new_category}/"
+        f"{safe_name}.webp"
+    )
+
+
+    # Ingenting har ändrats
+    if old_key == new_key:
+
+        return {
+            "key": old_key,
+            "url": (
+                f"{R2_PUBLIC_URL.rstrip('/')}/"
+                f"{old_key}"
+            )
+        }
+
+
+    # =================================
+    # KONTROLLERA DUBBLETT
+    # =================================
+
+    try:
+
+        r2_client.head_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=new_key
+        )
+
+        raise FileExistsError(
+            f"{safe_name}.webp finns redan "
+            f"i kategorin {new_category}."
+        )
+
+    except r2_client.exceptions.ClientError as error:
+
+        error_code = (
+            error.response
+            .get("Error", {})
+            .get("Code")
+        )
+
+        if error_code not in (
+            "404",
+            "NoSuchKey",
+            "NotFound"
+        ):
+            raise
+
+
+    # =================================
+    # KONTROLLERA ORIGINAL
+    # =================================
+
+    try:
+
+        r2_client.head_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=old_key
+        )
+
+    except r2_client.exceptions.ClientError:
+
+        raise FileNotFoundError(
+            "Originalbilden finns inte längre i R2."
+        )
+
+
+    # =================================
+    # KOPIERA TILL NY PLATS
+    # =================================
+
+    r2_client.copy_object(
+        Bucket=R2_BUCKET_NAME,
+
+        CopySource={
+            "Bucket": R2_BUCKET_NAME,
+            "Key": old_key
+        },
+
+        Key=new_key,
+
+        ContentType="image/webp",
+
+        MetadataDirective="REPLACE"
+    )
+
+
+    # =================================
+    # KONTROLLERA NYA FILEN
+    # =================================
+
+    r2_client.head_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=new_key
+    )
+
+
+    # =================================
+    # RADERA GAMLA FILEN
+    # =================================
+
+    r2_client.delete_object(
+        Bucket=R2_BUCKET_NAME,
+        Key=old_key
+    )
+
+
+    return {
+        "key": new_key,
+        "filename": f"{safe_name}.webp",
+        "category": new_category,
+        "url": (
+            f"{R2_PUBLIC_URL.rstrip('/')}/"
+            f"{new_key}"
+        )
+    }
 
 def upload_database_image(image_file, slug):
 
@@ -1352,6 +1648,451 @@ def admin():
     return render_template(
         "admin.html",
         varn_lista=varn_lista
+    )
+
+@app.route(
+    "/admin/bilder",
+    methods=["GET", "POST"]
+)
+@login_required
+def admin_bilder():
+
+    upload_results = []
+
+    # =================================
+    # LADDA UPP BILDER
+    # =================================
+
+    if request.method == "POST":
+
+        category = request.form.get(
+            "category",
+            ""
+        ).strip()
+
+        images = request.files.getlist(
+            "images"
+        )
+
+        # Ta bort tomma filfält
+        images = [
+            image
+            for image in images
+            if image and image.filename
+        ]
+
+        # -----------------------------
+        # MAX 20 BILDER
+        # -----------------------------
+
+        if len(images) > 20:
+
+            flash(
+                "Du kan ladda upp max 20 bilder åt gången.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_bilder")
+            )
+
+        # -----------------------------
+        # INGA BILDER
+        # -----------------------------
+
+        if not images:
+
+            flash(
+                "Välj minst en bild.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_bilder")
+            )
+
+        # -----------------------------
+        # BEARBETA EN I TAGET
+        # -----------------------------
+
+        for image in images:
+
+            original_filename = (
+                image.filename
+            )
+
+            try:
+
+                result = (
+                    upload_r2_library_image(
+                        image,
+                        category
+                    )
+                )
+
+                upload_results.append({
+                    "status": "success",
+                    "filename": (
+                        result["filename"]
+                    ),
+                    "message": "Uppladdad"
+                })
+
+            except FileExistsError as error:
+
+                upload_results.append({
+                    "status": "duplicate",
+                    "filename": (
+                        original_filename
+                    ),
+                    "message": str(error)
+                })
+
+            except Exception as error:
+
+                print(
+                    "Bilduppladdning misslyckades:",
+                    original_filename,
+                    error
+                )
+
+                upload_results.append({
+                    "status": "error",
+                    "filename": (
+                        original_filename
+                    ),
+                    "message": (
+                        "Bilden kunde inte "
+                        "laddas upp."
+                    )
+                })
+
+    # =================================
+    # BILDBIBLIOTEK
+    # =================================
+
+    try:
+
+        image_library = (
+            get_r2_image_library()
+        )
+
+    except Exception as error:
+
+        print(
+            "Kunde inte läsa bildbibliotek:",
+            error
+        )
+
+        image_library = []
+
+    return render_template(
+        "admin_bilder.html",
+        image_library=image_library,
+        upload_results=upload_results
+    )
+
+# =================================
+# ADMIN - REDIGERA R2-BILD
+# =================================
+
+@app.route(
+    "/admin/bilder/redigera",
+    methods=["POST"]
+)
+@login_required
+def admin_bilder_edit():
+
+    old_key = request.form.get(
+        "old_key",
+        ""
+    ).strip()
+
+    new_name = request.form.get(
+        "new_name",
+        ""
+    ).strip()
+
+    new_category = request.form.get(
+        "new_category",
+        ""
+    ).strip()
+
+
+    # =================================
+    # KONTROLLERA DATA
+    # =================================
+
+    if not old_key:
+
+        flash(
+            "Bilden kunde inte identifieras.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_bilder")
+        )
+
+
+    if not new_name:
+
+        flash(
+            "Bilden måste ha ett namn.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_bilder")
+        )
+
+
+    # =================================
+    # FLYTTA / BYT NAMN
+    # =================================
+
+    try:
+
+        result = move_r2_library_image(
+            old_key,
+            new_name,
+            new_category
+        )
+
+        flash(
+            f'{result["filename"]} har uppdaterats.',
+            "success"
+        )
+
+
+    except FileExistsError as error:
+
+        flash(
+            str(error),
+            "error"
+        )
+
+
+    except FileNotFoundError as error:
+
+        flash(
+            str(error),
+            "error"
+        )
+
+
+    except ValueError as error:
+
+        flash(
+            str(error),
+            "error"
+        )
+
+
+    except Exception as error:
+
+        print(
+            "Kunde inte redigera R2-bild:",
+            error
+        )
+
+        flash(
+            "Bilden kunde inte uppdateras.",
+            "error"
+        )
+
+
+    return redirect(
+        url_for("admin_bilder")
+    )
+
+# =================================
+# ADMIN - RADERA R2-BILD
+# =================================
+
+@app.route(
+    "/admin/bilder/radera",
+    methods=["POST"]
+)
+@login_required
+def admin_bilder_delete():
+
+    image_key = request.form.get(
+        "image_key",
+        ""
+    ).strip()
+
+    # =================================
+    # KONTROLLERA OM BILDEN ANVÄNDS
+    # =================================
+
+    image_url = (
+        f"{R2_PUBLIC_URL.rstrip('/')}/"
+        f"{image_key}"
+    )
+
+    connection = get_db_connection()
+
+    try:
+
+        # Huvudbild på databaspost
+        main_image = connection.execute(
+            """
+            SELECT id, title
+            FROM database_posts
+            WHERE image_url = %s
+            LIMIT 1
+            """,
+            (image_url,)
+        ).fetchone()
+
+
+        # Bild i galleri
+        gallery_image = connection.execute(
+            """
+            SELECT
+                database_posts.id,
+                database_posts.title
+            FROM database_post_images
+            JOIN database_posts
+                ON database_posts.id =
+                   database_post_images.post_id
+            WHERE database_post_images.image_url = %s
+            LIMIT 1
+            """,
+            (image_url,)
+        ).fetchone()
+
+    finally:
+
+        connection.close()
+
+
+    if main_image or gallery_image:
+
+        used_by = (
+            main_image
+            if main_image
+            else gallery_image
+        )
+
+        flash(
+            f'Bilden används av databasposten '
+            f'"{used_by["title"]}" och kan därför '
+            f'inte raderas.',
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_bilder")
+        )
+
+    # =================================
+    # KONTROLLERA DATA
+    # =================================
+
+    if not image_key:
+
+        flash(
+            "Bilden kunde inte identifieras.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_bilder")
+        )
+
+
+    # Tillåt endast bildfiler från R2.
+    # Hindrar formuläret från att användas
+    # för att försöka radera andra objekt.
+    if not image_key.lower().endswith(
+        (".jpg", ".jpeg", ".png", ".webp")
+    ):
+
+        flash(
+            "Ogiltig bildfil.",
+            "error"
+        )
+
+        return redirect(
+            url_for("admin_bilder")
+        )
+
+
+    # =================================
+    # KONTROLLERA ATT BILDEN FINNS
+    # =================================
+
+    try:
+
+        r2_client.head_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=image_key
+        )
+
+    except r2_client.exceptions.ClientError as error:
+
+        error_code = (
+            error.response
+            .get("Error", {})
+            .get("Code")
+        )
+
+        if error_code in (
+            "404",
+            "NoSuchKey",
+            "NotFound"
+        ):
+
+            flash(
+                "Bilden finns inte längre i R2.",
+                "error"
+            )
+
+            return redirect(
+                url_for("admin_bilder")
+            )
+
+        raise
+
+
+    # =================================
+    # RADERA
+    # =================================
+
+    try:
+
+        r2_client.delete_object(
+            Bucket=R2_BUCKET_NAME,
+            Key=image_key
+        )
+
+        filename = (
+            image_key
+            .split("/")[-1]
+        )
+
+        flash(
+            f"{filename} har raderats.",
+            "success"
+        )
+
+    except Exception as error:
+
+        print(
+            "Kunde inte radera R2-bild:",
+            error
+        )
+
+        flash(
+            "Bilden kunde inte raderas.",
+            "error"
+        )
+
+
+    return redirect(
+        url_for("admin_bilder")
     )
 # =================================
 # STATISTIK
