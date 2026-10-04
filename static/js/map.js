@@ -150,7 +150,10 @@ const varnTypeIcons = {
     "PJV": "QGIS",
 
     "OBS": "Observationsvärn",
+    "Observationsvärn": "Observationsvärn",
+
     "SK": "Skyddsrum",
+    "Skyddsrum": "Skyddsrum",
 
     "LV": "QGIS",
     "KA": "QGIS",
