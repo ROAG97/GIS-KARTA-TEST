@@ -182,10 +182,10 @@ const varnTypeIcons = {
 function normalizeIconName(type) {
 
     if (!type) {
-        return "";
+        return "QGIS";
     }
 
-    return varnTypeIcons[type] || "";
+    return varnTypeIcons[type] || "QGIS";
 }
 /* =================================
  *  SKAPA IKON
