@@ -92,10 +92,18 @@ class PooledConnection:
         return self.connection.rollback()
 
 
-    def close(self):
+def close(self):
 
-        if self.connection is not None:
+    if self.connection is not None:
 
+        try:
+            # SELECT startar också en transaktion i psycopg.
+            # Om anropande kod inte redan har gjort commit()
+            # eller rollback() avslutar vi transaktionen här.
+            if self.connection.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
+                self.connection.rollback()
+
+        finally:
             self.pool.putconn(
                 self.connection
             )
