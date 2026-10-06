@@ -35,7 +35,12 @@
 <!-- BAKGRUNDSBILD -->
 <div
     class="varn-background"
-    style="background-image:url('{{ varn.properties.Bild }}');">
+    {% if detaljinfo.get("image_url") %}
+        style="background-image: url('{{ detaljinfo.get("image_url") }}');"
+    {% else %}
+        style="background-image: none;"
+    {% endif %}
+>
 </div>
 
 <!-- Dynamisk mörkning -->
@@ -141,7 +146,104 @@
     </section>
     {% endif %}
 
+    {% if gallery_images %}
+
+<section class="content-card">
+
+    <h2>Bildgalleri</h2>
+
+    <div class="varn-gallery">
+
+        {% for image in gallery_images %}
+
+            <figure class="varn-gallery-item">
+
+<button
+    type="button"
+    class="database-gallery-image-button"
+    data-image-url="{{ image.image_url }}"
+    data-image-caption="{{ image.caption or '' }}"
+>
+    <img
+        src="{{ image.image_url }}"
+        alt="{{ image.caption or '' }}"
+        loading="lazy"
+    >
+</button>
+
+                {% if image.caption %}
+
+                    <figcaption>
+                        {{ image.caption }}
+                    </figcaption>
+
+                {% endif %}
+
+            </figure>
+
+        {% endfor %}
+
+    </div>
+
+</section>
+
+{% endif %}
+
 </main>
+
+<!-- =================================
+     BILD LIGHTBOX
+     ================================= -->
+
+<div
+    id="gallery-lightbox"
+    class="gallery-lightbox"
+    hidden
+>
+
+    <button
+        type="button"
+        class="gallery-lightbox-close"
+        aria-label="Stäng bild"
+    >
+        ×
+    </button>
+
+
+    <button
+        type="button"
+        class="gallery-lightbox-prev"
+        aria-label="Föregående bild"
+    >
+        ‹
+    </button>
+
+
+    <div class="gallery-lightbox-content">
+
+        <img
+            id="gallery-lightbox-image"
+            src=""
+            alt=""
+        >
+
+        <p
+            id="gallery-lightbox-caption"
+            class="gallery-lightbox-caption"
+        ></p>
+
+    </div>
+
+
+    <button
+        type="button"
+        class="gallery-lightbox-next"
+        aria-label="Nästa bild"
+    >
+        ›
+    </button>
+
+</div>
 
 <script src="{{ url_for('static', filename='js/varn.js') }}"></script>
 

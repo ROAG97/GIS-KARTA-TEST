@@ -87,28 +87,29 @@ class PooledConnection:
 
         return self.connection.commit()
 
+
     def rollback(self):
 
         return self.connection.rollback()
 
 
-def close(self):
+    def close(self):
 
-    if self.connection is not None:
+        if self.connection is not None:
 
-        try:
-            # SELECT startar också en transaktion i psycopg.
-            # Om anropande kod inte redan har gjort commit()
-            # eller rollback() avslutar vi transaktionen här.
-            if self.connection.info.transaction_status != psycopg.pq.TransactionStatus.IDLE:
-                self.connection.rollback()
+            try:
+                if (
+                    self.connection.info.transaction_status
+                    != psycopg.pq.TransactionStatus.IDLE
+                ):
+                    self.connection.rollback()
 
-        finally:
-            self.pool.putconn(
-                self.connection
-            )
+            finally:
+                self.pool.putconn(
+                    self.connection
+                )
 
-            self.connection = None
+                self.connection = None
 
 
 def get_db_connection():
@@ -134,6 +135,15 @@ def create_database():
             plomberad TEXT,
             modell TEXT
         )
+    """)
+
+    # =================================
+    # VÄRN - OMSLAGSBILD
+    # =================================
+
+    connection.execute("""
+        ALTER TABLE varn
+        ADD COLUMN IF NOT EXISTS image_url TEXT
     """)
 
     # =================================
@@ -262,6 +272,36 @@ def create_database():
         CREATE INDEX IF NOT EXISTS
         idx_database_post_facts_post_id
         ON database_post_facts (post_id)
+    """)
+
+    # =================================
+    # VÄRN - BILDGALLERI
+    # =================================
+
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS varn_images (
+            id BIGSERIAL PRIMARY KEY,
+
+            varn_nr TEXT NOT NULL
+                REFERENCES varn(nr)
+                ON DELETE CASCADE,
+
+            image_url TEXT NOT NULL,
+
+            caption TEXT,
+
+            sort_order INTEGER NOT NULL
+                DEFAULT 0,
+
+            created_at TIMESTAMPTZ NOT NULL
+                DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
+    connection.execute("""
+        CREATE INDEX IF NOT EXISTS
+        idx_varn_images_varn_nr
+        ON varn_images (varn_nr)
     """)
     connection.commit()
     connection.close()

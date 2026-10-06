@@ -1022,19 +1022,42 @@ def varn(nr):
     detaljinfo.setdefault("bilder", [])
     detaljinfo.setdefault("dokument", [])
 
+    # -----------------------------
+    # BILDGALLERI
+    # -----------------------------
+
+    connection = get_db_connection()
+
+    gallery_images = connection.execute(
+        """
+        SELECT
+            image_url,
+            caption,
+            sort_order
+        FROM varn_images
+        WHERE varn_nr = %s
+        ORDER BY sort_order, id
+        """,
+        (str(nr),)
+    ).fetchall()
+
+    connection.close()
 
     # =========================
     # 4. SKICKA TILL HTML
     # =========================
 
     return render_template(
-      "varn.html",
-      varn=valt_varn,
-      detaljinfo=detaljinfo,
-      variant_namn=get_varn_type_name(
-          valt_varn["properties"].get("Variant")
+        "varn.html",
+        varn=valt_varn,
+        detaljinfo=detaljinfo,
+        variant_namn=get_varn_type_name(
+            valt_varn["properties"].get(
+                "Variant"
+            )
+        ),
+        gallery_images=gallery_images
     )
-)
 
 # =================================
 # ADMIN - DATABAS
@@ -2695,6 +2718,26 @@ def edit_varn(nr):
             ""
         ).strip()
 
+        # -----------------------------
+        # OMSLAGSBILD
+        # -----------------------------
+
+        image_url = request.form.get(
+            "image_url",
+            ""
+        ).strip()
+
+        # -----------------------------
+        # BILDGALLERI
+        # -----------------------------
+
+        gallery_image_urls = request.form.getlist(
+            "gallery_image_url[]"
+        )
+
+        gallery_captions = request.form.getlist(
+            "gallery_caption[]"
+        )
 
         # -----------------------------
         # SKETCHFAB / 3D-MODELL
@@ -2732,7 +2775,8 @@ def edit_varn(nr):
             "parkering": parkering,
             "tillganglighet": tillganglighet,
             "plomberad": plomberad,
-            "modell": modell
+            "modell": modell,
+            "image_url": image_url
         }
 
         field_labels = {
@@ -2741,7 +2785,8 @@ def edit_varn(nr):
             "parkering": "Parkering",
             "tillganglighet": "Tillgänglighet",
             "plomberad": "Plomberad",
-            "modell": "3D-modell"
+            "modell": "3D-modell",
+            "image_url": "Omslagsbild"
         }
 
         for field_name, new_value in new_data.items():
@@ -2781,45 +2826,96 @@ def edit_varn(nr):
                     )
                 )
         # -----------------------------
-        # SPARA I SQLITE
+        # SPARA I NEON
         # -----------------------------
 
         connection.execute(
             """
-INSERT INTO varn (
-    nr,
-    byggar,
-    historik,
-    parkering,
-    tillganglighet,
-    plomberad,
-    modell
-)
+            INSERT INTO varn (
+                nr,
+                byggar,
+                historik,
+                parkering,
+                tillganglighet,
+                plomberad,
+                modell,
+                image_url
+            )
 
-VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
 
-ON CONFLICT(nr)
-DO UPDATE SET
-
-    byggar = excluded.byggar,
-    historik = excluded.historik,
-    parkering = excluded.parkering,
-    tillganglighet = excluded.tillganglighet,
-    plomberad = excluded.plomberad,
-    modell = excluded.modell
+            ON CONFLICT(nr)
+            DO UPDATE SET
+                byggar = excluded.byggar,
+                historik = excluded.historik,
+                parkering = excluded.parkering,
+                tillganglighet = excluded.tillganglighet,
+                plomberad = excluded.plomberad,
+                modell = excluded.modell,
+                image_url = excluded.image_url
             """,
             (
- (
-    str(nr),
-    byggar,
-    historik,
-    parkering,
-    tillganglighet,
-    plomberad,
-    modell
-)
+                str(nr),
+                byggar,
+                historik,
+                parkering,
+                tillganglighet,
+                plomberad,
+                modell,
+                image_url or None
             )
         )
+
+        # -----------------------------
+        # SPARA BILDGALLERI
+        # -----------------------------
+
+        connection.execute(
+            """
+            DELETE FROM varn_images
+            WHERE varn_nr = %s
+            """,
+            (str(nr),)
+        )
+
+        for sort_order, gallery_image_url in enumerate(
+            gallery_image_urls
+        ):
+            gallery_image_url = (
+                gallery_image_url.strip()
+            )
+
+            if not gallery_image_url:
+                continue
+
+            gallery_caption = ""
+
+            if sort_order < len(
+                gallery_captions
+            ):
+                gallery_caption = (
+                    gallery_captions[
+                        sort_order
+                    ].strip()
+                )
+
+            connection.execute(
+                """
+                INSERT INTO varn_images (
+                    varn_nr,
+                    image_url,
+                    caption,
+                    sort_order
+                )
+                VALUES (%s, %s, %s, %s)
+                """,
+                (
+                    str(nr),
+                    gallery_image_url,
+                    gallery_caption or None,
+                    sort_order
+                )
+            )
 
         connection.commit()
         connection.close()
@@ -2865,11 +2961,33 @@ DO UPDATE SET
 
         detaljinfo = dict(detaljinfo)
 
+    # -----------------------------
+    # HÄMTA BILDGALLERI
+    # -----------------------------
+
+    connection = get_db_connection()
+
+    gallery_images = connection.execute(
+        """
+        SELECT
+            image_url,
+            caption,
+            sort_order
+        FROM varn_images
+        WHERE varn_nr = %s
+        ORDER BY sort_order, id
+        """,
+        (str(nr),)
+    ).fetchall()
+
+    connection.close()
 
     return render_template(
         "admin_edit_varn.html",
         varn=valt_varn,
-        detaljinfo=detaljinfo
+        detaljinfo=detaljinfo,
+        gallery_images=gallery_images,
+        image_library=get_r2_image_library()
     )
 # =================================
 # STARTA FLASK

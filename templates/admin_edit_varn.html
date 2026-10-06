@@ -388,6 +388,226 @@
 
 
         /* =================================
+   BILDBIBLIOTEK
+   ================================= */
+
+.image-library {
+    grid-column: 1 / -1;
+
+    padding: 18px;
+    margin-top: 15px;
+
+    border: 1px solid #444;
+    border-radius: 10px;
+
+    background: #202020;
+}
+
+.image-library-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+
+    margin-bottom: 15px;
+
+    color: #ccc;
+}
+
+.image-library-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(140px, 1fr)
+        );
+
+    gap: 12px;
+}
+
+.image-library-item {
+    min-width: 0;
+
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid #444;
+    border-radius: 8px;
+
+    background: #292929;
+    color: white;
+
+    text-align: left;
+
+    cursor: pointer;
+}
+
+.image-library-item:hover {
+    border-color: #888;
+}
+
+.image-library-item img {
+    display: block;
+
+    width: 100%;
+    height: 110px;
+
+    object-fit: cover;
+
+    background: #111;
+}
+
+.image-library-item span {
+    display: block;
+
+    padding: 8px;
+
+    overflow: hidden;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.image-library-search {
+    width: 100%;
+
+    margin-bottom: 12px;
+
+    padding: 12px;
+
+    border: 1px solid #444;
+    border-radius: 7px;
+
+    outline: none;
+
+    background: #292929;
+    color: white;
+
+    font: inherit;
+}
+
+.image-library-search:focus {
+    border-color: #777;
+}
+
+.image-library-filters {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+
+    margin-bottom: 15px;
+}
+
+.cover-image-filter,
+.gallery-image-filter {
+    padding: 7px 12px;
+
+    border: 1px solid #444;
+    border-radius: 20px;
+
+    background: #292929;
+    color: #bbb;
+
+    cursor: pointer;
+}
+
+.cover-image-filter:hover,
+.cover-image-filter.active,
+.gallery-image-filter:hover,
+.gallery-image-filter.active {
+    border-color: #888;
+
+    background: #444;
+    color: white;
+}
+
+
+/* =================================
+   BILDGALLERI
+   ================================= */
+
+.gallery-title-row {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: flex-start;
+
+    gap: 20px;
+}
+
+.selected-gallery-images {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(180px, 1fr)
+        );
+
+    gap: 15px;
+
+    margin-top: 15px;
+}
+
+.selected-gallery-item {
+    overflow: hidden;
+
+    border: 1px solid #444;
+    border-radius: 9px;
+
+    background: #202020;
+}
+
+.selected-gallery-item img {
+    display: block;
+
+    width: 100%;
+    height: 140px;
+
+    object-fit: cover;
+}
+
+.selected-gallery-item input[type="text"] {
+    width: calc(100% - 16px);
+
+    margin: 8px;
+
+    padding: 9px;
+
+    border: 1px solid #444;
+    border-radius: 6px;
+
+    background: #292929;
+    color: white;
+}
+
+.remove-gallery-image {
+    width: calc(100% - 16px);
+
+    margin:
+        0
+        8px
+        8px;
+
+    padding: 8px;
+
+    border: 1px solid #633;
+    border-radius: 6px;
+
+    background: #352020;
+    color: #ffb3b3;
+
+    cursor: pointer;
+}
+
+        /* =================================
            SURFPLATTA
            ================================= */
 
@@ -408,6 +628,133 @@
 
         }
 
+        /* =================================
+   BILDBIBLIOTEK
+   ================================= */
+
+.image-library {
+    grid-column: 1 / -1;
+    padding: 18px;
+    margin-top: 15px;
+
+    border: 1px solid #444;
+    border-radius: 10px;
+
+    background: #202020;
+}
+
+.image-library-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    gap: 15px;
+    margin-bottom: 15px;
+
+    color: #ccc;
+}
+
+.image-library-search {
+    width: 100%;
+
+    margin-bottom: 12px;
+    padding: 12px;
+
+    border: 1px solid #444;
+    border-radius: 7px;
+
+    background: #292929;
+    color: white;
+
+    font: inherit;
+}
+
+.image-library-filters {
+    display: flex;
+    flex-wrap: wrap;
+
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.cover-image-filter,
+.gallery-image-filter {
+    padding: 7px 12px;
+
+    border: 1px solid #444;
+    border-radius: 20px;
+
+    background: #292929;
+    color: #bbb;
+
+    cursor: pointer;
+}
+
+.cover-image-filter:hover,
+.cover-image-filter.active,
+.gallery-image-filter:hover,
+.gallery-image-filter.active {
+    border-color: #888;
+
+    background: #444;
+    color: white;
+}
+
+.image-library-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(140px, 1fr)
+        );
+
+    gap: 12px;
+}
+
+.image-library-item {
+    min-width: 0;
+    padding: 0;
+
+    overflow: hidden;
+
+    border: 1px solid #444;
+    border-radius: 8px;
+
+    background: #292929;
+    color: white;
+
+    text-align: left;
+    cursor: pointer;
+}
+
+.image-library-item:hover {
+    border-color: #888;
+}
+
+.image-library-item img {
+    display: block;
+
+    width: 100%;
+    height: 110px;
+
+    object-fit: cover;
+
+    background: #111;
+}
+
+.image-library-item span {
+    display: block;
+
+    padding: 8px;
+
+    overflow: hidden;
+
+    font-size: 11px;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
 
         /* =================================
            MOBIL
@@ -625,6 +972,168 @@
         method="POST"
         class="edit-form"
     >
+
+    <!-- =================================
+     OMSLAGSBILD
+     ================================= -->
+
+<div class="form-group">
+
+    <label>
+        Bakgrundsbild
+    </label>
+
+    <input
+        type="hidden"
+        name="image_url"
+        id="image_url"
+        value="{{ detaljinfo.image_url or '' }}"
+    >
+
+    <div
+        id="selected-cover-preview"
+        style="margin-top: 10px;"
+    >
+        {% if detaljinfo.image_url %}
+
+            <img
+                src="{{ detaljinfo.image_url }}"
+                alt="Nuvarande omslagsbild"
+                style="
+                    width: 220px;
+                    max-height: 150px;
+                    object-fit: cover;
+                    border-radius: 8px;
+                "
+            >
+
+        {% else %}
+
+            <p>Ingen omslagsbild vald.</p>
+
+        {% endif %}
+    </div>
+
+    <button
+        type="button"
+        id="choose-cover-button"
+        class="button"
+    >
+        Välj från bildbibliotek
+    </button>
+
+    <button
+    type="button"
+    id="remove-cover-button"
+    class="button"
+>
+    Ta bort bakgrundsbild
+</button>
+
+</div>
+
+<!-- =================================
+     OMSLAG - BILDBIBLIOTEK
+     ================================= -->
+
+<div
+    id="cover-image-library"
+    class="image-library"
+    hidden
+>
+
+    <div class="image-library-header">
+
+        <strong>
+            Välj Bakgrundsbild
+        </strong>
+
+        <button
+            type="button"
+            id="close-cover-library"
+            class="button"
+        >
+            Stäng
+        </button>
+
+    </div>
+
+
+    <input
+        type="search"
+        id="cover-image-search"
+        class="image-library-search"
+        placeholder="Sök bild, värnnummer, namn..."
+        autocomplete="off"
+    >
+
+
+    <div class="image-library-filters">
+
+        <button
+            type="button"
+            class="cover-image-filter active"
+            data-prefix=""
+        >
+            Alla
+        </button>
+
+        <button
+            type="button"
+            class="cover-image-filter"
+            data-prefix="databas/"
+        >
+            Databas
+        </button>
+
+        <button
+            type="button"
+            class="cover-image-filter"
+            data-prefix="varn/"
+        >
+            Värn
+        </button>
+
+        <button
+            type="button"
+            class="cover-image-filter"
+            data-prefix="stridsvagn/"
+        >
+            Övrigt
+        </button>
+
+    </div>
+
+
+    <div class="image-library-grid">
+
+        {% for image in image_library %}
+
+        <button
+            type="button"
+            class="image-library-item cover-library-item"
+            data-image-url="{{ image.url }}"
+            data-image-key="{{ image.key|lower }}"
+            title="{{ image.key }}"
+        >
+
+            <img
+                src="{{ image.url }}"
+                alt="{{ image.key }}"
+                loading="lazy"
+            >
+
+            <span>
+                {{ image.key }}
+            </span>
+
+        </button>
+
+        {% endfor %}
+
+    </div>
+
+</div>
 
 
         <!-- =================================
@@ -877,7 +1386,183 @@
                     embed-länken.
                 </div>
 
-            </div>
+    <!-- =================================
+     BILDGALLERI
+     ================================= -->
+
+<div class="form-group full">
+
+    <div class="gallery-title-row">
+
+        <div>
+            <label>
+                Bildgalleri
+            </label>
+
+            <p class="field-help">
+                Bilder som visas på värnets informationssida.
+            </p>
+        </div>
+
+        <button
+            type="button"
+            id="open-gallery-library"
+            class="button"
+        >
+            + Lägg till från bildbibliotek
+        </button>
+
+    </div>
+
+
+<div
+    id="selected-gallery-images"
+    class="selected-gallery-images"
+>
+
+    {% for image in gallery_images %}
+
+        <div
+            class="selected-gallery-item"
+            data-image-url="{{ image.image_url }}"
+        >
+
+            <img
+                src="{{ image.image_url }}"
+                alt=""
+                loading="lazy"
+            >
+
+            <input
+                type="hidden"
+                name="gallery_image_url[]"
+                value="{{ image.image_url }}"
+            >
+
+            <input
+                type="text"
+                name="gallery_caption[]"
+                value="{{ image.caption or '' }}"
+                placeholder="Bildtext (valfritt)"
+            >
+
+            <button
+                type="button"
+                class="remove-gallery-image"
+            >
+                Ta bort
+            </button>
+
+        </div>
+
+    {% endfor %}
+
+</div>
+
+    </div>
+
+    <!-- =================================
+     GALLERI - BILDBIBLIOTEK
+     ================================= -->
+
+<div
+    id="gallery-image-library"
+    class="image-library"
+    hidden
+>
+
+    <div class="image-library-header">
+
+        <strong>
+            Välj bilder till galleriet
+        </strong>
+
+        <button
+            type="button"
+            id="close-gallery-library"
+            class="button"
+        >
+            Stäng
+        </button>
+
+    </div>
+
+
+    <input
+        type="search"
+        id="gallery-image-search"
+        class="image-library-search"
+        placeholder="Sök bild, värnnummer, namn..."
+        autocomplete="off"
+    >
+
+
+    <div class="image-library-filters">
+
+        <button
+            type="button"
+            class="gallery-image-filter active"
+            data-prefix=""
+        >
+            Alla
+        </button>
+
+        <button
+            type="button"
+            class="gallery-image-filter"
+            data-prefix="databas/"
+        >
+            Databas
+        </button>
+
+        <button
+            type="button"
+            class="gallery-image-filter"
+            data-prefix="varn/"
+        >
+            Värn
+        </button>
+
+        <button
+            type="button"
+            class="gallery-image-filter"
+            data-prefix="stridsvagn/"
+        >
+            Övrigt
+        </button>
+
+    </div>
+
+
+    <div class="image-library-grid">
+
+        {% for image in image_library %}
+
+        <button
+            type="button"
+            class="image-library-item gallery-library-item"
+            data-image-url="{{ image.url }}"
+            data-image-key="{{ image.key|lower }}"
+            title="{{ image.key }}"
+        >
+
+            <img
+                src="{{ image.url }}"
+                alt="{{ image.key }}"
+                loading="lazy"
+            >
+
+            <span>
+                {{ image.key }}
+            </span>
+
+        </button>
+
+        {% endfor %}
+
+    </div>
+
+</div>
 
         </section>
 
@@ -911,6 +1596,384 @@
 
 </div>
 
+<script>
+
+// =================================
+// BAKGRUNDSBILD
+// =================================
+
+const chooseCoverButton =
+    document.getElementById(
+        "choose-cover-button"
+    );
+
+const closeCoverLibraryButton =
+    document.getElementById(
+        "close-cover-library"
+    );
+
+const coverImageLibrary =
+    document.getElementById(
+        "cover-image-library"
+    );
+
+    const removeCoverButton =
+    document.getElementById(
+        "remove-cover-button"
+    );
+
+    const coverImageInput =
+    document.getElementById(
+        "image_url"
+    );
+
+const selectedCoverPreview =
+    document.getElementById(
+        "selected-cover-preview"
+    );
+
+const coverLibraryItems =
+    document.querySelectorAll(
+        ".cover-library-item"
+    );
+
+chooseCoverButton.addEventListener(
+    "click",
+    () => {
+
+        coverImageLibrary.hidden = false;
+
+    }
+);
+
+
+closeCoverLibraryButton.addEventListener(
+    "click",
+    () => {
+
+        coverImageLibrary.hidden = true;
+
+    }
+);
+
+removeCoverButton.addEventListener(
+    "click",
+    () => {
+
+        coverImageInput.value = "";
+
+        selectedCoverPreview.innerHTML =
+            "<p>Ingen bakgrundsbild vald.</p>";
+
+    }
+);
+
+coverLibraryItems.forEach(
+    (item) => {
+
+        item.addEventListener(
+            "click",
+            () => {
+
+                const imageUrl =
+                    item.dataset.imageUrl;
+
+                coverImageInput.value =
+                    imageUrl;
+
+                selectedCoverPreview.innerHTML = `
+                    <img
+                        src="${imageUrl}"
+                        alt="Vald bakgrundsbild"
+                        style="
+                            width: 220px;
+                            max-height: 150px;
+                            object-fit: cover;
+                            border-radius: 8px;
+                        "
+                    >
+                `;
+
+                coverImageLibrary.hidden = true;
+
+            }
+        );
+
+    }
+);
+
+
+// =================================
+// BILDGALLERI
+// =================================
+
+
+const openGalleryLibraryButton =
+    document.getElementById(
+        "open-gallery-library"
+    );
+
+const closeGalleryLibraryButton =
+    document.getElementById(
+        "close-gallery-library"
+    );
+
+const galleryImageLibrary =
+    document.getElementById(
+        "gallery-image-library"
+    );
+
+    const galleryImageSearch =
+    document.getElementById(
+        "gallery-image-search"
+    );
+
+const galleryLibraryItems =
+    document.querySelectorAll(
+        ".gallery-library-item"
+    );
+
+const galleryFilterButtons =
+    document.querySelectorAll(
+        ".gallery-image-filter"
+    );
+
+let activeGalleryPrefix = "";
+
+const selectedGalleryImages =
+    document.getElementById(
+        "selected-gallery-images"
+    );
+
+
+openGalleryLibraryButton.addEventListener(
+    "click",
+    () => {
+
+        galleryImageLibrary.hidden = false;
+
+    }
+);
+
+
+closeGalleryLibraryButton.addEventListener(
+    "click",
+    () => {
+
+        galleryImageLibrary.hidden = true;
+
+    }
+);
+
+function filterGalleryLibrary() {
+
+    const searchText =
+        galleryImageSearch
+            .value
+            .trim()
+            .toLowerCase();
+
+    galleryLibraryItems.forEach(
+        (item) => {
+
+            const key =
+                item.dataset.imageKey || "";
+
+            const matchesSearch =
+                key.includes(searchText);
+
+            const matchesCategory =
+                !activeGalleryPrefix ||
+                key.startsWith(
+                    activeGalleryPrefix
+                );
+
+            item.hidden =
+                !(
+                    matchesSearch &&
+                    matchesCategory
+                );
+
+        }
+    );
+
+}
+
+
+galleryImageSearch.addEventListener(
+    "input",
+    filterGalleryLibrary
+);
+
+
+galleryFilterButtons.forEach(
+    (button) => {
+
+        button.addEventListener(
+            "click",
+            () => {
+
+                galleryFilterButtons.forEach(
+                    (otherButton) => {
+
+                        otherButton
+                            .classList
+                            .remove("active");
+
+                    }
+                );
+
+                button
+                    .classList
+                    .add("active");
+
+                activeGalleryPrefix =
+                    button.dataset.prefix || "";
+
+                filterGalleryLibrary();
+
+            }
+        );
+
+    }
+);
+
+
+function connectGalleryRemoveButton(
+    button
+) {
+
+    button.addEventListener(
+        "click",
+        () => {
+
+            const galleryItem =
+                button.closest(
+                    ".selected-gallery-item"
+                );
+
+            if (galleryItem) {
+                galleryItem.remove();
+            }
+
+        }
+    );
+
+}
+
+document
+    .querySelectorAll(
+        ".remove-gallery-image"
+    )
+    .forEach(
+        connectGalleryRemoveButton
+    );
+
+galleryLibraryItems.forEach(
+    (item) => {
+
+        item.addEventListener(
+            "click",
+            () => {
+
+                const imageUrl =
+                    item.dataset.imageUrl;
+
+
+                // Kontrollera om bilden
+                // redan finns i galleriet.
+
+                const alreadyExists =
+                    Array.from(
+                        selectedGalleryImages
+                            .querySelectorAll(
+                                ".selected-gallery-item"
+                            )
+                    ).some(
+                        (selectedItem) => {
+
+                            return (
+                                selectedItem
+                                    .dataset
+                                    .imageUrl
+                                === imageUrl
+                            );
+
+                        }
+                    );
+
+
+                if (alreadyExists) {
+                    return;
+                }
+
+
+                // Skapa nytt bildkort.
+
+                const galleryItem =
+                    document.createElement(
+                        "div"
+                    );
+
+                galleryItem.className =
+                    "selected-gallery-item";
+
+                galleryItem.dataset.imageUrl =
+                    imageUrl;
+
+
+                galleryItem.innerHTML = `
+                    <img
+                        src="${imageUrl}"
+                        alt=""
+                        loading="lazy"
+                    >
+
+                    <input
+                        type="hidden"
+                        name="gallery_image_url[]"
+                        value="${imageUrl}"
+                    >
+
+                    <input
+                        type="text"
+                        name="gallery_caption[]"
+                        placeholder="Bildtext (valfritt)"
+                    >
+
+                    <button
+                        type="button"
+                        class="remove-gallery-image"
+                    >
+                        Ta bort
+                    </button>
+                `;
+
+
+                selectedGalleryImages
+                    .appendChild(
+                        galleryItem
+                    );
+
+
+                const removeButton =
+                    galleryItem
+                        .querySelector(
+                            ".remove-gallery-image"
+                        );
+
+
+                connectGalleryRemoveButton(
+                    removeButton
+                );
+
+            }
+        );
+
+    }
+);
+
+</script>
 
 </body>
 

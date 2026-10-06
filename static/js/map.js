@@ -2,9 +2,58 @@
  *  KARTA
  *  ================================= */
 
+const defaultMapView = {
+    lat: 55.95,
+    lng: 13.35,
+    zoom: 8
+};
+
+let initialMapView = defaultMapView;
+
+const savedMapView =
+sessionStorage.getItem(
+    "bunkerkarta-map-view"
+);
+
+const hasSavedMapView =
+savedMapView !== null;
+
+if (savedMapView) {
+
+    try {
+
+        const parsed =
+        JSON.parse(savedMapView);
+
+        if (
+            Number.isFinite(parsed.lat) &&
+            Number.isFinite(parsed.lng) &&
+            Number.isFinite(parsed.zoom)
+        ) {
+
+            initialMapView = parsed;
+
+
+            sessionStorage.removeItem(
+                "bunkerkarta-map-view"
+            );
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Kunde inte återställa kartposition:",
+            error
+        );
+    }
+}
+
 const map = L.map("map").setView(
-    [56.0465, 12.6945],
-    10
+    [
+        initialMapView.lat,
+        initialMapView.lng
+    ],
+    initialMapView.zoom
 );
 
 
@@ -469,6 +518,20 @@ function getImagePath(imageValue) {
 /* =================================
  *  ÖPPNA INFOPANEL
  *  ================================= */
+function saveMapViewForReturn() {
+
+    const center = map.getCenter();
+
+    sessionStorage.setItem(
+        "bunkerkarta-map-view",
+        JSON.stringify({
+            lat: center.lat,
+            lng: center.lng,
+            zoom: map.getZoom()
+        })
+    );
+}
+
 
 function openInfoPanel(feature) {
 
@@ -596,6 +659,7 @@ function openInfoPanel(feature) {
     <a
     href="/varn/${p.Nr}"
     class="info-button"
+    onclick="saveMapViewForReturn()"
     >
     Visa mer info om värnet
     </a>
@@ -881,6 +945,34 @@ function loadVarn() {
             );
 
             updateVarnVisibility();
+
+
+            /* =================================
+             *  STARTVY - VISA ALLA VÄRN
+             *  ================================= */
+
+            if (
+                !hasSavedMapView &&
+                varnFeatures.length > 0
+            ) {
+
+                const allMarkers =
+                varnFeatures.map(
+                    item => item.marker
+                );
+
+                const group =
+                L.featureGroup(
+                    allMarkers
+                );
+
+                map.fitBounds(
+                    group.getBounds(),
+                              {
+                                  padding: [30, 30]
+                              }
+                );
+            }
         }
     )
 
