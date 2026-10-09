@@ -66,6 +66,19 @@ class PooledConnection:
         self.pool = pool
         self.connection = pool.getconn()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        try:
+            if exc_type is None:
+                self.connection.commit()
+            else:
+                self.connection.rollback()
+        finally:
+            self.close()
+
+        return False
 
     def execute(self, *args, **kwargs):
 

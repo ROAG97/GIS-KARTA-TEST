@@ -702,23 +702,21 @@ def index():
 @app.route("/databas")
 def databas():
 
-    connection = get_db_connection()
+    with get_db_connection() as connection:
 
-    posts = connection.execute(
-        """
-        SELECT
-            slug,
-            title,
-            category,
-            description,
-            image_url
-        FROM database_posts
-        WHERE published = TRUE
-        ORDER BY title
-        """
-    ).fetchall()
-
-    connection.close()
+        posts = connection.execute(
+            """
+            SELECT
+                slug,
+                title,
+                category,
+                description,
+                image_url
+            FROM database_posts
+            WHERE published = TRUE
+            ORDER BY title
+            """
+        ).fetchall()
 
     posts = [
         dict(post)
